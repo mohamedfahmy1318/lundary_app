@@ -22,6 +22,7 @@ RegisterRequestModel _$RegisterRequestModelFromJson(
   email: json['email'] as String,
   password: json['password'] as String,
   phone: json['phone'] as String,
+  passwordConfirmation: json['password_confirmation'] as String,
 );
 
 Map<String, dynamic> _$RegisterRequestModelToJson(
@@ -31,25 +32,34 @@ Map<String, dynamic> _$RegisterRequestModelToJson(
   'email': instance.email,
   'password': instance.password,
   'phone': instance.phone,
+  'password_confirmation': instance.passwordConfirmation,
 };
 
 AuthResponseModel _$AuthResponseModelFromJson(Map<String, dynamic> json) =>
     AuthResponseModel(
       token: json['token'] as String,
-      user: User.fromJson(json['user'] as Map<String, dynamic>),
+      user: UserModel.fromJson(json['user'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$AuthResponseModelToJson(AuthResponseModel instance) =>
     <String, dynamic>{'token': instance.token, 'user': instance.user};
 
-User _$UserFromJson(Map<String, dynamic> json) => User(
+UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
   id: (json['id'] as num).toInt(),
   name: json['name'] as String,
   email: json['email'] as String,
+  phone: json['phone'] as String,
+  walletBalance: json['wallet_balance'] as String?,
+  avatar: json['avatar'] as String?,
+  role: json['role'] as String?,
 );
 
-Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
+Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
   'id': instance.id,
   'name': instance.name,
   'email': instance.email,
+  'phone': instance.phone,
+  'wallet_balance': instance.walletBalance,
+  'avatar': instance.avatar,
+  'role': instance.role,
 };

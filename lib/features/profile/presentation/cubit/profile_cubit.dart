@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:laundry/features/profile/domain/repos/profile_repo.dart';
-import 'package:laundry/features/profile/logic/profile_state.dart';
+import 'package:laundry/features/profile/presentation/cubit/profile_state.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
   final ProfileRepo _repo;

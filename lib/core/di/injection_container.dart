@@ -24,11 +24,11 @@ import 'package:laundry/features/orders/presentation/cubit/orders_cubit.dart';
 import 'package:laundry/features/wallet/data/data_sources/wallet_remote_data_source.dart';
 import 'package:laundry/features/wallet/domain/repos/wallet_repo.dart';
 import 'package:laundry/features/wallet/data/repos/wallet_repo_impl.dart';
-import 'package:laundry/features/wallet/logic/wallet_cubit.dart';
+import 'package:laundry/features/wallet/presentation/cubit/wallet_cubit.dart';
 import 'package:laundry/features/profile/data/data_sources/profile_remote_data_source.dart';
 import 'package:laundry/features/profile/domain/repos/profile_repo.dart';
 import 'package:laundry/features/profile/data/repos/profile_repo_impl.dart';
-import 'package:laundry/features/profile/logic/profile_cubit.dart';
+import 'package:laundry/features/profile/presentation/cubit/profile_cubit.dart';
 
 final getIt = GetIt.instance;
 

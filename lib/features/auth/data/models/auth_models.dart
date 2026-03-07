@@ -12,29 +12,29 @@ class LoginRequestModel {
   Map<String, dynamic> toJson() => _$LoginRequestModelToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class RegisterRequestModel {
   final String name;
   final String email;
   final String password;
   final String phone;
+  final String passwordConfirmation;
 
   RegisterRequestModel({
     required this.name,
     required this.email,
     required this.password,
     required this.phone,
+    required this.passwordConfirmation,
   });
 
   Map<String, dynamic> toJson() => _$RegisterRequestModelToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class AuthResponseModel {
   final String token;
-  // Add other user fields if needed based on API response
-  @JsonKey(name: 'user')
-  final User user;
+  final UserModel user;
 
   AuthResponseModel({required this.token, required this.user});
 
@@ -42,13 +42,28 @@ class AuthResponseModel {
       _$AuthResponseModelFromJson(json);
 }
 
-@JsonSerializable()
-class User {
+@JsonSerializable(fieldRename: FieldRename.snake)
+class UserModel {
   final int id;
   final String name;
   final String email;
+  final String phone;
+  final String? walletBalance;
+  final String? avatar;
+  final String? role;
 
-  User({required this.id, required this.name, required this.email});
+  UserModel({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.phone,
+    this.walletBalance,
+    this.avatar,
+    this.role,
+  });
 
-  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
+  factory UserModel.fromJson(Map<String, dynamic> json) =>
+      _$UserModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UserModelToJson(this);
 }

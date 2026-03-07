@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:laundry/core/utils/app_extensions.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_bar_factory.dart';
@@ -11,7 +12,11 @@ class ManageAccountPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: AppBarFactory.build(context, title: "Manage Account"),
+      appBar: AppBarFactory.build(
+        context,
+        title: "Manage Account",
+        onBack: () => context.pop(),
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
         child: Column(

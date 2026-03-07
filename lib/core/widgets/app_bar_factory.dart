@@ -21,16 +21,17 @@ class AppBarFactory {
     bool showBack = true,
   }) {
     return AppBar(
-      leading: showBack
-          ? IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios,
-                color: AppColors.textPrimary,
-                size: 20.sp,
-              ),
-              onPressed: onBack ?? () => Navigator.of(context).canPop(),
-            )
-          : null,
+      leading:
+          showBack
+              ? IconButton(
+                icon: Icon(
+                  Icons.arrow_back_ios,
+                  color: AppColors.textPrimary,
+                  size: 20.sp,
+                ),
+                onPressed: onBack,
+              )
+              : null,
       title: Text(title, style: AppTextStyles.pageTitle),
       actions: actions,
       backgroundColor: backgroundColor ?? AppColors.white,

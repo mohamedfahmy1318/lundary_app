@@ -14,7 +14,11 @@ class SupportPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: AppBarFactory.build(context, title: "Support"),
+      appBar: AppBarFactory.build(
+        context,
+        title: "Support",
+        onBack: () => context.pop(),
+      ),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
         child: Column(
@@ -31,8 +35,9 @@ class SupportPage extends StatelessWidget {
               child: ListView.separated(
                 itemCount: TicketModel.mockTickets.length,
                 separatorBuilder: (_, _) => SizedBox(height: 16.h),
-                itemBuilder: (_, index) =>
-                    _TicketCard(ticket: TicketModel.mockTickets[index]),
+                itemBuilder:
+                    (_, index) =>
+                        _TicketCard(ticket: TicketModel.mockTickets[index]),
               ),
             ),
             SizedBox(height: 16.h),

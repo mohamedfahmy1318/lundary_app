@@ -29,7 +29,11 @@ class _NewTicketPageState extends State<NewTicketPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: AppBarFactory.build(context, title: "New Ticket"),
+      appBar: AppBarFactory.build(
+        context,
+        title: "New Ticket",
+        onBack: () => context.pop(),
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
         child: Column(
@@ -49,19 +53,19 @@ class _NewTicketPageState extends State<NewTicketPage> {
             Wrap(
               spacing: 8.w,
               runSpacing: 12.h,
-              children: _categories.map((category) {
-                return SelectableChip(
-                  label: category,
-                  isSelected: _selectedCategory == category,
-                  onTap: () {
-                    setState(() {
-                      _selectedCategory = _selectedCategory == category
-                          ? null
-                          : category;
-                    });
-                  },
-                );
-              }).toList(),
+              children:
+                  _categories.map((category) {
+                    return SelectableChip(
+                      label: category,
+                      isSelected: _selectedCategory == category,
+                      onTap: () {
+                        setState(() {
+                          _selectedCategory =
+                              _selectedCategory == category ? null : category;
+                        });
+                      },
+                    );
+                  }).toList(),
             ),
 
             SizedBox(height: 24.h),

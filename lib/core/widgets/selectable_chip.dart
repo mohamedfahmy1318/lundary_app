@@ -37,6 +37,7 @@ class SelectableChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
+        alignment: Alignment.center,
         padding:
             padding ?? EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
         decoration: BoxDecoration(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:laundry/core/di/injection_container.dart';
 import 'package:laundry/core/routing/routing_names.dart';
+import 'package:laundry/core/services/local_storage_service.dart';
 
 import 'package:laundry/features/home/presentation/screens/main_screen.dart';
 import 'package:laundry/features/onboarding/presentation/screens/on_boarding_screen.dart';
@@ -21,8 +23,16 @@ import 'package:laundry/features/basket/presentation/pages/order_success_page.da
 import 'package:laundry/features/wallet/presentation/pages/wallet_page.dart';
 
 class AppRouter {
+  static String get _initialLocation {
+    final storage = getIt<LocalStorageService>();
+    if (storage.isLoggedIn()) {
+      return RoutingNames.main;
+    }
+    return RoutingNames.onBoarding;
+  }
+
   static final GoRouter router = GoRouter(
-    initialLocation: RoutingNames.onBoarding,
+    initialLocation: _initialLocation,
     debugLogDiagnostics: true,
     routes: [
       //onBoarding

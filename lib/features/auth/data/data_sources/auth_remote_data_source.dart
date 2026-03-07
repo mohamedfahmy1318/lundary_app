@@ -5,8 +5,6 @@ import 'package:laundry/features/auth/data/models/auth_models.dart';
 abstract class AuthRemoteDataSource {
   Future<AuthResponseModel> login(LoginRequestModel loginRequest);
   Future<AuthResponseModel> register(RegisterRequestModel registerRequest);
-  // Add verify and resend if API exists, for now placeholders or implementation depends on specific API docs which I don't have fully yet.
-  // Assuming standard implementation:
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -18,10 +16,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<AuthResponseModel> login(LoginRequestModel loginRequest) async {
     final response = await _apiClient.post(
-      ApiConstants.login, // Ensure this constant exists or add it
+      ApiConstants.login,
       data: loginRequest.toJson(),
     );
-    return AuthResponseModel.fromJson(response.data);
+    return AuthResponseModel.fromJson(response.data['data']);
   }
 
   @override
@@ -29,9 +27,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     RegisterRequestModel registerRequest,
   ) async {
     final response = await _apiClient.post(
-      ApiConstants.register, // Ensure this constant exists or add it
+      ApiConstants.register,
       data: registerRequest.toJson(),
     );
-    return AuthResponseModel.fromJson(response.data);
+    return AuthResponseModel.fromJson(response.data['data']);
   }
 }

@@ -15,14 +15,14 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
   @override
   Future<List<PostModel>> getPosts() async {
-    final response = await _apiClient.get(ApiConstants.posts);
+    final response = await _apiClient.get(ApiConstants.products);
     final List<dynamic> data = response.data;
     return data.map((json) => PostModel.fromJson(json)).toList();
   }
 
   @override
   Future<PostModel> getPostById(int id) async {
-    final response = await _apiClient.get('${ApiConstants.posts}/$id');
+    final response = await _apiClient.get('${ApiConstants.products}/$id');
     return PostModel.fromJson(response.data);
   }
 }

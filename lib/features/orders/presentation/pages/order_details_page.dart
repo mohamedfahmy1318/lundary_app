@@ -19,19 +19,8 @@ class OrderDetailsPage extends StatelessWidget {
       appBar: AppBarFactory.build(
         context,
         title: "Order Details",
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: 16.w),
-            child: Container(
-              padding: EdgeInsets.all(8.r),
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.menu, color: AppColors.white, size: 20),
-            ),
-          ),
-        ],
+        showBack: true,
+        onBack: () => Navigator.pop(context),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),

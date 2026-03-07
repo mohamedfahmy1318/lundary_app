@@ -13,7 +13,11 @@ class SubscriptionPlansPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: AppBarFactory.build(context, title: "Subscription Plans"),
+      appBar: AppBarFactory.build(
+        context,
+        title: "Subscription Plans",
+        onBack: () => context.pop(),
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
         child: Column(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/routing/routing_names.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_bar_factory.dart';
 
@@ -13,11 +12,7 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: AppBarFactory.build(
-        context,
-        title: "Profile",
-        onBack: () => context.go(RoutingNames.home),
-      ),
+      appBar: AppBarFactory.build(context, title: "Profile", showBack: false),
       body: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.only(bottom: 100.h),

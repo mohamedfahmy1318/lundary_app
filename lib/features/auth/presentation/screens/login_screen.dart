@@ -25,6 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -44,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
             listener: (context, state) {
               state.maybeWhen(
                 authenticated: (response) {
-                  context.goNamed('home');
+                  context.goNamed('main');
                 },
                 error: (message) {
                   AppDialogs.showMessage(
@@ -92,7 +93,20 @@ class _LoginScreenState extends State<LoginScreen> {
                           Icons.lock,
                           color: Color(0xffb6b6b7),
                         ),
-                        obscureText: true,
+                        obscureText: _obscurePassword,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: const Color(0xffb6b6b7),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
                         validator: (value) {
                           return Validators.password(value);
                         },
@@ -106,13 +120,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            context.pushNamed('verification');
-                            /*
                             context.read<AuthCubit>().login(
                               _emailController.text,
                               _passwordController.text,
                             );
-                            */
                           }
                         },
                       ),

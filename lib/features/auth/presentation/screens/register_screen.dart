@@ -25,14 +25,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     _phoneController.dispose();
     super.dispose();
   }
@@ -48,7 +52,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             listener: (context, state) {
               state.maybeWhen(
                 authenticated: (response) {
-                  context.goNamed('verification');
+                  context.goNamed('main');
                 },
                 error: (message) {
                   AppDialogs.showMessage(
@@ -111,9 +115,54 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           Icons.lock_outline,
                           color: Colors.grey,
                         ),
-                        obscureText: true,
+                        obscureText: _obscurePassword,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
                         validator: (value) {
                           return Validators.password(value);
+                        },
+                      ),
+                      SizedBox(height: 16.h),
+                      CustomTextField(
+                        controller: _confirmPasswordController,
+                        hintText: 'Confirm your password..',
+                        prefixIcon: const Icon(
+                          Icons.lock_outline,
+                          color: Colors.grey,
+                        ),
+                        obscureText: _obscureConfirmPassword,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureConfirmPassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscureConfirmPassword = !_obscureConfirmPassword;
+                            });
+                          },
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please confirm your password';
+                          }
+                          if (value != _passwordController.text) {
+                            return 'Passwords do not match';
+                          }
+                          return null;
                         },
                       ),
                       SizedBox(height: 16.h),

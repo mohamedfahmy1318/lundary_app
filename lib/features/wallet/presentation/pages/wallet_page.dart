@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:laundry/core/utils/app_extensions.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/app_bar_factory.dart';
 import '../../../../core/widgets/chip_tab_bar.dart';
@@ -36,14 +37,18 @@ class _WalletPageState extends State<WalletPage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: AppBarFactory.build(context, title: "E-Wallet & Payment Methods"),
+      appBar: AppBarFactory.build(
+        context,
+        title: "E-Wallet & Payment Methods",
+        onBack: () => context.pop(),
+      ),
       body: Column(
         children: [
           SizedBox(height: 12.h),
 
           // Tab Switcher
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
+            padding: EdgeInsets.symmetric(horizontal: 15.w),
             child: ChipTabBar(
               tabs: _tabs,
               selectedIndex: _tabController.index,

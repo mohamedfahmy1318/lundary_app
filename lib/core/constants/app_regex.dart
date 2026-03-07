@@ -1,8 +1,3 @@
-/// Common regex patterns used across the app
-///
-/// Usage:
-///   if (AppRegex.email.hasMatch(value)) { ... }
-///   inputFormatters: [FilteringTextInputFormatter.allow(AppRegex.digitsOnly)]
 abstract class AppRegex {
   /// Email validation
   static final RegExp email = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');

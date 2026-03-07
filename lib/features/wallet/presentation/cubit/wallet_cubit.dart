@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:laundry/features/wallet/domain/repos/wallet_repo.dart';
-import 'package:laundry/features/wallet/logic/wallet_state.dart';
+import 'package:laundry/features/wallet/presentation/cubit/wallet_state.dart';
 
 class WalletCubit extends Cubit<WalletState> {
   final WalletRepo _repo;
@@ -40,7 +40,7 @@ class WalletCubit extends Cubit<WalletState> {
     final result = await _repo.topUp(amount, cardId);
     result.fold(
       (failure) => emit(WalletState.error(failure.message)),
-      (_) => loadWallet(), // Refresh after top-up
+      (_) => loadWallet(),
     );
   }
 

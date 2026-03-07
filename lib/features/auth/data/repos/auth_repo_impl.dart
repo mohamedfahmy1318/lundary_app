@@ -30,6 +30,7 @@ class AuthRepoImpl implements AuthRepo {
     try {
       final response = await _remoteDataSource.login(loginRequest);
       await _localStorageService.saveToken(response.token);
+      await _localStorageService.setLoggedIn(true);
       return Right(response);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
@@ -48,6 +49,7 @@ class AuthRepoImpl implements AuthRepo {
     try {
       final response = await _remoteDataSource.register(registerRequest);
       await _localStorageService.saveToken(response.token);
+      await _localStorageService.setLoggedIn(true);
       return Right(response);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));

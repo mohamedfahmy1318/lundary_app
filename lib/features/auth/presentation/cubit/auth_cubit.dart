@@ -34,6 +34,7 @@ class AuthCubit extends Cubit<AuthState> {
         email: email,
         password: password,
         phone: phone,
+        passwordConfirmation: password,
       ),
     );
     result.fold(

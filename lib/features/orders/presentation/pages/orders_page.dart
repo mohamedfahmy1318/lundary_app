@@ -36,7 +36,7 @@ class _OrdersPageState extends State<OrdersPage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: AppBarFactory.build(context, title: "Orders"),
+      appBar: AppBarFactory.build(context, title: "Orders", showBack: false),
       body: Column(
         children: [
           SizedBox(height: 16.h),
