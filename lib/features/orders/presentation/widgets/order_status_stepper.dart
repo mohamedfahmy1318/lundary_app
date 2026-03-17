@@ -34,14 +34,21 @@ class OrderStatusStepper extends StatelessWidget {
 
   int _getActiveStep() {
     switch (status) {
-      case OrderStatus.inProgress:
-        return 1;
-      case OrderStatus.deliveryOnTheWay:
-        return 2;
-      case OrderStatus.completed:
-        return 3;
-      case OrderStatus.cancelled:
+      case OrderStatus.pending:
         return 0;
+      case OrderStatus.confirmed:
+      case OrderStatus.pickedUp:
+        return 1;
+      case OrderStatus.processing:
+      case OrderStatus.ready:
+        return 2;
+      case OrderStatus.outForDelivery:
+        return 3;
+      case OrderStatus.delivered:
+      case OrderStatus.completed:
+        return 4;
+      case OrderStatus.cancelled:
+        return -1;
     }
   }
 

@@ -44,14 +44,3 @@ PaginatedResponse<T> _$PaginatedResponseFromJson<T>(
   perPage: (json['per_page'] as num?)?.toInt(),
   total: (json['total'] as num?)?.toInt(),
 );
-
-Map<String, dynamic> _$PaginatedResponseToJson<T>(
-  PaginatedResponse<T> instance,
-  Object? Function(T value) toJsonT,
-) => <String, dynamic>{
-  'data': instance.data?.map(toJsonT).toList(),
-  'current_page': instance.currentPage,
-  'last_page': instance.lastPage,
-  'per_page': instance.perPage,
-  'total': instance.total,
-};

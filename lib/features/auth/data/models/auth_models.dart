@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'auth_models.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createFactory: false)
 class LoginRequestModel {
   final String email;
   final String password;
@@ -12,7 +12,7 @@ class LoginRequestModel {
   Map<String, dynamic> toJson() => _$LoginRequestModelToJson(this);
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createFactory: false)
 class RegisterRequestModel {
   final String name;
   final String email;
@@ -31,7 +31,7 @@ class RegisterRequestModel {
   Map<String, dynamic> toJson() => _$RegisterRequestModelToJson(this);
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 class AuthResponseModel {
   final String token;
   final UserModel user;

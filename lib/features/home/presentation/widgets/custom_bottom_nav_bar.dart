@@ -47,21 +47,6 @@ class CustomBottomNavBar extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: List.generate(_tabs.length, (i) {
-                  // Insert spacer in the middle for the notch gap
-                  if (i == 2) {
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(width: 36.w),
-                        _NavBarIcon(
-                          icon: _tabs[i].icon,
-                          label: _tabs[i].label,
-                          isSelected: currentIndex == i,
-                          onTap: () => onTap(i),
-                        ),
-                      ],
-                    );
-                  }
                   return _NavBarIcon(
                     icon: _tabs[i].icon,
                     label: _tabs[i].label,
@@ -150,9 +135,10 @@ class CustomNavBarPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
+    final paint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.fill;
 
     final path = Path();
 

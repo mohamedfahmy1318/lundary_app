@@ -1,154 +1,146 @@
-enum OrderStatus { completed, inProgress, deliveryOnTheWay, cancelled }
+import 'package:json_annotation/json_annotation.dart';
 
-class OrderItem {
-  final String name;
-  final double price;
-  final int quantity;
+part 'order_model.g.dart';
 
-  OrderItem({required this.name, required this.price, required this.quantity});
-
-  factory OrderItem.fromJson(Map<String, dynamic> json) {
-    return OrderItem(
-      name: json['name'] as String? ?? '',
-      price: (json['price'] as num?)?.toDouble() ?? 0.0,
-      quantity: json['quantity'] as int? ?? 0,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {'name': name, 'price': price, 'quantity': quantity};
-  }
+enum OrderStatus {
+  @JsonValue('pending')
+  pending,
+  @JsonValue('confirmed')
+  confirmed,
+  @JsonValue('picked_up')
+  pickedUp,
+  @JsonValue('processing')
+  processing,
+  @JsonValue('ready')
+  ready,
+  @JsonValue('out_for_delivery')
+  outForDelivery,
+  @JsonValue('delivered')
+  delivered,
+  @JsonValue('completed')
+  completed,
+  @JsonValue('cancelled')
+  cancelled,
 }
 
-class OrderModel {
-  final String id;
-  final String locationName;
-  final DateTime pickupDate;
-  final DateTime deliveryDate;
-  final OrderStatus status;
-  final List<OrderItem> items;
-  final String basketItemsCount;
-  final double totalAmount;
+@JsonSerializable(fieldRename: FieldRename.snake)
+class OrderItemModel {
+  final int id;
+  final int orderId;
+  final int serviceId;
+  final String serviceName;
+  final int quantity;
+  final String unitPrice;
+  final String totalPrice;
+  final String? specialInstructions;
 
-  OrderModel({
+  const OrderItemModel({
     required this.id,
-    required this.locationName,
-    required this.pickupDate,
-    required this.deliveryDate,
-    required this.status,
-    required this.items,
-    required this.basketItemsCount,
-    required this.totalAmount,
+    required this.orderId,
+    required this.serviceId,
+    required this.serviceName,
+    required this.quantity,
+    required this.unitPrice,
+    required this.totalPrice,
+    this.specialInstructions,
   });
 
-  factory OrderModel.fromJson(Map<String, dynamic> json) {
-    return OrderModel(
-      id: json['id']?.toString() ?? '',
-      locationName: json['location_name'] as String? ?? '',
-      pickupDate: json['pickup_date'] != null
-          ? DateTime.parse(json['pickup_date'] as String)
-          : DateTime.now(),
-      deliveryDate: json['delivery_date'] != null
-          ? DateTime.parse(json['delivery_date'] as String)
-          : DateTime.now(),
-      status: _parseStatus(json['status'] as String?),
-      items:
-          (json['items'] as List<dynamic>?)
-              ?.map((e) => OrderItem.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      basketItemsCount: json['basket_items_count'] as String? ?? '',
-      totalAmount: (json['total_amount'] as num?)?.toDouble() ?? 0.0,
-    );
-  }
+  factory OrderItemModel.fromJson(Map<String, dynamic> json) =>
+      _$OrderItemModelFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'location_name': locationName,
-      'pickup_date': pickupDate.toIso8601String(),
-      'delivery_date': deliveryDate.toIso8601String(),
-      'status': status.name,
-      'items': items.map((e) => e.toJson()).toList(),
-      'basket_items_count': basketItemsCount,
-      'total_amount': totalAmount,
-    };
-  }
+  Map<String, dynamic> toJson() => _$OrderItemModelToJson(this);
 
-  static OrderStatus _parseStatus(String? status) {
-    switch (status) {
-      case 'completed':
-        return OrderStatus.completed;
-      case 'in_progress':
-        return OrderStatus.inProgress;
-      case 'delivery_on_the_way':
-        return OrderStatus.deliveryOnTheWay;
-      case 'cancelled':
-        return OrderStatus.cancelled;
-      default:
-        return OrderStatus.inProgress;
-    }
-  }
+  double get unitPriceAsDouble => double.tryParse(unitPrice) ?? 0.0;
+  double get totalPriceAsDouble => double.tryParse(totalPrice) ?? 0.0;
+}
 
-  static List<OrderModel> mockOrders = [
-    OrderModel(
-      id: "#22456",
-      locationName: "Home 1",
-      pickupDate: DateTime(2025, 7, 20),
-      deliveryDate: DateTime(2025, 7, 22),
-      status: OrderStatus.deliveryOnTheWay,
-      basketItemsCount: "23 Items in total",
-      totalAmount: 240.0,
-      items: [
-        OrderItem(name: "Suit", price: 30.00, quantity: 1),
-        OrderItem(name: "Suit", price: 30.00, quantity: 1),
-        OrderItem(name: "Suit", price: 30.00, quantity: 1),
-        OrderItem(name: "Suit", price: 30.00, quantity: 1),
-        OrderItem(name: "Suit", price: 30.00, quantity: 1),
-        OrderItem(name: "Suit", price: 30.00, quantity: 1),
-        OrderItem(name: "Suit", price: 30.00, quantity: 1),
-        OrderItem(name: "Suit", price: 30.00, quantity: 1),
-      ],
-    ),
-    OrderModel(
-      id: "#22455",
-      locationName: "Home 1",
-      pickupDate: DateTime(2025, 7, 18),
-      deliveryDate: DateTime(2025, 7, 20),
-      status: OrderStatus.completed,
-      basketItemsCount: "10 Items in total",
-      totalAmount: 150.0,
-      items: [OrderItem(name: "Shirt", price: 15.00, quantity: 10)],
-    ),
-    OrderModel(
-      id: "#22454",
-      locationName: "Home 1",
-      pickupDate: DateTime(2025, 7, 15),
-      deliveryDate: DateTime(2025, 7, 17),
-      status: OrderStatus.completed,
-      basketItemsCount: "5 Items in total",
-      totalAmount: 75.0,
-      items: [],
-    ),
-    OrderModel(
-      id: "#22453",
-      locationName: "Office",
-      pickupDate: DateTime(2025, 7, 10),
-      deliveryDate: DateTime(2025, 7, 12),
-      status: OrderStatus.completed,
-      basketItemsCount: "2 Items in total",
-      totalAmount: 30.0,
-      items: [],
-    ),
-    OrderModel(
-      id: "#22452",
-      locationName: "Home 1",
-      pickupDate: DateTime(2025, 7, 5),
-      deliveryDate: DateTime(2025, 7, 7),
-      status: OrderStatus.completed,
-      basketItemsCount: "1 Items in total",
-      totalAmount: 15.0,
-      items: [],
-    ),
-  ];
+@JsonSerializable(fieldRename: FieldRename.snake)
+class OrderModel {
+  final int id;
+  final String orderNumber;
+  final int userId;
+  final OrderStatus status;
+  final String? pickupDate;
+  final String? pickupTimeSlot;
+  final String? pickupAddress;
+  final String? deliveryDate;
+  final String? deliveryTimeSlot;
+  final String? deliveryAddress;
+  final String subtotal;
+  final String deliveryFee;
+  final String discountAmount;
+  final String totalAmount;
+  final String? paymentMethod;
+  final String? paymentStatus;
+  final String? notes;
+  final String? promoCode;
+  final bool isExpress;
+  final String? cancelledAt;
+  final String? cancellationReason;
+  final String? createdAt;
+  final String? updatedAt;
+  final List<OrderItemModel>? items;
+
+  const OrderModel({
+    required this.id,
+    required this.orderNumber,
+    required this.userId,
+    required this.status,
+    this.pickupDate,
+    this.pickupTimeSlot,
+    this.pickupAddress,
+    this.deliveryDate,
+    this.deliveryTimeSlot,
+    this.deliveryAddress,
+    required this.subtotal,
+    required this.deliveryFee,
+    required this.discountAmount,
+    required this.totalAmount,
+    this.paymentMethod,
+    this.paymentStatus,
+    this.notes,
+    this.promoCode,
+    this.isExpress = false,
+    this.cancelledAt,
+    this.cancellationReason,
+    this.createdAt,
+    this.updatedAt,
+    this.items,
+  });
+
+  factory OrderModel.fromJson(Map<String, dynamic> json) =>
+      _$OrderModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$OrderModelToJson(this);
+
+  double get totalAmountAsDouble => double.tryParse(totalAmount) ?? 0.0;
+
+  int get itemsCount =>
+      items?.fold(0, (sum, item) => sum! + item.quantity) ?? 0;
+
+  DateTime? get pickupDateTime =>
+      pickupDate != null ? DateTime.tryParse(pickupDate!) : null;
+
+  DateTime? get deliveryDateTime =>
+      deliveryDate != null ? DateTime.tryParse(deliveryDate!) : null;
+}
+
+@JsonSerializable(fieldRename: FieldRename.snake)
+class OrderStatistics {
+  final int totalOrders;
+  final int pendingOrders;
+  final int completedOrders;
+  final int totalSpent;
+
+  const OrderStatistics({
+    required this.totalOrders,
+    required this.pendingOrders,
+    required this.completedOrders,
+    required this.totalSpent,
+  });
+
+  factory OrderStatistics.fromJson(Map<String, dynamic> json) =>
+      _$OrderStatisticsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$OrderStatisticsToJson(this);
 }

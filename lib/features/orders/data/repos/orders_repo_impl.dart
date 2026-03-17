@@ -33,13 +33,43 @@ class OrdersRepoImpl implements OrdersRepo {
   }
 
   @override
-  Future<Either<Failure, OrderModel>> getOrderById(String id) async {
+  Future<Either<Failure, OrderModel>> getOrderById(int id) async {
     if (!await _networkInfo.isConnected) {
       return const Left(NoInternetFailure());
     }
     try {
       final order = await _remoteDataSource.getOrderById(id);
       return Right(order);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, OrderModel>> cancelOrder(int id) async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NoInternetFailure());
+    }
+    try {
+      final order = await _remoteDataSource.cancelOrder(id);
+      return Right(order);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, OrderStatistics>> getStatistics() async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NoInternetFailure());
+    }
+    try {
+      final stats = await _remoteDataSource.getStatistics();
+      return Right(stats);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } catch (e) {

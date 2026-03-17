@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:laundry/features/basket/data/models/basket_item_model.dart';
+import 'package:laundry/features/basket/data/models/cart_item.dart';
 import 'package:laundry/features/basket/domain/repos/basket_repo.dart';
 import 'package:laundry/features/basket/presentation/cubit/basket_state.dart';
 
@@ -11,112 +11,103 @@ class BasketCubit extends Cubit<BasketState> {
     : _basketRepo = basketRepo,
       super(const BasketState.initial());
 
-  List<BasketItemModel> _items = [];
-  DateTime? selectedPickupDate;
-  int? selectedPickupSlot;
-  DateTime? selectedDeliveryDate;
-  int? selectedDeliverySlot;
-  String pickupNote = '';
-  String deliveryNote = '';
-  int selectedPaymentMethod = 0;
-  String promoCode = '';
+  /// serviceId → CartItem
+  final Map<int, CartItem> _cart = {};
 
-  List<BasketItemModel> get items => _items;
+  Map<int, CartItem> get cart => Map.unmodifiable(_cart);
 
-  double get totalAmount {
-    return _items.fold(0.0, (sum, item) => sum + (item.price * item.quantity));
+  List<CartItem> get cartItems =>
+      _cart.values.where((i) => i.quantity > 0).toList();
+
+  double get totalAmount =>
+      cartItems.fold(0.0, (sum, item) => sum + item.totalPrice);
+
+  int get totalItemsCount =>
+      cartItems.fold(0, (sum, item) => sum + item.quantity);
+
+  int getQuantity(int serviceId) => _cart[serviceId]?.quantity ?? 0;
+
+  List<CartItem> getItemsByCategory(String category) =>
+      cartItems.where((i) => i.categoryName == category).toList();
+
+  /// Add or increment a service in the cart.
+  void addItem({
+    required int serviceId,
+    required String serviceName,
+    required String categoryName,
+    required double unitPrice,
+  }) {
+    if (_cart.containsKey(serviceId)) {
+      _cart[serviceId]!.quantity++;
+    } else {
+      _cart[serviceId] = CartItem(
+        serviceId: serviceId,
+        serviceName: serviceName,
+        categoryName: categoryName,
+        unitPrice: unitPrice,
+      );
+    }
+    _emitLoaded();
   }
 
-  int get totalItemsCount {
-    return _items.fold(0, (sum, item) => sum + item.quantity);
-  }
-
-  List<BasketItemModel> getItemsByCategory(String category) {
-    return _items.where((item) => item.category == category).toList();
-  }
-
-  Future<void> loadServices() async {
-    emit(const BasketState.loading());
-    final result = await _basketRepo.getServices();
-    result.fold((failure) => emit(BasketState.error(failure.message)), (items) {
-      _items = items;
-      emit(BasketState.loaded(List.from(_items)));
-    });
-  }
-
-  void incrementItem(String itemId) {
-    final index = _items.indexWhere((item) => item.id == itemId);
-    if (index != -1) {
-      _items[index].quantity++;
-      emit(BasketState.loaded(List.from(_items)));
+  void decrementItem(int serviceId) {
+    final item = _cart[serviceId];
+    if (item != null && item.quantity > 0) {
+      item.quantity--;
+      if (item.quantity == 0) _cart.remove(serviceId);
+      _emitLoaded();
     }
   }
 
-  void decrementItem(String itemId) {
-    final index = _items.indexWhere((item) => item.id == itemId);
-    if (index != -1 && _items[index].quantity > 0) {
-      _items[index].quantity--;
-      emit(BasketState.loaded(List.from(_items)));
-    }
+  void removeItem(int serviceId) {
+    _cart.remove(serviceId);
+    _emitLoaded();
   }
 
-  void setPickupSchedule(DateTime date, int slotIndex, String note) {
-    selectedPickupDate = date;
-    selectedPickupSlot = slotIndex;
-    pickupNote = note;
+  void clearCart() {
+    _cart.clear();
+    _emitLoaded();
   }
 
-  void setDeliverySchedule(DateTime date, int slotIndex, String note) {
-    selectedDeliveryDate = date;
-    selectedDeliverySlot = slotIndex;
-    deliveryNote = note;
-  }
-
-  void setPaymentMethod(int index) {
-    selectedPaymentMethod = index;
-  }
-
-  void setPromoCode(String code) {
-    promoCode = code;
-  }
-
-  Future<void> createOrder() async {
+  /// Send the order to the API.
+  Future<void> createOrder({
+    required String pickupDate,
+    required String pickupTimeSlot,
+    required String deliveryDate,
+    required String deliveryTimeSlot,
+    required String pickupAddress,
+    required String paymentMethod,
+    bool isExpress = false,
+    String? promoCode,
+    String? notes,
+  }) async {
+    if (cartItems.isEmpty) return;
     emit(const BasketState.orderCreating());
 
     final orderData = {
-      'items': _items
-          .where((item) => item.quantity > 0)
-          .map((item) => item.toJson())
-          .toList(),
-      'pickup_date': selectedPickupDate?.toIso8601String(),
-      'pickup_slot': selectedPickupSlot,
-      'pickup_note': pickupNote,
-      'delivery_date': selectedDeliveryDate?.toIso8601String(),
-      'delivery_slot': selectedDeliverySlot,
-      'delivery_note': deliveryNote,
-      'payment_method': selectedPaymentMethod,
-      'promo_code': promoCode,
-      'total_amount': totalAmount,
+      'items': cartItems.map((i) => i.toOrderJson()).toList(),
+      'pickup_date': pickupDate,
+      'pickup_time_slot': pickupTimeSlot,
+      'delivery_date': deliveryDate,
+      'delivery_time_slot': deliveryTimeSlot,
+      'pickup_address': pickupAddress,
+      'payment_method': paymentMethod,
+      'is_express': isExpress,
+      if (promoCode != null && promoCode.isNotEmpty) 'promo_code': promoCode,
+      if (notes != null && notes.isNotEmpty) 'notes': notes,
     };
 
     final result = await _basketRepo.createOrder(orderData);
-    result.fold((failure) => emit(BasketState.error(failure.message)), (_) {
-      _resetOrder();
-      emit(const BasketState.orderCreated());
-    });
+    result.fold(
+      (failure) => emit(BasketState.error(failure.message)),
+      (_) {
+        _cart.clear();
+        emit(const BasketState.orderCreated());
+      },
+    );
   }
 
-  void _resetOrder() {
-    for (final item in _items) {
-      item.quantity = 0;
-    }
-    selectedPickupDate = null;
-    selectedPickupSlot = null;
-    selectedDeliveryDate = null;
-    selectedDeliverySlot = null;
-    pickupNote = '';
-    deliveryNote = '';
-    selectedPaymentMethod = 0;
-    promoCode = '';
+  void _emitLoaded() {
+    emit(BasketState.loaded(cartItems));
   }
 }

@@ -10,14 +10,14 @@ class HomeCubit extends Cubit<HomeState> {
     : _homeRepo = homeRepo,
       super(const HomeState.initial());
 
-  Future<void> getPosts() async {
+  Future<void> getCategories() async {
     emit(const HomeState.loading());
 
-    final result = await _homeRepo.getPosts();
+    final result = await _homeRepo.getCategories();
 
     result.fold(
       (failure) => emit(HomeState.error(failure.message)),
-      (posts) => emit(HomeState.loaded(posts)),
+      (categories) => emit(HomeState.loaded(categories)),
     );
   }
 }

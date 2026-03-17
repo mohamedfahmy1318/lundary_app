@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_bar_factory.dart';
-import '../../../../core/widgets/date_time_info_row.dart';
 import '../../data/models/order_model.dart';
 import '../widgets/order_status_stepper.dart';
 
@@ -27,7 +26,7 @@ class OrderDetailsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Order ${order.id}", style: AppTextStyles.caption),
+            Text("Order #${order.orderNumber}", style: AppTextStyles.caption),
             SizedBox(height: 20.h),
 
             // Basket Summary
@@ -55,7 +54,7 @@ class OrderDetailsPage extends StatelessWidget {
                         children: [
                           Text("Basket", style: AppTextStyles.sectionTitle),
                           Text(
-                            order.basketItemsCount,
+                            '${order.itemsCount} items',
                             style: AppTextStyles.caption,
                           ),
                         ],
@@ -66,8 +65,20 @@ class OrderDetailsPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      DateTimeInfoRow(date: "July-20-2025", time: "09:00 WIB"),
-                      DateTimeInfoRow(date: "July-22-2025", time: "18:00 WIB"),
+                      Expanded(
+                        child: _DateTimeColumn(
+                          label: 'Pickup',
+                          date: order.pickupDate ?? '-',
+                          time: order.pickupTimeSlot ?? '-',
+                        ),
+                      ),
+                      Expanded(
+                        child: _DateTimeColumn(
+                          label: 'Delivery',
+                          date: order.deliveryDate ?? '-',
+                          time: order.deliveryTimeSlot ?? '-',
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -82,10 +93,42 @@ class OrderDetailsPage extends StatelessWidget {
             SizedBox(height: 30.h),
 
             // Items List
-            if (order.items.isNotEmpty)
-              ...order.items.map((item) => _OrderItemRow(item: item))
+            if (order.items != null && order.items!.isNotEmpty)
+              ...order.items!.map((item) => _OrderItemRow(item: item))
             else
               const Center(child: Text("No detailed items for this order")),
+
+            SizedBox(height: 20.h),
+
+            // Price Summary
+            Container(
+              padding: EdgeInsets.all(16.r),
+              decoration: BoxDecoration(
+                color: AppColors.cardBackground,
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: Column(
+                children: [
+                  _PriceRow(label: 'Subtotal', value: order.subtotal),
+                  SizedBox(height: 8.h),
+                  _PriceRow(label: 'Delivery Fee', value: order.deliveryFee),
+                  if (double.tryParse(order.discountAmount) != 0.0) ...[
+                    SizedBox(height: 8.h),
+                    _PriceRow(
+                      label: 'Discount',
+                      value: '-${order.discountAmount}',
+                      valueColor: Colors.green,
+                    ),
+                  ],
+                  Divider(height: 24.h),
+                  _PriceRow(
+                    label: 'Total',
+                    value: order.totalAmount,
+                    isBold: true,
+                  ),
+                ],
+              ),
+            ),
 
             SizedBox(height: 80.h),
           ],
@@ -95,8 +138,75 @@ class OrderDetailsPage extends StatelessWidget {
   }
 }
 
+class _DateTimeColumn extends StatelessWidget {
+  final String label;
+  final String date;
+  final String time;
+
+  const _DateTimeColumn({
+    required this.label,
+    required this.date,
+    required this.time,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTextStyles.caption),
+        SizedBox(height: 4.h),
+        Text(date, style: AppTextStyles.bodyMedium),
+        Text(time, style: AppTextStyles.caption),
+      ],
+    );
+  }
+}
+
+class _PriceRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool isBold;
+  final Color? valueColor;
+
+  const _PriceRow({
+    required this.label,
+    required this.value,
+    this.isBold = false,
+    this.valueColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style:
+              isBold
+                  ? AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                  )
+                  : AppTextStyles.caption,
+        ),
+        Text(
+          'AED $value',
+          style:
+              isBold
+                  ? AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: valueColor ?? AppColors.primary,
+                  )
+                  : AppTextStyles.bodyMedium.copyWith(color: valueColor),
+        ),
+      ],
+    );
+  }
+}
+
 class _OrderItemRow extends StatelessWidget {
-  final OrderItem item;
+  final OrderItemModel item;
 
   const _OrderItemRow({required this.item});
 
@@ -124,9 +234,9 @@ class _OrderItemRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.name, style: AppTextStyles.bodyMedium),
+                Text(item.serviceName, style: AppTextStyles.bodyMedium),
                 Text(
-                  "\$${item.price.toStringAsFixed(2)}/Item",
+                  "AED ${item.unitPrice}/Item",
                   style: AppTextStyles.caption,
                 ),
               ],
@@ -135,7 +245,7 @@ class _OrderItemRow extends StatelessWidget {
           Text("${item.quantity}", style: AppTextStyles.bodyMedium),
           SizedBox(width: 40.w),
           Text(
-            "\$${(item.price * item.quantity).toStringAsFixed(2)}",
+            "AED ${item.totalPrice}",
             style: AppTextStyles.bodyMedium.copyWith(color: AppColors.primary),
           ),
         ],

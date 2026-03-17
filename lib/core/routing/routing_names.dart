@@ -18,4 +18,5 @@ class RoutingNames {
   static const String payment = '/payment';
   static const String orderSuccess = '/order-success';
   static const String wallet = '/wallet';
+  static const String categoryServices = '/category-services';
 }

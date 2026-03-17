@@ -4,7 +4,8 @@ import 'package:laundry/core/error/exceptions.dart';
 import 'package:laundry/core/error/failures.dart';
 import 'package:laundry/core/network/network_info.dart';
 import 'package:laundry/features/home/data/data_sources/home_remote_data_source.dart';
-import 'package:laundry/features/home/data/models/post_model.dart';
+import 'package:laundry/features/home/data/models/category_model.dart';
+import 'package:laundry/features/home/data/models/service_model.dart';
 import 'package:laundry/features/home/domain/repos/home_repo.dart';
 
 class HomeRepoImpl implements HomeRepo {
@@ -18,13 +19,13 @@ class HomeRepoImpl implements HomeRepo {
        _networkInfo = networkInfo;
 
   @override
-  Future<Either<Failure, List<PostModel>>> getPosts() async {
+  Future<Either<Failure, List<CategoryModel>>> getCategories() async {
     if (!await _networkInfo.isConnected) {
       return const Left(NoInternetFailure());
     }
     try {
-      final posts = await _remoteDataSource.getPosts();
-      return Right(posts);
+      final categories = await _remoteDataSource.getCategories();
+      return Right(categories);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } on UnauthorizedException catch (e) {
@@ -35,13 +36,19 @@ class HomeRepoImpl implements HomeRepo {
   }
 
   @override
-  Future<Either<Failure, PostModel>> getPostById(int id) async {
+  Future<Either<Failure, List<ServiceModel>>> getServices({
+    int? categoryId,
+    String? search,
+  }) async {
     if (!await _networkInfo.isConnected) {
       return const Left(NoInternetFailure());
     }
     try {
-      final post = await _remoteDataSource.getPostById(id);
-      return Right(post);
+      final services = await _remoteDataSource.getServices(
+        categoryId: categoryId,
+        search: search,
+      );
+      return Right(services);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } on UnauthorizedException catch (e) {

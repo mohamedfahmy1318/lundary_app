@@ -12,8 +12,9 @@ enum ScheduleType { pickup, delivery }
 
 class SchedulePage extends StatefulWidget {
   final ScheduleType type;
+  final Map<String, String>? pickupData;
 
-  const SchedulePage({super.key, required this.type});
+  const SchedulePage({super.key, required this.type, this.pickupData});
 
   @override
   State<SchedulePage> createState() => _SchedulePageState();
@@ -74,8 +75,8 @@ class _SchedulePageState extends State<SchedulePage> {
                 children: [
                   CalendarGrid(
                     selectedDate: _selectedDate,
-                    onDateSelected: (date) =>
-                        setState(() => _selectedDate = date),
+                    onDateSelected:
+                        (date) => setState(() => _selectedDate = date),
                   ),
                   SizedBox(height: 16.h),
                   Text(
@@ -93,8 +94,9 @@ class _SchedulePageState extends State<SchedulePage> {
                       return SelectableChip(
                         label: _timeSlots[index],
                         isSelected: _selectedTimeSlotIndex == index,
-                        onTap: () =>
-                            setState(() => _selectedTimeSlotIndex = index),
+                        onTap:
+                            () =>
+                                setState(() => _selectedTimeSlotIndex = index),
                       );
                     }),
                   ),
@@ -150,10 +152,29 @@ class _SchedulePageState extends State<SchedulePage> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
+                      if (_selectedTimeSlotIndex == null) return;
+                      final dateStr =
+                          '${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}';
+                      final timeSlot = _timeSlots[_selectedTimeSlotIndex!];
                       if (_isPickup) {
-                        context.pushNamed('deliverySchedule');
+                        context.pushNamed(
+                          'deliverySchedule',
+                          extra: {
+                            'pickupDate': dateStr,
+                            'pickupTimeSlot': timeSlot,
+                            'pickupNotes': _noteController.text,
+                          },
+                        );
                       } else {
-                        context.pushNamed('payment');
+                        context.pushNamed(
+                          'payment',
+                          extra: {
+                            ...?widget.pickupData,
+                            'deliveryDate': dateStr,
+                            'deliveryTimeSlot': timeSlot,
+                            'deliveryNotes': _noteController.text,
+                          },
+                        );
                       }
                     },
                     style: ElevatedButton.styleFrom(

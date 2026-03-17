@@ -10,6 +10,7 @@ import 'package:laundry/features/home/data/data_sources/home_remote_data_source.
 import 'package:laundry/features/home/data/repos/home_repo_impl.dart';
 import 'package:laundry/features/home/domain/repos/home_repo.dart';
 import 'package:laundry/features/home/presentation/cubit/home_cubit.dart';
+import 'package:laundry/features/home/presentation/cubit/category_services_cubit.dart';
 import 'package:laundry/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:laundry/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:laundry/features/auth/domain/repos/auth_repo.dart';
@@ -65,6 +66,7 @@ Future<void> setupDependencies() async {
     () => HomeRepoImpl(remoteDataSource: getIt(), networkInfo: getIt()),
   );
   getIt.registerFactory(() => HomeCubit(homeRepo: getIt()));
+  getIt.registerFactory(() => CategoryServicesCubit(homeRepo: getIt()));
 
   //============================================================
   // Features - Auth
@@ -90,7 +92,8 @@ Future<void> setupDependencies() async {
   getIt.registerLazySingleton<BasketRepo>(
     () => BasketRepoImpl(remoteDataSource: getIt(), networkInfo: getIt()),
   );
-  getIt.registerFactory(() => BasketCubit(basketRepo: getIt()));
+  // Singleton so the cart persists across all screens
+  getIt.registerLazySingleton(() => BasketCubit(basketRepo: getIt()));
 
   //============================================================
   // Features - Orders

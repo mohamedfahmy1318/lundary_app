@@ -30,4 +30,18 @@ class OrdersCubit extends Cubit<OrdersState> {
       emit(OrdersState.loaded(orders));
     });
   }
+
+  Future<void> cancelOrder(int orderId) async {
+    emit(const OrdersState.loading());
+    final result = await _ordersRepo.cancelOrder(orderId);
+    result.fold((failure) => emit(OrdersState.error(failure.message)), (
+      cancelledOrder,
+    ) {
+      final index = _allOrders.indexWhere((o) => o.id == orderId);
+      if (index != -1) {
+        _allOrders[index] = cancelledOrder;
+      }
+      emit(OrdersState.loaded(List.from(_allOrders)));
+    });
+  }
 }

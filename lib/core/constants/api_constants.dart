@@ -15,6 +15,7 @@ abstract class ApiConstants {
 
   // Home
   static const String categories = '/categories';
+  static const String services = '/services';
   static const String products = '/products';
 
   // Orders

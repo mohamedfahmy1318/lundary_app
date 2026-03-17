@@ -6,24 +6,8 @@ part of 'auth_models.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-LoginRequestModel _$LoginRequestModelFromJson(Map<String, dynamic> json) =>
-    LoginRequestModel(
-      email: json['email'] as String,
-      password: json['password'] as String,
-    );
-
 Map<String, dynamic> _$LoginRequestModelToJson(LoginRequestModel instance) =>
     <String, dynamic>{'email': instance.email, 'password': instance.password};
-
-RegisterRequestModel _$RegisterRequestModelFromJson(
-  Map<String, dynamic> json,
-) => RegisterRequestModel(
-  name: json['name'] as String,
-  email: json['email'] as String,
-  password: json['password'] as String,
-  phone: json['phone'] as String,
-  passwordConfirmation: json['password_confirmation'] as String,
-);
 
 Map<String, dynamic> _$RegisterRequestModelToJson(
   RegisterRequestModel instance,
@@ -40,9 +24,6 @@ AuthResponseModel _$AuthResponseModelFromJson(Map<String, dynamic> json) =>
       token: json['token'] as String,
       user: UserModel.fromJson(json['user'] as Map<String, dynamic>),
     );
-
-Map<String, dynamic> _$AuthResponseModelToJson(AuthResponseModel instance) =>
-    <String, dynamic>{'token': instance.token, 'user': instance.user};
 
 UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
   id: (json['id'] as num).toInt(),

@@ -26,9 +26,16 @@ class OrderCard extends StatelessWidget {
             _buildStatusIcon(),
             SizedBox(width: 12.w),
             Expanded(
-              child: Text(
-                'Order ${order.id} (${order.locationName})',
-                style: AppTextStyles.bodyMedium,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(order.orderNumber, style: AppTextStyles.bodyMedium),
+                  SizedBox(height: 4.h),
+                  Text(
+                    'AED ${order.totalAmount}  ·  ${order.itemsCount} items',
+                    style: AppTextStyles.caption,
+                  ),
+                ],
               ),
             ),
             Icon(
@@ -47,22 +54,25 @@ class OrderCard extends StatelessWidget {
     IconData iconData;
 
     switch (order.status) {
-      case OrderStatus.inProgress:
+      case OrderStatus.pending:
+        iconColor = AppColors.warning;
+        iconData = Icons.schedule;
+      case OrderStatus.confirmed:
+      case OrderStatus.pickedUp:
+      case OrderStatus.processing:
+      case OrderStatus.ready:
         iconColor = AppColors.success;
         iconData = Icons.sync;
-        break;
-      case OrderStatus.deliveryOnTheWay:
+      case OrderStatus.outForDelivery:
         iconColor = AppColors.warning;
         iconData = Icons.local_shipping;
-        break;
+      case OrderStatus.delivered:
       case OrderStatus.completed:
         iconColor = AppColors.primary;
         iconData = Icons.check;
-        break;
       case OrderStatus.cancelled:
         iconColor = AppColors.error;
         iconData = Icons.close;
-        break;
     }
 
     return Container(

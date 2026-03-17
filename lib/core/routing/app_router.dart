@@ -21,6 +21,8 @@ import 'package:laundry/features/basket/presentation/pages/schedule_page.dart';
 import 'package:laundry/features/basket/presentation/pages/payment_page.dart';
 import 'package:laundry/features/basket/presentation/pages/order_success_page.dart';
 import 'package:laundry/features/wallet/presentation/pages/wallet_page.dart';
+import 'package:laundry/features/home/presentation/screens/category_services_page.dart';
+import 'package:laundry/features/home/data/models/category_model.dart';
 
 class AppRouter {
   static String get _initialLocation {
@@ -102,19 +104,24 @@ class AppRouter {
       GoRoute(
         path: RoutingNames.pickupSchedule,
         name: 'pickupSchedule',
-        builder: (context, state) =>
-            const SchedulePage(type: ScheduleType.pickup),
+        builder:
+            (context, state) => const SchedulePage(type: ScheduleType.pickup),
       ),
       GoRoute(
         path: RoutingNames.deliverySchedule,
         name: 'deliverySchedule',
-        builder: (context, state) =>
-            const SchedulePage(type: ScheduleType.delivery),
+        builder:
+            (context, state) => SchedulePage(
+              type: ScheduleType.delivery,
+              pickupData: state.extra as Map<String, String>?,
+            ),
       ),
       GoRoute(
         path: RoutingNames.payment,
         name: 'payment',
-        builder: (context, state) => const PaymentPage(),
+        builder:
+            (context, state) =>
+                PaymentPage(scheduleData: state.extra as Map<String, String>?),
       ),
       GoRoute(
         path: RoutingNames.orderSuccess,
@@ -126,8 +133,23 @@ class AppRouter {
         name: 'wallet',
         builder: (context, state) => const WalletPage(),
       ),
+      GoRoute(
+        path: RoutingNames.categoryServices,
+        name: 'categoryServices',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          final categories = extra['categories'] as List<CategoryModel>;
+          final selectedIndex = extra['selectedIndex'] as int? ?? 0;
+          return CategoryServicesPage(
+            categories: categories,
+            initialCategoryIndex: selectedIndex,
+          );
+        },
+      ),
     ],
-    errorBuilder: (context, state) =>
-        Scaffold(body: Center(child: Text('Page not found: ${state.error}'))),
+    errorBuilder:
+        (context, state) => Scaffold(
+          body: Center(child: Text('Page not found: ${state.error}')),
+        ),
   );
 }

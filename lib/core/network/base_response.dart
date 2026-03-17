@@ -41,7 +41,7 @@ class BaseResponse<T> {
 
 /// For paginated API responses:
 /// { "status": true, "data": [...], "current_page": 1, "last_page": 5 }
-@JsonSerializable(genericArgumentFactories: true)
+@JsonSerializable(genericArgumentFactories: true, createToJson: false)
 class PaginatedResponse<T> {
   final List<T>? data;
   @JsonKey(name: 'current_page')
