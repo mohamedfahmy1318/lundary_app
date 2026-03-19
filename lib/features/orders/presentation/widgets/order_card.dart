@@ -29,7 +29,19 @@ class OrderCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(order.orderNumber, style: AppTextStyles.bodyMedium),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(order.orderNumber, style: AppTextStyles.bodyMedium),
+                      Text(
+                        order.status.uiName,
+                        style: AppTextStyles.caption.copyWith(
+                          color: order.status.uiColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                   SizedBox(height: 4.h),
                   Text(
                     'AED ${order.totalAmount}  ·  ${order.itemsCount} items',
@@ -50,35 +62,30 @@ class OrderCard extends StatelessWidget {
   }
 
   Widget _buildStatusIcon() {
-    Color iconColor;
     IconData iconData;
 
     switch (order.status) {
       case OrderStatus.pending:
-        iconColor = AppColors.warning;
         iconData = Icons.schedule;
       case OrderStatus.confirmed:
+      case OrderStatus.pickingUp:
       case OrderStatus.pickedUp:
       case OrderStatus.processing:
       case OrderStatus.ready:
-        iconColor = AppColors.success;
         iconData = Icons.sync;
       case OrderStatus.outForDelivery:
-        iconColor = AppColors.warning;
         iconData = Icons.local_shipping;
       case OrderStatus.delivered:
       case OrderStatus.completed:
-        iconColor = AppColors.primary;
         iconData = Icons.check;
       case OrderStatus.cancelled:
-        iconColor = AppColors.error;
         iconData = Icons.close;
     }
 
     return Container(
       width: 40.w,
       height: 40.w,
-      decoration: BoxDecoration(color: iconColor, shape: BoxShape.circle),
+      decoration: BoxDecoration(color: order.status.uiColor, shape: BoxShape.circle),
       child: Icon(iconData, color: AppColors.white, size: 24.sp),
     );
   }

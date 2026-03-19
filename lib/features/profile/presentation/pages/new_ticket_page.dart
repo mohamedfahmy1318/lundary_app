@@ -1,29 +1,84 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:laundry/core/di/injection_container.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_bar_factory.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/selectable_chip.dart';
+import '../cubit/support_cubit.dart';
+import '../cubit/support_state.dart';
 
-class NewTicketPage extends StatefulWidget {
+class NewTicketPage extends StatelessWidget {
   const NewTicketPage({super.key});
 
   @override
-  State<NewTicketPage> createState() => _NewTicketPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => getIt<SupportCubit>(),
+      child: const _NewTicketView(),
+    );
+  }
 }
 
-class _NewTicketPageState extends State<NewTicketPage> {
+class _NewTicketView extends StatefulWidget {
+  const _NewTicketView();
+
+  @override
+  State<_NewTicketView> createState() => _NewTicketViewState();
+}
+
+class _NewTicketViewState extends State<_NewTicketView> {
   String? _selectedCategory;
+  final TextEditingController _orderNumberController = TextEditingController();
+  final TextEditingController _subjectController = TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
+
   final List<String> _categories = [
-    "Order Issue",
-    "Delivery Problem",
-    "Quality Complaint",
-    "Refund Request",
-    "Payment Issue",
-    "Other",
+    "order_issue",
+    "delivery_problem",
+    "quality_complaint",
+    "refund_request",
+    "payment_issue",
+    "other",
   ];
+
+  @override
+  void dispose() {
+    _orderNumberController.dispose();
+    _subjectController.dispose();
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  void _submitTicket() {
+    if (_selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a category.')));
+      return;
+    }
+    if (_subjectController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a subject.')));
+      return;
+    }
+    if (_messageController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please describe your issue.')));
+      return;
+    }
+
+    String finalSubject = _subjectController.text.trim();
+    if (_orderNumberController.text.trim().isNotEmpty) {
+      finalSubject += " - Order: ${_orderNumberController.text.trim()}";
+    }
+
+    context.read<SupportCubit>().createTicket(
+      finalSubject,
+      _messageController.text.trim(),
+      "low", // default priority valid by backend
+      _selectedCategory!,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,97 +89,92 @@ class _NewTicketPageState extends State<NewTicketPage> {
         title: "New Ticket",
         onBack: () => context.pop(),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Create Support Ticket", style: AppTextStyles.sectionTitle),
-            SizedBox(height: 8.h),
-            Text(
-              "We're here to help. Describe your issue below.",
-              style: AppTextStyles.bodyRegular,
-            ),
-            SizedBox(height: 30.h),
-
-            // Categories
-            Text("Select Category *", style: AppTextStyles.sectionLabel),
-            SizedBox(height: 12.h),
-            Wrap(
-              spacing: 8.w,
-              runSpacing: 12.h,
-              children:
-                  _categories.map((category) {
-                    return SelectableChip(
-                      label: category,
-                      isSelected: _selectedCategory == category,
-                      onTap: () {
-                        setState(() {
-                          _selectedCategory =
-                              _selectedCategory == category ? null : category;
-                        });
-                      },
-                    );
-                  }).toList(),
-            ),
-
-            SizedBox(height: 24.h),
-
-            // Order Number
-            _buildLabeledField(
-              label: "Order Number (Optional)",
-              hint: "e.g., #123456",
-            ),
-            SizedBox(height: 24.h),
-
-            // Description
-            _buildLabeledField(
-              label: "Describe Your Issue *",
-              hint: "Please provide details about your issue...",
-              maxLines: 5,
-            ),
-            SizedBox(height: 24.h),
-
-            // Attach Image
-            Text("Attach Image (Optional)", style: AppTextStyles.sectionLabel),
-            SizedBox(height: 12.h),
-            Container(
-              width: double.infinity,
-              height: 100.h,
-              decoration: BoxDecoration(
-                color: AppColors.cardBackground,
-                borderRadius: BorderRadius.circular(24.r),
-                border: Border.all(color: Colors.grey[300]!, width: 1.5),
+      body: BlocListener<SupportCubit, SupportState>(
+        listener: (context, state) {
+          state.maybeWhen(
+            submissionSuccess: () {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Support ticket created successfully!')));
+              context.pop();
+            },
+            error: (msg) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+            },
+            orElse: () {},
+          );
+        },
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Create Support Ticket", style: AppTextStyles.sectionTitle),
+              SizedBox(height: 8.h),
+              Text(
+                "We're here to help. Describe your issue below.",
+                style: AppTextStyles.bodyRegular,
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.file_upload_outlined,
-                    color: AppColors.textHint,
-                    size: 30.sp,
-                  ),
-                  SizedBox(height: 8.h),
-                  Text(
-                    "Tap to upload image",
-                    style: AppTextStyles.caption.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    "PNG, JPG up to 10MB",
-                    style: AppTextStyles.captionSmall,
-                  ),
-                ],
+              SizedBox(height: 30.h),
+
+              // Categories
+              Text("Select Category *", style: AppTextStyles.sectionLabel),
+              SizedBox(height: 12.h),
+              Wrap(
+                spacing: 8.w,
+                runSpacing: 12.h,
+                children: _categories.map((category) {
+                  return SelectableChip(
+                    label: category.replaceAll('_', ' ').toUpperCase(),
+                    isSelected: _selectedCategory == category,
+                    onTap: () {
+                      setState(() {
+                        _selectedCategory = _selectedCategory == category ? null : category;
+                      });
+                    },
+                  );
+                }).toList(),
               ),
-            ),
 
-            SizedBox(height: 32.h),
+              SizedBox(height: 24.h),
 
-            // Submit Button
-            CustomButton(text: "Submit Ticket", onPressed: () => context.pop()),
-            SizedBox(height: 32.h),
-          ],
+              // Subject
+              _buildLabeledField(
+                label: "Subject *",
+                hint: "e.g., Missing items in my bag",
+                controller: _subjectController,
+              ),
+              SizedBox(height: 24.h),
+
+              // Order Number
+              _buildLabeledField(
+                label: "Order Number (Optional)",
+                hint: "e.g., #123456",
+                controller: _orderNumberController,
+              ),
+              SizedBox(height: 24.h),
+
+              // Description
+              _buildLabeledField(
+                label: "Describe Your Issue *",
+                hint: "Please provide details about your issue...",
+                maxLines: 5,
+                controller: _messageController,
+              ),
+              
+              SizedBox(height: 32.h),
+
+              // Submit Button
+              BlocBuilder<SupportCubit, SupportState>(
+                builder: (context, state) {
+                  final isSubmitting = state.maybeWhen(submitting: () => true, orElse: () => false);
+                  return CustomButton(
+                    text: isSubmitting ? "Submitting..." : "Submit Ticket",
+                    onPressed: isSubmitting ? () {} : _submitTicket,
+                  );
+                },
+              ),
+              SizedBox(height: 32.h),
+            ],
+          ),
         ),
       ),
     );
@@ -133,6 +183,7 @@ class _NewTicketPageState extends State<NewTicketPage> {
   Widget _buildLabeledField({
     required String label,
     required String hint,
+    required TextEditingController controller,
     int maxLines = 1,
   }) {
     return Column(
@@ -141,6 +192,7 @@ class _NewTicketPageState extends State<NewTicketPage> {
         Text(label, style: AppTextStyles.sectionLabel),
         SizedBox(height: 12.h),
         TextField(
+          controller: controller,
           maxLines: maxLines,
           decoration: InputDecoration(
             hintText: hint,

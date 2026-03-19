@@ -1,6 +1,11 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get_it/get_it.dart';
 import 'package:laundry/features/basket/domain/repos/basket_repo.dart';
+import 'package:laundry/features/onboarding/data/data_sources/on_boarding_remote_data_source.dart';
+import 'package:laundry/features/onboarding/data/repos/on_boarding_repo_impl.dart';
+import 'package:laundry/features/onboarding/domain/repos/on_boarding_repo.dart';
+import 'package:laundry/features/onboarding/presentation/cubit/on_boarding_cubit.dart';
+import 'package:laundry/features/profile/presentation/cubit/support_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:laundry/core/network/api_client.dart';
@@ -30,6 +35,9 @@ import 'package:laundry/features/profile/data/data_sources/profile_remote_data_s
 import 'package:laundry/features/profile/domain/repos/profile_repo.dart';
 import 'package:laundry/features/profile/data/repos/profile_repo_impl.dart';
 import 'package:laundry/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:laundry/features/profile/presentation/cubit/change_password_cubit.dart';
+import 'package:laundry/features/profile/presentation/cubit/update_profile_cubit.dart';
+import 'package:laundry/features/profile/presentation/cubit/subscriptions_cubit.dart';
 
 final getIt = GetIt.instance;
 
@@ -106,7 +114,7 @@ Future<void> setupDependencies() async {
   );
   getIt.registerFactory(() => OrdersCubit(ordersRepo: getIt()));
 
-  //============================================================
+  // ============================================================
   // Features - Wallet
   //============================================================
   getIt.registerLazySingleton<WalletRemoteDataSource>(
@@ -126,5 +134,21 @@ Future<void> setupDependencies() async {
   getIt.registerLazySingleton<ProfileRepo>(
     () => ProfileRepoImpl(remoteDataSource: getIt(), networkInfo: getIt()),
   );
+
+  //============================================================
+  // Features - OnBoarding
+  //============================================================
+  getIt.registerLazySingleton<OnBoardingRemoteDataSource>(
+    () => OnBoardingRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<OnBoardingRepo>(
+    () => OnBoardingRepoImpl(remoteDataSource: getIt(), networkInfo: getIt()),
+  );
+
   getIt.registerFactory(() => ProfileCubit(repo: getIt()));
+  getIt.registerFactory(() => ChangePasswordCubit(getIt()));
+  getIt.registerFactory(() => SubscriptionsCubit(repo: getIt()));
+  getIt.registerFactory(() => SupportCubit(repo: getIt()));
+  getIt.registerFactory(() => OnBoardingCubit(repo: getIt()));
+  getIt.registerFactory(() => UpdateProfileCubit(repo: getIt()));
 }

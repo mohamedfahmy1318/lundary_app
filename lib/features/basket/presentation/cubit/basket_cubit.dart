@@ -38,7 +38,14 @@ class BasketCubit extends Cubit<BasketState> {
     required double unitPrice,
   }) {
     if (_cart.containsKey(serviceId)) {
-      _cart[serviceId]!.quantity++;
+      final existing = _cart[serviceId]!;
+      _cart[serviceId] = CartItem(
+        serviceId: existing.serviceId,
+        serviceName: existing.serviceName,
+        categoryName: existing.categoryName,
+        unitPrice: existing.unitPrice,
+        quantity: existing.quantity + 1,
+      );
     } else {
       _cart[serviceId] = CartItem(
         serviceId: serviceId,
@@ -53,8 +60,18 @@ class BasketCubit extends Cubit<BasketState> {
   void decrementItem(int serviceId) {
     final item = _cart[serviceId];
     if (item != null && item.quantity > 0) {
-      item.quantity--;
-      if (item.quantity == 0) _cart.remove(serviceId);
+      final newQty = item.quantity - 1;
+      if (newQty == 0) {
+        _cart.remove(serviceId);
+      } else {
+        _cart[serviceId] = CartItem(
+          serviceId: item.serviceId,
+          serviceName: item.serviceName,
+          categoryName: item.categoryName,
+          unitPrice: item.unitPrice,
+          quantity: newQty,
+        );
+      }
       _emitLoaded();
     }
   }

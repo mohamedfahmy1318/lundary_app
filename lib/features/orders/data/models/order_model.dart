@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
+import '../../../../core/constants/app_colors.dart';
 
 part 'order_model.g.dart';
 
@@ -7,6 +9,8 @@ enum OrderStatus {
   pending,
   @JsonValue('confirmed')
   confirmed,
+  @JsonValue('picking_up')
+  pickingUp,
   @JsonValue('picked_up')
   pickedUp,
   @JsonValue('processing')
@@ -21,6 +25,38 @@ enum OrderStatus {
   completed,
   @JsonValue('cancelled')
   cancelled,
+}
+
+extension OrderStatusX on OrderStatus {
+  String get uiName {
+    switch (this) {
+      case OrderStatus.pending: return 'Pending';
+      case OrderStatus.confirmed: return 'Confirmed';
+      case OrderStatus.pickingUp: return 'Picking Up';
+      case OrderStatus.pickedUp: return 'Picked Up';
+      case OrderStatus.processing: return 'In Process';
+      case OrderStatus.ready: return 'Ready';
+      case OrderStatus.outForDelivery: return 'Out for Delivery';
+      case OrderStatus.delivered: return 'Delivered';
+      case OrderStatus.completed: return 'Completed';
+      case OrderStatus.cancelled: return 'Cancelled';
+    }
+  }
+
+  Color get uiColor {
+    switch (this) {
+      case OrderStatus.pending: return Colors.orange;
+      case OrderStatus.confirmed: return Colors.blue;
+      case OrderStatus.pickingUp: return Colors.indigo;
+      case OrderStatus.pickedUp: return Colors.deepPurple;
+      case OrderStatus.processing: return Colors.purple;
+      case OrderStatus.ready: return Colors.teal;
+      case OrderStatus.outForDelivery: return Colors.orangeAccent;
+      case OrderStatus.delivered: return AppColors.success;
+      case OrderStatus.completed: return AppColors.success;
+      case OrderStatus.cancelled: return AppColors.error;
+    }
+  }
 }
 
 @JsonSerializable(fieldRename: FieldRename.snake)

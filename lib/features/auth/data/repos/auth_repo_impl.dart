@@ -57,4 +57,21 @@ class AuthRepoImpl implements AuthRepo {
       return Left(UnknownFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> logout() async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NoInternetFailure());
+    }
+    try {
+      await _remoteDataSource.logout();
+      await _localStorageService.setLoggedIn(false);
+      await _localStorageService.clearToken();
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
 }

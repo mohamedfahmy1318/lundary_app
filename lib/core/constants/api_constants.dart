@@ -12,6 +12,7 @@ abstract class ApiConstants {
   static const String register = '/auth/register';
   static const String verify = '/auth/verify';
   static const String resend = '/auth/resend';
+  static const String logout = '/auth/logout';
 
   // Home
   static const String categories = '/categories';
@@ -32,9 +33,13 @@ abstract class ApiConstants {
   static const String walletTransactions = '/wallet/transactions';
 
   // Profile
-  static const String profile = '/profile';
+  static const String profile = '/auth/profile';
+  static const String changePassword = '/auth/change-password';
   static const String tickets = '/support/tickets';
-  static const String subscriptions = '/subscriptions';
+  static const String subscriptionPlans = '/subscription-plans';
+  static const String mySubscriptions = '/subscriptions/my';
+  static const String onboarding = '/settings/onboarding';
+  static const String updateProfile = '/auth/profile';
 
   // Headers
   static const String contentType = 'application/json';

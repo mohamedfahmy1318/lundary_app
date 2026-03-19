@@ -27,6 +27,7 @@ class BasketPage extends StatelessWidget {
         appBar: AppBarFactory.build(
           context,
           title: "Laundry Basket",
+          onBack: () => context.pop(),
           actions: [
             Padding(
               padding: EdgeInsets.only(right: 16.w),

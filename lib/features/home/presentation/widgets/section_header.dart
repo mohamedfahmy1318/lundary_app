@@ -25,18 +25,6 @@ class SectionHeader extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
-          if (onViewAll != null)
-            GestureDetector(
-              onTap: onViewAll,
-              child: Text(
-                'View All',
-                style: GoogleFonts.urbanist(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primary,
-                ),
-              ),
-            ),
         ],
       ),
     );

@@ -12,11 +12,14 @@ class OnBoardingItem extends StatelessWidget {
     required this.onBoardingModel,
     required this.currentIndex,
     required this.totalPages,
+    required this.buttonText,
     this.onButtonPressed,
   });
+  
   final OnBoardingModel onBoardingModel;
   final int currentIndex;
   final int totalPages;
+  final String buttonText;
   final VoidCallback? onButtonPressed;
 
   @override
@@ -41,16 +44,16 @@ class OnBoardingItem extends StatelessWidget {
           currentIndex: currentIndex,
         ),
         SizedBox(height: 24.h),
-        Expanded(child: AppCachedImage(assetPath: onBoardingModel.image)),
-        if (onBoardingModel.buttonText != null) ...[
-          SizedBox(height: 10.h),
-          CustomButton(
-            backgroundColor: Theme.of(context).primaryColor,
-            onPressed: onButtonPressed,
-            text: onBoardingModel.buttonText!,
-            width: 380.w,
-          ),
-        ],
+        // We will make sure AppCachedImage handles network images natively.
+        Expanded(child: AppCachedImage(imageUrl: onBoardingModel.image)),
+        
+        SizedBox(height: 10.h),
+        CustomButton(
+          backgroundColor: Theme.of(context).primaryColor,
+          onPressed: onButtonPressed,
+          text: buttonText,
+          width: 380.w,
+        ),
         SizedBox(height: 24.h),
       ],
     );

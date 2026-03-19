@@ -128,12 +128,12 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( Map<String, dynamic> profile,  List<TicketModel> tickets,  List<Map<String, dynamic>> subscriptionPlans)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( ProfileModel profile)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Loaded() when loaded != null:
-return loaded(_that.profile,_that.tickets,_that.subscriptionPlans);case _Error() when error != null:
+return loaded(_that.profile);case _Error() when error != null:
 return error(_that.message);case _:
   return orElse();
 
@@ -152,12 +152,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( Map<String, dynamic> profile,  List<TicketModel> tickets,  List<Map<String, dynamic>> subscriptionPlans)  loaded,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( ProfileModel profile)  loaded,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _Loaded():
-return loaded(_that.profile,_that.tickets,_that.subscriptionPlans);case _Error():
+return loaded(_that.profile);case _Error():
 return error(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -175,12 +175,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( Map<String, dynamic> profile,  List<TicketModel> tickets,  List<Map<String, dynamic>> subscriptionPlans)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( ProfileModel profile)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Loaded() when loaded != null:
-return loaded(_that.profile,_that.tickets,_that.subscriptionPlans);case _Error() when error != null:
+return loaded(_that.profile);case _Error() when error != null:
 return error(_that.message);case _:
   return null;
 
@@ -257,30 +257,10 @@ String toString() {
 
 
 class _Loaded implements ProfileState {
-  const _Loaded({required final  Map<String, dynamic> profile, required final  List<TicketModel> tickets, required final  List<Map<String, dynamic>> subscriptionPlans}): _profile = profile,_tickets = tickets,_subscriptionPlans = subscriptionPlans;
+  const _Loaded({required this.profile});
   
 
- final  Map<String, dynamic> _profile;
- Map<String, dynamic> get profile {
-  if (_profile is EqualUnmodifiableMapView) return _profile;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableMapView(_profile);
-}
-
- final  List<TicketModel> _tickets;
- List<TicketModel> get tickets {
-  if (_tickets is EqualUnmodifiableListView) return _tickets;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_tickets);
-}
-
- final  List<Map<String, dynamic>> _subscriptionPlans;
- List<Map<String, dynamic>> get subscriptionPlans {
-  if (_subscriptionPlans is EqualUnmodifiableListView) return _subscriptionPlans;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_subscriptionPlans);
-}
-
+ final  ProfileModel profile;
 
 /// Create a copy of ProfileState
 /// with the given fields replaced by the non-null parameter values.
@@ -292,16 +272,16 @@ _$LoadedCopyWith<_Loaded> get copyWith => __$LoadedCopyWithImpl<_Loaded>(this, _
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loaded&&const DeepCollectionEquality().equals(other._profile, _profile)&&const DeepCollectionEquality().equals(other._tickets, _tickets)&&const DeepCollectionEquality().equals(other._subscriptionPlans, _subscriptionPlans));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loaded&&(identical(other.profile, profile) || other.profile == profile));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_profile),const DeepCollectionEquality().hash(_tickets),const DeepCollectionEquality().hash(_subscriptionPlans));
+int get hashCode => Object.hash(runtimeType,profile);
 
 @override
 String toString() {
-  return 'ProfileState.loaded(profile: $profile, tickets: $tickets, subscriptionPlans: $subscriptionPlans)';
+  return 'ProfileState.loaded(profile: $profile)';
 }
 
 
@@ -312,7 +292,7 @@ abstract mixin class _$LoadedCopyWith<$Res> implements $ProfileStateCopyWith<$Re
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
 @useResult
 $Res call({
- Map<String, dynamic> profile, List<TicketModel> tickets, List<Map<String, dynamic>> subscriptionPlans
+ ProfileModel profile
 });
 
 
@@ -329,12 +309,10 @@ class __$LoadedCopyWithImpl<$Res>
 
 /// Create a copy of ProfileState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? profile = null,Object? tickets = null,Object? subscriptionPlans = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? profile = null,}) {
   return _then(_Loaded(
-profile: null == profile ? _self._profile : profile // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>,tickets: null == tickets ? _self._tickets : tickets // ignore: cast_nullable_to_non_nullable
-as List<TicketModel>,subscriptionPlans: null == subscriptionPlans ? _self._subscriptionPlans : subscriptionPlans // ignore: cast_nullable_to_non_nullable
-as List<Map<String, dynamic>>,
+profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
+as ProfileModel,
   ));
 }
 

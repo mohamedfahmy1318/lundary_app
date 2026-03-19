@@ -9,4 +9,5 @@ abstract class AuthRepo {
   Future<Either<Failure, AuthResponseModel>> register(
     RegisterRequestModel registerRequest,
   );
+  Future<Either<Failure, void>> logout();
 }

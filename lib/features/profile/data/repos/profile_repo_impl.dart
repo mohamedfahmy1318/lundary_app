@@ -3,6 +3,7 @@ import 'package:laundry/core/error/exceptions.dart';
 import 'package:laundry/core/error/failures.dart';
 import 'package:laundry/core/network/network_info.dart';
 import 'package:laundry/features/profile/data/data_sources/profile_remote_data_source.dart';
+import 'package:laundry/features/profile/data/models/profile_model.dart';
 import 'package:laundry/features/profile/data/models/ticket_model.dart';
 import 'package:laundry/features/profile/domain/repos/profile_repo.dart';
 
@@ -17,7 +18,7 @@ class ProfileRepoImpl implements ProfileRepo {
        _networkInfo = networkInfo;
 
   @override
-  Future<Either<Failure, Map<String, dynamic>>> getProfile() async {
+  Future<Either<Failure, ProfileModel>> getProfile() async {
     if (!await _networkInfo.isConnected) {
       return const Left(NoInternetFailure());
     }
@@ -30,12 +31,25 @@ class ProfileRepoImpl implements ProfileRepo {
   }
 
   @override
-  Future<Either<Failure, void>> updateProfile(Map<String, dynamic> data) async {
+  Future<Either<Failure, void>> updateProfile({String? name, String? phone, String? avatarFilePath}) async {
     if (!await _networkInfo.isConnected) {
       return const Left(NoInternetFailure());
     }
     try {
-      await _remoteDataSource.updateProfile(data);
+      await _remoteDataSource.updateProfile(name: name, phone: phone, avatarFilePath: avatarFilePath);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> changePassword(Map<String, dynamic> data) async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NoInternetFailure());
+    }
+    try {
+      await _remoteDataSource.changePassword(data);
       return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
@@ -71,14 +85,26 @@ class ProfileRepoImpl implements ProfileRepo {
   }
 
   @override
-  Future<Either<Failure, List<Map<String, dynamic>>>>
-  getSubscriptionPlans() async {
+  Future<Either<Failure, List<SubscriptionPlan>>> getSubscriptionPlans() async {
     if (!await _networkInfo.isConnected) {
       return const Left(NoInternetFailure());
     }
     try {
       final plans = await _remoteDataSource.getSubscriptionPlans();
       return Right(plans);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<ActiveSubscription>>> getMySubscriptions() async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NoInternetFailure());
+    }
+    try {
+      final subscriptions = await _remoteDataSource.getMySubscriptions();
+      return Right(subscriptions);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     }

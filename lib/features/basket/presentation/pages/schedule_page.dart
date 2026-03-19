@@ -46,6 +46,7 @@ class _SchedulePageState extends State<SchedulePage> {
       backgroundColor: AppColors.white,
       appBar: AppBarFactory.build(
         context,
+        onBack: () => context.pop(),
         title: _isPickup ? "Pick-up" : "Delivery",
         actions: [
           Padding(

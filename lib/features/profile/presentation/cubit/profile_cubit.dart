@@ -13,41 +13,20 @@ class ProfileCubit extends Cubit<ProfileState> {
     emit(const ProfileState.loading());
 
     final profileResult = await _repo.getProfile();
-    final ticketsResult = await _repo.getTickets();
-    final plansResult = await _repo.getSubscriptionPlans();
 
-    if (profileResult.isLeft()) {
-      profileResult.fold(
-        (failure) => emit(ProfileState.error(failure.message)),
-        (_) {},
-      );
-      return;
-    }
-
-    emit(
-      ProfileState.loaded(
-        profile: profileResult.getOrElse(() => {}),
-        tickets: ticketsResult.getOrElse(() => []),
-        subscriptionPlans: plansResult.getOrElse(() => []),
-      ),
-    );
-  }
-
-  Future<void> updateProfile(Map<String, dynamic> data) async {
-    final result = await _repo.updateProfile(data);
-    result.fold(
+    profileResult.fold(
       (failure) => emit(ProfileState.error(failure.message)),
-      (_) => loadProfile(),
+      (profile) {
+        emit(
+          ProfileState.loaded(
+            profile: profile,
+          ),
+        );
+      },
     );
   }
 
-  Future<void> createTicket(Map<String, dynamic> ticketData) async {
-    final result = await _repo.createTicket(ticketData);
-    result.fold(
-      (failure) => emit(ProfileState.error(failure.message)),
-      (_) => loadProfile(),
-    );
-  }
+
 
   Future<void> deleteAccount() async {
     final result = await _repo.deleteAccount();

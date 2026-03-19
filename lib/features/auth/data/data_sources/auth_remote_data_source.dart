@@ -5,6 +5,7 @@ import 'package:laundry/features/auth/data/models/auth_models.dart';
 abstract class AuthRemoteDataSource {
   Future<AuthResponseModel> login(LoginRequestModel loginRequest);
   Future<AuthResponseModel> register(RegisterRequestModel registerRequest);
+  Future<void> logout();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -31,5 +32,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       data: registerRequest.toJson(),
     );
     return AuthResponseModel.fromJson(response.data['data']);
+  }
+
+  @override
+  Future<void> logout() async {
+    await _apiClient.post(ApiConstants.logout);
   }
 }

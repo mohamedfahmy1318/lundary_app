@@ -91,6 +91,7 @@ Map<String, dynamic> _$OrderModelToJson(OrderModel instance) =>
 const _$OrderStatusEnumMap = {
   OrderStatus.pending: 'pending',
   OrderStatus.confirmed: 'confirmed',
+  OrderStatus.pickingUp: 'picking_up',
   OrderStatus.pickedUp: 'picked_up',
   OrderStatus.processing: 'processing',
   OrderStatus.ready: 'ready',
