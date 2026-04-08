@@ -2,10 +2,12 @@ import 'package:laundry/core/constants/api_constants.dart';
 import 'package:laundry/core/network/api_client.dart';
 import 'package:laundry/features/home/data/models/category_model.dart';
 import 'package:laundry/features/home/data/models/service_model.dart';
+import 'package:laundry/features/home/data/models/banner_model.dart';
 
 abstract class HomeRemoteDataSource {
   Future<List<CategoryModel>> getCategories();
   Future<List<ServiceModel>> getServices({int? categoryId, String? search});
+  Future<List<BannerModel>> getBanners();
 }
 
 class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
@@ -39,6 +41,15 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     final List<dynamic> data = response.data['data'];
     return data
         .map((json) => ServiceModel.fromJson(json as Map<String, dynamic>))
+        .toList();
+  }
+
+  @override
+  Future<List<BannerModel>> getBanners() async {
+    final response = await _apiClient.get(ApiConstants.banners);
+    final List<dynamic> data = response.data['data'];
+    return data
+        .map((json) => BannerModel.fromJson(json as Map<String, dynamic>))
         .toList();
   }
 }

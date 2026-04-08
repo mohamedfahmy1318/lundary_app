@@ -1,5 +1,5 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
-
 import 'package:laundry/app.dart';
 import 'package:laundry/core/di/injection_container.dart';
 import 'package:laundry/core/services/hive_service.dart';
@@ -8,16 +8,23 @@ import 'package:laundry/core/utils/app_helpers.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Set portrait orientation only
+  // Catch Flutter framework errors
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    // TODO: Send to crash reporting service (e.g., Firebase Crashlytics)
+  };
+
+  // Catch errors outside the Flutter framework (e.g., in async code)
+  PlatformDispatcher.instance.onError = (error, stack) {
+    // TODO: Send to crash reporting service
+    debugPrint('Uncaught error: $error\n$stack');
+    return true;
+  };
+
   await AppHelpers.setPortraitOnly();
-
-  // Initialize Hive
   await HiveService.init();
-
-  // Setup dependency injection
   await setupDependencies();
 
-  // Initialize Firebase (uncomment when needed)
   // await Firebase.initializeApp();
 
   runApp(const MyApp());

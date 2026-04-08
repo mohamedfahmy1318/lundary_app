@@ -70,6 +70,48 @@ class ProfileRepoImpl implements ProfileRepo {
   }
 
   @override
+  Future<Either<Failure, TicketModel>> getTicketDetails(int ticketId) async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NoInternetFailure());
+    }
+    try {
+      final ticket = await _remoteDataSource.getTicketDetails(ticketId);
+      return Right(ticket);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, TicketReplyModel>> replyToTicket({
+    required int ticketId,
+    required String message,
+  }) async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NoInternetFailure());
+    }
+    try {
+      final reply = await _remoteDataSource.replyToTicket(ticketId, message);
+      return Right(reply);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, TicketModel>> closeTicket(int ticketId) async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NoInternetFailure());
+    }
+    try {
+      final ticket = await _remoteDataSource.closeTicket(ticketId);
+      return Right(ticket);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> createTicket(
     Map<String, dynamic> ticketData,
   ) async {

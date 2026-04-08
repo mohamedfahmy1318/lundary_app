@@ -21,6 +21,10 @@ TicketModel _$TicketModelFromJson(Map<String, dynamic> json) => TicketModel(
   resolvedAt: json['resolved_at'] as String?,
   createdAt: json['created_at'] as String,
   updatedAt: json['updated_at'] as String,
+  replies:
+      (json['replies'] as List<dynamic>?)
+          ?.map((e) => TicketReplyModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
 );
 
 Map<String, dynamic> _$TicketModelToJson(TicketModel instance) =>
@@ -39,6 +43,7 @@ Map<String, dynamic> _$TicketModelToJson(TicketModel instance) =>
       'resolved_at': instance.resolvedAt,
       'created_at': instance.createdAt,
       'updated_at': instance.updatedAt,
+      'replies': instance.replies,
     };
 
 const _$TicketStatusEnumMap = {
@@ -47,3 +52,46 @@ const _$TicketStatusEnumMap = {
   TicketStatus.resolved: 'resolved',
   TicketStatus.closed: 'closed',
 };
+
+TicketReplyModel _$TicketReplyModelFromJson(Map<String, dynamic> json) =>
+    TicketReplyModel(
+      id: (json['id'] as num).toInt(),
+      ticketId: (json['ticket_id'] as num).toInt(),
+      userId: (json['user_id'] as num).toInt(),
+      message: json['message'] as String,
+      isStaffReply: json['is_staff_reply'] as bool,
+      attachments: json['attachments'] as String?,
+      createdAt: json['created_at'] as String,
+      updatedAt: json['updated_at'] as String,
+      user:
+          json['user'] == null
+              ? null
+              : ReplyUserModel.fromJson(json['user'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$TicketReplyModelToJson(TicketReplyModel instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'ticket_id': instance.ticketId,
+      'user_id': instance.userId,
+      'message': instance.message,
+      'is_staff_reply': instance.isStaffReply,
+      'attachments': instance.attachments,
+      'created_at': instance.createdAt,
+      'updated_at': instance.updatedAt,
+      'user': instance.user,
+    };
+
+ReplyUserModel _$ReplyUserModelFromJson(Map<String, dynamic> json) =>
+    ReplyUserModel(
+      id: (json['id'] as num).toInt(),
+      name: json['name'] as String,
+      role: json['role'] as String,
+    );
+
+Map<String, dynamic> _$ReplyUserModelToJson(ReplyUserModel instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'role': instance.role,
+    };

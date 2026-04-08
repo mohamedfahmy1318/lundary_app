@@ -15,6 +15,7 @@ import 'package:laundry/features/orders/data/models/order_model.dart';
 import 'package:laundry/features/profile/presentation/pages/manage_account_page.dart';
 import 'package:laundry/features/profile/presentation/pages/support_page.dart';
 import 'package:laundry/features/profile/presentation/pages/new_ticket_page.dart';
+import 'package:laundry/features/profile/presentation/pages/ticket_details_page.dart';
 import 'package:laundry/features/profile/presentation/pages/subscription_plans_page.dart';
 import 'package:laundry/features/basket/presentation/pages/basket_page.dart';
 import 'package:laundry/features/basket/presentation/pages/schedule_page.dart';
@@ -90,6 +91,19 @@ class AppRouter {
         path: RoutingNames.newTicket,
         name: 'newTicket',
         builder: (context, state) => const NewTicketPage(),
+      ),
+      GoRoute(
+        path: RoutingNames.ticketDetails,
+        name: 'ticketDetails',
+        builder: (context, state) {
+          final ticketId = int.tryParse(state.pathParameters['ticketId'] ?? '');
+          if (ticketId == null) {
+            return const Scaffold(
+              body: Center(child: Text('Invalid ticket id')),
+            );
+          }
+          return TicketDetailsPage(ticketId: ticketId);
+        },
       ),
       GoRoute(
         path: RoutingNames.subscriptionPlans,

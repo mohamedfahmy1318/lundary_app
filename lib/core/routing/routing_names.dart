@@ -11,6 +11,7 @@ class RoutingNames {
   static const String manageAccount = '/manage-account';
   static const String support = '/support';
   static const String newTicket = '/support/new-ticket';
+  static const String ticketDetails = '/support/tickets/:ticketId';
   static const String subscriptionPlans = '/subscription-plans';
   static const String basket = '/basket';
   static const String pickupSchedule = '/schedule/pickup';

@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 import 'package:laundry/core/error/failures.dart';
 import 'package:laundry/features/home/data/models/category_model.dart';
 import 'package:laundry/features/home/data/models/service_model.dart';
+import 'package:laundry/features/home/data/models/banner_model.dart';
 
 abstract class HomeRepo {
   Future<Either<Failure, List<CategoryModel>>> getCategories();
@@ -10,4 +11,5 @@ abstract class HomeRepo {
     int? categoryId,
     String? search,
   });
+  Future<Either<Failure, List<BannerModel>>> getBanners();
 }

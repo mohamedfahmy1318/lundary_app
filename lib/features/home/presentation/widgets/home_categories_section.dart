@@ -44,7 +44,7 @@ class HomeCategoriesSection extends StatelessWidget {
         BlocConsumer<HomeCubit, HomeState>(
           listener: (context, state) {
             state.whenOrNull(
-              loaded: (cats) {
+              loaded: (cats, banners) {
                 onCategoriesLoaded(cats);
                 if (cats.isNotEmpty) {
                   servicesCubit.getServices(
@@ -61,7 +61,7 @@ class HomeCategoriesSection extends StatelessWidget {
                 height: 48.h,
                 child: const Center(child: CircularProgressIndicator()),
               ),
-              loaded: (cats) => SizedBox(
+              loaded: (cats, banners) => SizedBox(
                 height: 48.h,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,

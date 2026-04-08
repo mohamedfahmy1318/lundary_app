@@ -6,6 +6,7 @@ import 'package:laundry/core/network/network_info.dart';
 import 'package:laundry/features/home/data/data_sources/home_remote_data_source.dart';
 import 'package:laundry/features/home/data/models/category_model.dart';
 import 'package:laundry/features/home/data/models/service_model.dart';
+import 'package:laundry/features/home/data/models/banner_model.dart';
 import 'package:laundry/features/home/domain/repos/home_repo.dart';
 
 class HomeRepoImpl implements HomeRepo {
@@ -49,6 +50,23 @@ class HomeRepoImpl implements HomeRepo {
         search: search,
       );
       return Right(services);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } on UnauthorizedException catch (e) {
+      return Left(UnauthorizedFailure(message: e.message));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<BannerModel>>> getBanners() async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NoInternetFailure());
+    }
+    try {
+      final banners = await _remoteDataSource.getBanners();
+      return Right(banners);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } on UnauthorizedException catch (e) {

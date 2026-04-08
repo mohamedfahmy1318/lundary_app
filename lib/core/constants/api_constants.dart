@@ -18,12 +18,16 @@ abstract class ApiConstants {
   static const String categories = '/categories';
   static const String services = '/services';
   static const String products = '/products';
+  static const String banners = '/settings/banners';
 
   // Orders
   static const String orders = '/orders';
 
   // Basket
   static const String basket = '/basket';
+  
+  // Settings
+  static const String timeslots = '/settings/timeslots';
 
   // Wallet
   static const String wallet = '/wallet';
@@ -36,6 +40,9 @@ abstract class ApiConstants {
   static const String profile = '/auth/profile';
   static const String changePassword = '/auth/change-password';
   static const String tickets = '/support/tickets';
+  static String ticketDetails(int ticketId) => '$tickets/$ticketId';
+  static String ticketReply(int ticketId) => '${ticketDetails(ticketId)}/reply';
+  static String closeTicket(int ticketId) => '${ticketDetails(ticketId)}/close';
   static const String subscriptionPlans = '/subscription-plans';
   static const String mySubscriptions = '/subscriptions/my';
   static const String onboarding = '/settings/onboarding';

@@ -113,20 +113,34 @@ class _OrdersPageState extends State<OrdersPage>
     final orders = _ordersCubit.getFilteredOrders(filterStatus);
 
     if (orders.isEmpty) {
-      return const Center(child: Text("No orders found"));
+      return RefreshIndicator(
+        onRefresh: () => _ordersCubit.getOrders(),
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverFillRemaining(
+              child: Center(child: Text("No orders found")),
+            ),
+          ],
+        ),
+      );
     }
 
-    return ListView.builder(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      itemCount: orders.length,
-      itemBuilder: (context, index) {
-        return OrderCard(
-          order: orders[index],
-          onTap: () {
-            context.pushNamed('orderDetails', extra: orders[index]);
-          },
-        );
-      },
+    return RefreshIndicator(
+      onRefresh: () => _ordersCubit.getOrders(),
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+        itemCount: orders.length,
+        itemBuilder: (context, index) {
+          return OrderCard(
+            order: orders[index],
+            onTap: () {
+              context.pushNamed('orderDetails', extra: orders[index]);
+            },
+          );
+        },
+      ),
     );
   }
 }

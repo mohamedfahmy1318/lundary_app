@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'home_state.dart';
+part of 'timeslots_state.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -12,7 +12,7 @@ part of 'home_state.dart';
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
-mixin _$HomeState {
+mixin _$TimeslotsState {
 
 
 
@@ -20,7 +20,7 @@ mixin _$HomeState {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HomeState);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TimeslotsState);
 }
 
 
@@ -29,20 +29,20 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'HomeState()';
+  return 'TimeslotsState()';
 }
 
 
 }
 
 /// @nodoc
-class $HomeStateCopyWith<$Res>  {
-$HomeStateCopyWith(HomeState _, $Res Function(HomeState) __);
+class $TimeslotsStateCopyWith<$Res>  {
+$TimeslotsStateCopyWith(TimeslotsState _, $Res Function(TimeslotsState) __);
 }
 
 
-/// Adds pattern-matching-related methods to [HomeState].
-extension HomeStatePatterns on HomeState {
+/// Adds pattern-matching-related methods to [TimeslotsState].
+extension TimeslotsStatePatterns on TimeslotsState {
 /// A variant of `map` that fallback to returning `orElse`.
 ///
 /// It is equivalent to doing:
@@ -128,12 +128,12 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<CategoryModel> categories,  List<BannerModel> banners)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<TimeSlotModel> timeSlots)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Loaded() when loaded != null:
-return loaded(_that.categories,_that.banners);case _Error() when error != null:
+return loaded(_that.timeSlots);case _Error() when error != null:
 return error(_that.message);case _:
   return orElse();
 
@@ -152,12 +152,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<CategoryModel> categories,  List<BannerModel> banners)  loaded,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<TimeSlotModel> timeSlots)  loaded,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _Loaded():
-return loaded(_that.categories,_that.banners);case _Error():
+return loaded(_that.timeSlots);case _Error():
 return error(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -175,12 +175,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<CategoryModel> categories,  List<BannerModel> banners)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<TimeSlotModel> timeSlots)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Loaded() when loaded != null:
-return loaded(_that.categories,_that.banners);case _Error() when error != null:
+return loaded(_that.timeSlots);case _Error() when error != null:
 return error(_that.message);case _:
   return null;
 
@@ -192,7 +192,7 @@ return error(_that.message);case _:
 /// @nodoc
 
 
-class _Initial implements HomeState {
+class _Initial implements TimeslotsState {
   const _Initial();
   
 
@@ -212,7 +212,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'HomeState.initial()';
+  return 'TimeslotsState.initial()';
 }
 
 
@@ -224,7 +224,7 @@ String toString() {
 /// @nodoc
 
 
-class _Loading implements HomeState {
+class _Loading implements TimeslotsState {
   const _Loading();
   
 
@@ -244,7 +244,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'HomeState.loading()';
+  return 'TimeslotsState.loading()';
 }
 
 
@@ -256,26 +256,19 @@ String toString() {
 /// @nodoc
 
 
-class _Loaded implements HomeState {
-  const _Loaded(final  List<CategoryModel> categories, final  List<BannerModel> banners): _categories = categories,_banners = banners;
+class _Loaded implements TimeslotsState {
+  const _Loaded(final  List<TimeSlotModel> timeSlots): _timeSlots = timeSlots;
   
 
- final  List<CategoryModel> _categories;
- List<CategoryModel> get categories {
-  if (_categories is EqualUnmodifiableListView) return _categories;
+ final  List<TimeSlotModel> _timeSlots;
+ List<TimeSlotModel> get timeSlots {
+  if (_timeSlots is EqualUnmodifiableListView) return _timeSlots;
   // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_categories);
-}
-
- final  List<BannerModel> _banners;
- List<BannerModel> get banners {
-  if (_banners is EqualUnmodifiableListView) return _banners;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_banners);
+  return EqualUnmodifiableListView(_timeSlots);
 }
 
 
-/// Create a copy of HomeState
+/// Create a copy of TimeslotsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
@@ -285,27 +278,27 @@ _$LoadedCopyWith<_Loaded> get copyWith => __$LoadedCopyWithImpl<_Loaded>(this, _
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loaded&&const DeepCollectionEquality().equals(other._categories, _categories)&&const DeepCollectionEquality().equals(other._banners, _banners));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loaded&&const DeepCollectionEquality().equals(other._timeSlots, _timeSlots));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_categories),const DeepCollectionEquality().hash(_banners));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_timeSlots));
 
 @override
 String toString() {
-  return 'HomeState.loaded(categories: $categories, banners: $banners)';
+  return 'TimeslotsState.loaded(timeSlots: $timeSlots)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$LoadedCopyWith<$Res> implements $HomeStateCopyWith<$Res> {
+abstract mixin class _$LoadedCopyWith<$Res> implements $TimeslotsStateCopyWith<$Res> {
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
 @useResult
 $Res call({
- List<CategoryModel> categories, List<BannerModel> banners
+ List<TimeSlotModel> timeSlots
 });
 
 
@@ -320,13 +313,12 @@ class __$LoadedCopyWithImpl<$Res>
   final _Loaded _self;
   final $Res Function(_Loaded) _then;
 
-/// Create a copy of HomeState
+/// Create a copy of TimeslotsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? categories = null,Object? banners = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? timeSlots = null,}) {
   return _then(_Loaded(
-null == categories ? _self._categories : categories // ignore: cast_nullable_to_non_nullable
-as List<CategoryModel>,null == banners ? _self._banners : banners // ignore: cast_nullable_to_non_nullable
-as List<BannerModel>,
+null == timeSlots ? _self._timeSlots : timeSlots // ignore: cast_nullable_to_non_nullable
+as List<TimeSlotModel>,
   ));
 }
 
@@ -336,13 +328,13 @@ as List<BannerModel>,
 /// @nodoc
 
 
-class _Error implements HomeState {
+class _Error implements TimeslotsState {
   const _Error(this.message);
   
 
  final  String message;
 
-/// Create a copy of HomeState
+/// Create a copy of TimeslotsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
@@ -361,14 +353,14 @@ int get hashCode => Object.hash(runtimeType,message);
 
 @override
 String toString() {
-  return 'HomeState.error(message: $message)';
+  return 'TimeslotsState.error(message: $message)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$ErrorCopyWith<$Res> implements $HomeStateCopyWith<$Res> {
+abstract mixin class _$ErrorCopyWith<$Res> implements $TimeslotsStateCopyWith<$Res> {
   factory _$ErrorCopyWith(_Error value, $Res Function(_Error) _then) = __$ErrorCopyWithImpl;
 @useResult
 $Res call({
@@ -387,7 +379,7 @@ class __$ErrorCopyWithImpl<$Res>
   final _Error _self;
   final $Res Function(_Error) _then;
 
-/// Create a copy of HomeState
+/// Create a copy of TimeslotsState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? message = null,}) {
   return _then(_Error(

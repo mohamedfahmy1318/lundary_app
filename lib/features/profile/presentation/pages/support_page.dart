@@ -55,7 +55,21 @@ class SupportPage extends StatelessWidget {
                         return ListView.separated(
                           itemCount: tickets.length,
                           separatorBuilder: (_, _) => SizedBox(height: 16.h),
-                          itemBuilder: (_, index) => _TicketCard(ticket: tickets[index]),
+                          itemBuilder:
+                              (_, index) => _TicketCard(
+                                ticket: tickets[index],
+                                onTap: () async {
+                                  await context.pushNamed(
+                                    'ticketDetails',
+                                    pathParameters: {
+                                      'ticketId': tickets[index].id.toString(),
+                                    },
+                                  );
+                                  if (context.mounted) {
+                                    context.read<SupportCubit>().loadTickets();
+                                  }
+                                },
+                              ),
                         );
                       },
                       orElse: () => const SizedBox.shrink(),
@@ -89,67 +103,72 @@ class SupportPage extends StatelessWidget {
 
 class _TicketCard extends StatelessWidget {
   final TicketModel ticket;
+  final VoidCallback onTap;
 
-  const _TicketCard({required this.ticket});
+  const _TicketCard({required this.ticket, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final bool isOpen = ticket.status == TicketStatus.open || ticket.status == TicketStatus.inProgress;
 
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                ticket.ticketNumber,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: isOpen ? Colors.orange.withAlpha(50) : AppColors.success.withAlpha(50),
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                child: Text(
-                  isOpen ? "Open" : "Closed",
-                  style: AppTextStyles.caption.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: isOpen ? Colors.orange[800] : AppColors.success,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20.r),
+      child: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  ticket.ticketNumber,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
                   ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8.h),
-          Text(ticket.subject, style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
-          SizedBox(height: 4.h),
-          Text(
-            ticket.description, 
-            style: AppTextStyles.caption.copyWith(color: Colors.grey[600]),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          SizedBox(height: 12.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Priority: ${ticket.priority.toUpperCase()}", style: AppTextStyles.captionSmall),
-              Text(_formatDate(ticket.createdAt), style: AppTextStyles.captionSmall),
-            ],
-          )
-        ],
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: isOpen ? Colors.orange.withAlpha(50) : AppColors.success.withAlpha(50),
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Text(
+                    isOpen ? "Open" : "Closed",
+                    style: AppTextStyles.caption.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: isOpen ? Colors.orange[800] : AppColors.success,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 8.h),
+            Text(ticket.subject, style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+            SizedBox(height: 4.h),
+            Text(
+              ticket.description,
+              style: AppTextStyles.caption.copyWith(color: Colors.grey[600]),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            SizedBox(height: 12.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Priority: ${ticket.priority.toUpperCase()}", style: AppTextStyles.captionSmall),
+                Text(_formatDate(ticket.createdAt), style: AppTextStyles.captionSmall),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }

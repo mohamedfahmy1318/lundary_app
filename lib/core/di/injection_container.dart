@@ -38,6 +38,7 @@ import 'package:laundry/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:laundry/features/profile/presentation/cubit/change_password_cubit.dart';
 import 'package:laundry/features/profile/presentation/cubit/update_profile_cubit.dart';
 import 'package:laundry/features/profile/presentation/cubit/subscriptions_cubit.dart';
+import 'package:laundry/features/profile/presentation/cubit/ticket_details_cubit.dart';
 
 final getIt = GetIt.instance;
 
@@ -149,6 +150,7 @@ Future<void> setupDependencies() async {
   getIt.registerFactory(() => ChangePasswordCubit(getIt()));
   getIt.registerFactory(() => SubscriptionsCubit(repo: getIt()));
   getIt.registerFactory(() => SupportCubit(repo: getIt()));
+  getIt.registerFactory(() => TicketDetailsCubit(repo: getIt()));
   getIt.registerFactory(() => OnBoardingCubit(repo: getIt()));
   getIt.registerFactory(() => UpdateProfileCubit(repo: getIt()));
 }

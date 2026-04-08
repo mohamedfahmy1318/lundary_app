@@ -13,11 +13,26 @@ class HomeCubit extends Cubit<HomeState> {
   Future<void> getCategories() async {
     emit(const HomeState.loading());
 
-    final result = await _homeRepo.getCategories();
+    final results = await Future.wait([
+      _homeRepo.getCategories(),
+      _homeRepo.getBanners(),
+    ]);
 
-    result.fold(
+    final categoriesResult = results[0];
+    final bannersResult = results[1];
+
+    categoriesResult.fold(
       (failure) => emit(HomeState.error(failure.message)),
-      (categories) => emit(HomeState.loaded(categories)),
+      (categoriesData) {
+        bannersResult.fold(
+          (failure) => emit(HomeState.error(failure.message)),
+          (bannersData) {
+            // categoriesData -> List<CategoryModel>
+            // bannersData -> List<BannerModel>
+            emit(HomeState.loaded(categoriesData as dynamic, bannersData as dynamic));
+          },
+        );
+      },
     );
   }
 }

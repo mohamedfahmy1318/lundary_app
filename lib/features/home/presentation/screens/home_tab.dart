@@ -11,8 +11,7 @@ import 'package:laundry/features/home/presentation/cubit/home_cubit.dart';
 import 'package:laundry/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:laundry/features/home/presentation/widgets/home_categories_section.dart';
 import 'package:laundry/features/home/presentation/widgets/home_quick_picks_section.dart';
-import 'package:laundry/features/home/presentation/widgets/promo_banner.dart';
-import 'package:laundry/features/home/presentation/widgets/promo_dots_indicator.dart';
+import 'package:laundry/features/home/presentation/widgets/home_banners_section.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -78,10 +77,7 @@ class _HomeTabState extends State<HomeTab> {
                       ),
                 ),
                 SizedBox(height: 16.h),
-                const PromoBanner(title: 'Welcome Offers', discount: '50%'),
-                SizedBox(height: 12.h),
-                const PromodotsIndicator(),
-                SizedBox(height: 24.h),
+                const HomeBannersSection(),
                 HomeCategoriesSection(
                   selectedCategoryIndex: _selectedCategoryIndex,
                   categories: _categories,

@@ -8,6 +8,12 @@ abstract class ProfileRepo {
   Future<Either<Failure, void>> updateProfile({String? name, String? phone, String? avatarFilePath});
   Future<Either<Failure, void>> changePassword(Map<String, dynamic> data);
   Future<Either<Failure, List<TicketModel>>> getTickets();
+  Future<Either<Failure, TicketModel>> getTicketDetails(int ticketId);
+  Future<Either<Failure, TicketReplyModel>> replyToTicket({
+    required int ticketId,
+    required String message,
+  });
+  Future<Either<Failure, TicketModel>> closeTicket(int ticketId);
   Future<Either<Failure, void>> createTicket(Map<String, dynamic> ticketData);
   Future<Either<Failure, List<SubscriptionPlan>>> getSubscriptionPlans();
   Future<Either<Failure, List<ActiveSubscription>>> getMySubscriptions();
