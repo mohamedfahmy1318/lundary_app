@@ -1,34 +1,50 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:laundry/features/profile/data/models/ticket_model.dart';
-import 'package:laundry/features/profile/domain/repos/profile_repo.dart';
+import 'package:laundry/features/profile/domain/entities/ticket_entity.dart';
+import 'package:laundry/features/profile/domain/entities/ticket_reply_entity.dart';
+import 'package:laundry/features/profile/domain/entities/ticket_reply_user_entity.dart';
+import 'package:laundry/features/profile/domain/entities/ticket_status.dart';
+import 'package:laundry/features/profile/domain/usecases/close_ticket_usecase.dart';
+import 'package:laundry/features/profile/domain/usecases/get_ticket_details_usecase.dart';
+import 'package:laundry/features/profile/domain/usecases/reply_to_ticket_usecase.dart';
 import 'package:laundry/features/profile/presentation/cubit/ticket_details_state.dart';
 
 class TicketDetailsCubit extends Cubit<TicketDetailsState> {
-  final ProfileRepo _repo;
+  final GetTicketDetailsUseCase _getTicketDetailsUseCase;
+  final ReplyToTicketUseCase _replyToTicketUseCase;
+  final CloseTicketUseCase _closeTicketUseCase;
 
-  TicketDetailsCubit({required ProfileRepo repo})
-    : _repo = repo,
-      super(TicketDetailsState.initial());
+  TicketDetailsCubit({
+    required GetTicketDetailsUseCase getTicketDetailsUseCase,
+    required ReplyToTicketUseCase replyToTicketUseCase,
+    required CloseTicketUseCase closeTicketUseCase,
+  }) : _getTicketDetailsUseCase = getTicketDetailsUseCase,
+       _replyToTicketUseCase = replyToTicketUseCase,
+       _closeTicketUseCase = closeTicketUseCase,
+       super(const TicketDetailsState());
 
   Future<void> loadTicket(int ticketId) async {
     emit(
-      state.copyWith(
-        isLoading: true,
-        clearError: true,
-        clearActionMessage: true,
-      ),
+      state.copyWith(isLoading: true, errorMessage: null, actionMessage: null),
     );
 
-    final result = await _repo.getTicketDetails(ticketId);
+    final result = await _getTicketDetailsUseCase(
+      GetTicketDetailsParams(ticketId: ticketId),
+    );
+
     result.fold(
-      (failure) =>
-          emit(state.copyWith(isLoading: false, errorMessage: failure.message)),
+      (failure) => emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: failure.message,
+          actionMessage: null,
+        ),
+      ),
       (ticket) {
         emit(
           state.copyWith(
             isLoading: false,
             ticket: _sortTicketReplies(ticket),
-            clearError: true,
+            errorMessage: null,
           ),
         );
       },
@@ -44,7 +60,8 @@ class TicketDetailsCubit extends Cubit<TicketDetailsState> {
 
     final now = DateTime.now().toUtc().toIso8601String();
     final tempReplyId = -DateTime.now().microsecondsSinceEpoch;
-    final optimisticReply = TicketReplyModel(
+
+    final optimisticReply = _TicketReplySnapshot(
       id: tempReplyId,
       ticketId: ticket.id,
       userId: ticket.userId,
@@ -56,8 +73,8 @@ class TicketDetailsCubit extends Cubit<TicketDetailsState> {
       user: _currentUserFromReplies(ticket.replies),
     );
 
-    final optimisticReplies = _sortReplies([
-      ...(ticket.replies ?? []),
+    final optimisticReplies = _sortReplies(<TicketReplyEntity>[
+      ...(ticket.replies ?? const <TicketReplyEntity>[]),
       optimisticReply,
     ]);
 
@@ -71,14 +88,13 @@ class TicketDetailsCubit extends Cubit<TicketDetailsState> {
       state.copyWith(
         isSendingReply: true,
         ticket: optimisticTicket,
-        clearError: true,
-        clearActionMessage: true,
+        errorMessage: null,
+        actionMessage: null,
       ),
     );
 
-    final result = await _repo.replyToTicket(
-      ticketId: ticket.id,
-      message: trimmedMessage,
+    final result = await _replyToTicketUseCase(
+      ReplyToTicketParams(ticketId: ticket.id, message: trimmedMessage),
     );
 
     result.fold(
@@ -90,7 +106,7 @@ class TicketDetailsCubit extends Cubit<TicketDetailsState> {
                 : _copyTicket(
                   currentTicket,
                   replies:
-                      (currentTicket.replies ?? [])
+                      (currentTicket.replies ?? const <TicketReplyEntity>[])
                           .where((reply) => reply.id != tempReplyId)
                           .toList(),
                   updatedAt: ticket.updatedAt,
@@ -101,13 +117,14 @@ class TicketDetailsCubit extends Cubit<TicketDetailsState> {
             isSendingReply: false,
             ticket: _sortTicketReplies(rolledBackTicket),
             errorMessage: failure.message,
+            actionMessage: null,
           ),
         );
       },
       (reply) {
         final currentTicket = state.ticket ?? optimisticTicket;
         final syncedReplies =
-            (currentTicket.replies ?? [])
+            (currentTicket.replies ?? const <TicketReplyEntity>[])
                 .where((item) => item.id != tempReplyId)
                 .toList();
         syncedReplies.add(reply);
@@ -123,7 +140,7 @@ class TicketDetailsCubit extends Cubit<TicketDetailsState> {
             isSendingReply: false,
             ticket: _sortTicketReplies(updatedTicket),
             actionMessage: 'Reply sent successfully',
-            clearError: true,
+            errorMessage: null,
           ),
         );
       },
@@ -139,37 +156,44 @@ class TicketDetailsCubit extends Cubit<TicketDetailsState> {
     emit(
       state.copyWith(
         isClosingTicket: true,
-        clearError: true,
-        clearActionMessage: true,
+        errorMessage: null,
+        actionMessage: null,
       ),
     );
 
-    final result = await _repo.closeTicket(ticket.id);
+    final result = await _closeTicketUseCase(
+      CloseTicketParams(ticketId: ticket.id),
+    );
+
     result.fold(
       (failure) => emit(
-        state.copyWith(isClosingTicket: false, errorMessage: failure.message),
+        state.copyWith(
+          isClosingTicket: false,
+          errorMessage: failure.message,
+          actionMessage: null,
+        ),
       ),
       (updatedTicket) => emit(
         state.copyWith(
           isClosingTicket: false,
           ticket: _sortTicketReplies(updatedTicket),
           actionMessage: 'Ticket marked as closed',
-          clearError: true,
+          errorMessage: null,
         ),
       ),
     );
   }
 
   void clearMessages() {
-    emit(state.copyWith(clearError: true, clearActionMessage: true));
+    emit(state.copyWith(errorMessage: null, actionMessage: null));
   }
 
-  TicketModel _copyTicket(
-    TicketModel source, {
-    List<TicketReplyModel>? replies,
+  _TicketSnapshot _copyTicket(
+    TicketEntity source, {
+    List<TicketReplyEntity>? replies,
     String? updatedAt,
   }) {
-    return TicketModel(
+    return _TicketSnapshot(
       id: source.id,
       ticketNumber: source.ticketNumber,
       userId: source.userId,
@@ -188,12 +212,15 @@ class TicketDetailsCubit extends Cubit<TicketDetailsState> {
     );
   }
 
-  TicketModel _sortTicketReplies(TicketModel ticket) {
-    return _copyTicket(ticket, replies: _sortReplies(ticket.replies ?? []));
+  TicketEntity _sortTicketReplies(TicketEntity ticket) {
+    return _copyTicket(
+      ticket,
+      replies: _sortReplies(ticket.replies ?? const <TicketReplyEntity>[]),
+    );
   }
 
-  List<TicketReplyModel> _sortReplies(List<TicketReplyModel> replies) {
-    final sorted = List<TicketReplyModel>.from(replies);
+  List<TicketReplyEntity> _sortReplies(List<TicketReplyEntity> replies) {
+    final sorted = List<TicketReplyEntity>.from(replies);
     sorted.sort(
       (a, b) => _parseDate(a.createdAt).compareTo(_parseDate(b.createdAt)),
     );
@@ -204,9 +231,15 @@ class TicketDetailsCubit extends Cubit<TicketDetailsState> {
     return DateTime.tryParse(value) ?? DateTime.fromMillisecondsSinceEpoch(0);
   }
 
-  ReplyUserModel _currentUserFromReplies(List<TicketReplyModel>? replies) {
+  TicketReplyUserEntity _currentUserFromReplies(
+    List<TicketReplyEntity>? replies,
+  ) {
     if (replies == null) {
-      return ReplyUserModel(id: 0, name: 'You', role: 'customer');
+      return const _TicketReplyUserSnapshot(
+        id: 0,
+        name: 'You',
+        role: 'customer',
+      );
     }
 
     for (final reply in replies.reversed) {
@@ -215,6 +248,105 @@ class TicketDetailsCubit extends Cubit<TicketDetailsState> {
       }
     }
 
-    return ReplyUserModel(id: 0, name: 'You', role: 'customer');
+    return const _TicketReplyUserSnapshot(id: 0, name: 'You', role: 'customer');
   }
+}
+
+class _TicketSnapshot extends TicketEntity {
+  @override
+  final int id;
+  @override
+  final String ticketNumber;
+  @override
+  final int userId;
+  @override
+  final int? orderId;
+  @override
+  final String subject;
+  @override
+  final String description;
+  @override
+  final String category;
+  @override
+  final String priority;
+  @override
+  final TicketStatus status;
+  @override
+  final String? assignedTo;
+  @override
+  final String? firstResponseAt;
+  @override
+  final String? resolvedAt;
+  @override
+  final String createdAt;
+  @override
+  final String updatedAt;
+  @override
+  final List<TicketReplyEntity>? replies;
+
+  const _TicketSnapshot({
+    required this.id,
+    required this.ticketNumber,
+    required this.userId,
+    required this.orderId,
+    required this.subject,
+    required this.description,
+    required this.category,
+    required this.priority,
+    required this.status,
+    required this.assignedTo,
+    required this.firstResponseAt,
+    required this.resolvedAt,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.replies,
+  });
+}
+
+class _TicketReplySnapshot extends TicketReplyEntity {
+  @override
+  final int id;
+  @override
+  final int ticketId;
+  @override
+  final int userId;
+  @override
+  final String message;
+  @override
+  final bool isStaffReply;
+  @override
+  final String? attachments;
+  @override
+  final String createdAt;
+  @override
+  final String updatedAt;
+  @override
+  final TicketReplyUserEntity? user;
+
+  const _TicketReplySnapshot({
+    required this.id,
+    required this.ticketId,
+    required this.userId,
+    required this.message,
+    required this.isStaffReply,
+    required this.attachments,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.user,
+  });
+}
+
+class _TicketReplyUserSnapshot extends TicketReplyUserEntity {
+  @override
+  final int id;
+  @override
+  final String name;
+  @override
+  final String role;
+
+  const _TicketReplyUserSnapshot({
+    required this.id,
+    required this.name,
+    required this.role,
+  });
 }

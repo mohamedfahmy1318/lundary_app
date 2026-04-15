@@ -128,7 +128,7 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<ServiceModel> services)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<HomeServiceEntity> services)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -152,7 +152,7 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<ServiceModel> services)  loaded,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<HomeServiceEntity> services)  loaded,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
@@ -175,7 +175,7 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<ServiceModel> services)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<HomeServiceEntity> services)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -257,11 +257,11 @@ String toString() {
 
 
 class _Loaded implements CategoryServicesState {
-  const _Loaded(final  List<ServiceModel> services): _services = services;
+  const _Loaded(final  List<HomeServiceEntity> services): _services = services;
   
 
- final  List<ServiceModel> _services;
- List<ServiceModel> get services {
+ final  List<HomeServiceEntity> _services;
+ List<HomeServiceEntity> get services {
   if (_services is EqualUnmodifiableListView) return _services;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_services);
@@ -298,7 +298,7 @@ abstract mixin class _$LoadedCopyWith<$Res> implements $CategoryServicesStateCop
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
 @useResult
 $Res call({
- List<ServiceModel> services
+ List<HomeServiceEntity> services
 });
 
 
@@ -318,7 +318,7 @@ class __$LoadedCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? services = null,}) {
   return _then(_Loaded(
 null == services ? _self._services : services // ignore: cast_nullable_to_non_nullable
-as List<ServiceModel>,
+as List<HomeServiceEntity>,
   ));
 }
 

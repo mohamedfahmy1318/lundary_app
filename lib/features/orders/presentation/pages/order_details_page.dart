@@ -1,18 +1,117 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:laundry/core/di/injection_container.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/utils/app_formatters.dart';
 import '../../../../core/widgets/app_bar_factory.dart';
-import '../../data/models/order_model.dart';
+import '../../domain/entities/order_entity.dart';
+import '../../domain/usecases/get_order_by_id_usecase.dart';
+import '../widgets/order_date_time_column.dart';
+import '../widgets/order_item_row.dart';
+import '../widgets/order_price_row.dart';
 import '../widgets/order_status_stepper.dart';
 
-class OrderDetailsPage extends StatelessWidget {
-  final OrderModel order;
+class OrderDetailsPage extends StatefulWidget {
+  final OrderEntity order;
 
   const OrderDetailsPage({super.key, required this.order});
 
   @override
+  State<OrderDetailsPage> createState() => _OrderDetailsPageState();
+}
+
+class _OrderDetailsPageState extends State<OrderDetailsPage> {
+  late OrderEntity _order;
+  bool _isRefreshingDetails = false;
+  String? _detailsErrorMessage;
+
+  String _formatOrderDate(String? rawDate) {
+    final value = rawDate?.trim();
+    if (value == null || value.isEmpty) {
+      return '-';
+    }
+
+    final parsed =
+        AppFormatters.tryParse(value) ??
+        AppFormatters.tryParse(value.replaceFirst(RegExp(r'z$'), 'Z'));
+    if (parsed != null) {
+      return AppFormatters.formatDate(parsed.toLocal(), pattern: 'dd MMM yyyy');
+    }
+
+    final datePart = value.split('T').first;
+    final parts = datePart.split('-');
+    if (parts.length == 3) {
+      final year = int.tryParse(parts[0]);
+      final month = int.tryParse(parts[1]);
+      final day = int.tryParse(parts[2]);
+      if (year != null && month != null && day != null) {
+        return AppFormatters.formatDate(
+          DateTime(year, month, day),
+          pattern: 'dd MMM yyyy',
+        );
+      }
+    }
+
+    return datePart;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _order = widget.order;
+    _loadOrderDetails(
+      showLoader: _order.items == null || _order.items!.isEmpty,
+    );
+  }
+
+  Future<void> _loadOrderDetails({bool showLoader = true}) async {
+    if (showLoader) {
+      setState(() {
+        _isRefreshingDetails = true;
+        _detailsErrorMessage = null;
+      });
+    }
+
+    final result = await getIt<GetOrderByIdUseCase>()(
+      GetOrderByIdParams(orderId: _order.id),
+    );
+    if (!mounted) {
+      return;
+    }
+
+    result.fold(
+      (failure) {
+        setState(() {
+          _isRefreshingDetails = false;
+          _detailsErrorMessage = failure.message;
+        });
+      },
+      (freshOrder) {
+        setState(() {
+          _order = freshOrder;
+          _isRefreshingDetails = false;
+          _detailsErrorMessage = null;
+        });
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isRefreshingDetails && _order.items == null) {
+      return Scaffold(
+        backgroundColor: AppColors.white,
+        appBar: AppBarFactory.build(
+          context,
+          title: "Order Details",
+          showBack: true,
+          onBack: () => Navigator.pop(context),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: AppBarFactory.build(
@@ -26,7 +125,34 @@ class OrderDetailsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Order #${order.orderNumber}", style: AppTextStyles.caption),
+            if (_detailsErrorMessage != null) ...[
+              Container(
+                width: double.infinity,
+                margin: EdgeInsets.only(bottom: 14.h),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                decoration: BoxDecoration(
+                  color: Colors.red.withAlpha(20),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _detailsErrorMessage!,
+                        style: AppTextStyles.caption.copyWith(
+                          color: Colors.red,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: _loadOrderDetails,
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            Text("Order #${_order.orderNumber}", style: AppTextStyles.caption),
             SizedBox(height: 20.h),
 
             // Basket Summary
@@ -54,7 +180,7 @@ class OrderDetailsPage extends StatelessWidget {
                         children: [
                           Text("Basket", style: AppTextStyles.sectionTitle),
                           Text(
-                            '${order.itemsCount} items',
+                            '${_order.itemsCount} items',
                             style: AppTextStyles.caption,
                           ),
                         ],
@@ -66,17 +192,17 @@ class OrderDetailsPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: _DateTimeColumn(
+                        child: OrderDateTimeColumn(
                           label: 'Pickup',
-                          date: order.pickupDate ?? '-',
-                          time: order.pickupTimeSlot ?? '-',
+                          date: _formatOrderDate(_order.pickupDate),
+                          time: _order.pickupTimeSlot ?? '-',
                         ),
                       ),
                       Expanded(
-                        child: _DateTimeColumn(
+                        child: OrderDateTimeColumn(
                           label: 'Delivery',
-                          date: order.deliveryDate ?? '-',
-                          time: order.deliveryTimeSlot ?? '-',
+                          date: _formatOrderDate(_order.deliveryDate),
+                          time: _order.deliveryTimeSlot ?? '-',
                         ),
                       ),
                     ],
@@ -88,13 +214,13 @@ class OrderDetailsPage extends StatelessWidget {
             SizedBox(height: 30.h),
 
             // Status Stepper
-            OrderStatusStepper(status: order.status),
+            OrderStatusStepper(status: _order.status),
 
             SizedBox(height: 30.h),
 
             // Items List
-            if (order.items != null && order.items!.isNotEmpty)
-              ...order.items!.map((item) => _OrderItemRow(item: item))
+            if (_order.items != null && _order.items!.isNotEmpty)
+              ..._order.items!.map((item) => OrderItemRow(item: item))
             else
               const Center(child: Text("No detailed items for this order")),
 
@@ -109,21 +235,24 @@ class OrderDetailsPage extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  _PriceRow(label: 'Subtotal', value: order.subtotal),
+                  OrderPriceRow(label: 'Subtotal', value: _order.subtotal),
                   SizedBox(height: 8.h),
-                  _PriceRow(label: 'Delivery Fee', value: order.deliveryFee),
-                  if (double.tryParse(order.discountAmount) != 0.0) ...[
+                  OrderPriceRow(
+                    label: 'Delivery Fee',
+                    value: _order.deliveryFee,
+                  ),
+                  if (double.tryParse(_order.discountAmount) != 0.0) ...[
                     SizedBox(height: 8.h),
-                    _PriceRow(
+                    OrderPriceRow(
                       label: 'Discount',
-                      value: '-${order.discountAmount}',
+                      value: '-${_order.discountAmount}',
                       valueColor: Colors.green,
                     ),
                   ],
                   Divider(height: 24.h),
-                  _PriceRow(
+                  OrderPriceRow(
                     label: 'Total',
-                    value: order.totalAmount,
+                    value: _order.totalAmount,
                     isBold: true,
                   ),
                 ],
@@ -133,122 +262,6 @@ class OrderDetailsPage extends StatelessWidget {
             SizedBox(height: 80.h),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _DateTimeColumn extends StatelessWidget {
-  final String label;
-  final String date;
-  final String time;
-
-  const _DateTimeColumn({
-    required this.label,
-    required this.date,
-    required this.time,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: AppTextStyles.caption),
-        SizedBox(height: 4.h),
-        Text(date, style: AppTextStyles.bodyMedium),
-        Text(time, style: AppTextStyles.caption),
-      ],
-    );
-  }
-}
-
-class _PriceRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool isBold;
-  final Color? valueColor;
-
-  const _PriceRow({
-    required this.label,
-    required this.value,
-    this.isBold = false,
-    this.valueColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style:
-              isBold
-                  ? AppTextStyles.bodyMedium.copyWith(
-                    fontWeight: FontWeight.bold,
-                  )
-                  : AppTextStyles.caption,
-        ),
-        Text(
-          'AED $value',
-          style:
-              isBold
-                  ? AppTextStyles.bodyMedium.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: valueColor ?? AppColors.primary,
-                  )
-                  : AppTextStyles.bodyMedium.copyWith(color: valueColor),
-        ),
-      ],
-    );
-  }
-}
-
-class _OrderItemRow extends StatelessWidget {
-  final OrderItemModel item;
-
-  const _OrderItemRow({required this.item});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(30.r),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 36.w,
-            height: 36.w,
-            decoration: const BoxDecoration(
-              color: AppColors.primary,
-              shape: BoxShape.circle,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(item.serviceName, style: AppTextStyles.bodyMedium),
-                Text(
-                  "AED ${item.unitPrice}/Item",
-                  style: AppTextStyles.caption,
-                ),
-              ],
-            ),
-          ),
-          Text("${item.quantity}", style: AppTextStyles.bodyMedium),
-          SizedBox(width: 40.w),
-          Text(
-            "AED ${item.totalPrice}",
-            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.primary),
-          ),
-        ],
       ),
     );
   }

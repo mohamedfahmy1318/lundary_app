@@ -6,7 +6,7 @@ import 'package:laundry/core/di/injection_container.dart';
 import 'package:laundry/core/theme/app_text_styles.dart';
 import 'package:laundry/core/widgets/app_bar_factory.dart';
 import 'package:laundry/core/widgets/custom_button.dart';
-import 'package:laundry/features/profile/data/models/ticket_model.dart';
+import 'package:laundry/features/profile/domain/entities/ticket_entity.dart';
 import 'package:laundry/features/profile/presentation/cubit/ticket_details_cubit.dart';
 import 'package:laundry/features/profile/presentation/cubit/ticket_details_state.dart';
 import 'package:laundry/features/profile/presentation/widgets/ticket_details/ticket_details_widgets.dart';
@@ -87,7 +87,7 @@ class _TicketDetailsViewState extends State<_TicketDetailsView> {
   Widget _buildBody(
     BuildContext context,
     TicketDetailsState state,
-    TicketModel? ticket,
+    TicketEntity? ticket,
   ) {
     if (state.isLoading && ticket == null) {
       return const Center(child: CircularProgressIndicator());
@@ -151,9 +151,9 @@ class _TicketDetailsViewState extends State<_TicketDetailsView> {
                       ),
                     )
                   else
-                    ...ticket.replies!
-                        .map((reply) => TicketReplyBubble(reply: reply))
-                        .toList(),
+                    ...ticket.replies!.map(
+                      (reply) => TicketReplyBubble(reply: reply),
+                    ),
                 ],
               ),
             ),

@@ -6,15 +6,15 @@ part of 'on_boarding_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-OnBoardingModel _$OnBoardingModelFromJson(Map<String, dynamic> json) =>
-    OnBoardingModel(
+_OnBoardingModel _$OnBoardingModelFromJson(Map<String, dynamic> json) =>
+    _OnBoardingModel(
       id: (json['id'] as num).toInt(),
       title: json['title'] as String,
       description: json['description'] as String,
-      image: json['image'] as String,
+      image: json['image'] as String?,
     );
 
-Map<String, dynamic> _$OnBoardingModelToJson(OnBoardingModel instance) =>
+Map<String, dynamic> _$OnBoardingModelToJson(_OnBoardingModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'title': instance.title,

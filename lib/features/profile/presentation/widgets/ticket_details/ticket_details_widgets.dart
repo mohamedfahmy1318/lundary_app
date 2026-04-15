@@ -4,10 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:laundry/core/constants/app_colors.dart';
 import 'package:laundry/core/theme/app_text_styles.dart';
 import 'package:laundry/core/widgets/custom_button.dart';
-import 'package:laundry/features/profile/data/models/ticket_model.dart';
+import 'package:laundry/features/profile/domain/entities/ticket_entity.dart';
+import 'package:laundry/features/profile/domain/entities/ticket_reply_entity.dart';
 
 class TicketSummaryCard extends StatelessWidget {
-  final TicketModel ticket;
+  final TicketEntity ticket;
   final bool isClosing;
   final VoidCallback onClose;
 
@@ -106,7 +107,7 @@ class _StatusBadge extends StatelessWidget {
 }
 
 class TicketReplyBubble extends StatelessWidget {
-  final TicketReplyModel reply;
+  final TicketReplyEntity reply;
 
   const TicketReplyBubble({super.key, required this.reply});
 
@@ -115,7 +116,8 @@ class TicketReplyBubble extends StatelessWidget {
     final isStaff = reply.isStaffReply;
     final isOptimistic = reply.id < 0;
     final textColor = isStaff ? AppColors.textPrimary : AppColors.white;
-    final metaColor = isStaff ? AppColors.textSecondary : AppColors.white.withAlpha(210);
+    final metaColor =
+        isStaff ? AppColors.textSecondary : AppColors.white.withAlpha(210);
 
     return Align(
       alignment: isStaff ? Alignment.centerLeft : Alignment.centerRight,
@@ -158,13 +160,17 @@ class TicketReplyBubble extends StatelessWidget {
                 children: [
                   Text(
                     TicketDateFormatter.dateTime(reply.createdAt),
-                    style: AppTextStyles.captionSmall.copyWith(color: metaColor),
+                    style: AppTextStyles.captionSmall.copyWith(
+                      color: metaColor,
+                    ),
                   ),
                   if (isOptimistic) ...[
                     SizedBox(width: 6.w),
                     Text(
                       'Sending...',
-                      style: AppTextStyles.captionSmall.copyWith(color: metaColor),
+                      style: AppTextStyles.captionSmall.copyWith(
+                        color: metaColor,
+                      ),
                     ),
                   ],
                 ],

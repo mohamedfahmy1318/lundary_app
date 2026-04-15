@@ -128,7 +128,7 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<CategoryModel> categories,  List<BannerModel> banners)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<HomeCategoryEntity> categories,  List<HomeBannerEntity> banners)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -152,7 +152,7 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<CategoryModel> categories,  List<BannerModel> banners)  loaded,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<HomeCategoryEntity> categories,  List<HomeBannerEntity> banners)  loaded,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
@@ -175,7 +175,7 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<CategoryModel> categories,  List<BannerModel> banners)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<HomeCategoryEntity> categories,  List<HomeBannerEntity> banners)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -257,18 +257,18 @@ String toString() {
 
 
 class _Loaded implements HomeState {
-  const _Loaded(final  List<CategoryModel> categories, final  List<BannerModel> banners): _categories = categories,_banners = banners;
+  const _Loaded(final  List<HomeCategoryEntity> categories, final  List<HomeBannerEntity> banners): _categories = categories,_banners = banners;
   
 
- final  List<CategoryModel> _categories;
- List<CategoryModel> get categories {
+ final  List<HomeCategoryEntity> _categories;
+ List<HomeCategoryEntity> get categories {
   if (_categories is EqualUnmodifiableListView) return _categories;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_categories);
 }
 
- final  List<BannerModel> _banners;
- List<BannerModel> get banners {
+ final  List<HomeBannerEntity> _banners;
+ List<HomeBannerEntity> get banners {
   if (_banners is EqualUnmodifiableListView) return _banners;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_banners);
@@ -305,7 +305,7 @@ abstract mixin class _$LoadedCopyWith<$Res> implements $HomeStateCopyWith<$Res> 
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
 @useResult
 $Res call({
- List<CategoryModel> categories, List<BannerModel> banners
+ List<HomeCategoryEntity> categories, List<HomeBannerEntity> banners
 });
 
 
@@ -325,8 +325,8 @@ class __$LoadedCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? categories = null,Object? banners = null,}) {
   return _then(_Loaded(
 null == categories ? _self._categories : categories // ignore: cast_nullable_to_non_nullable
-as List<CategoryModel>,null == banners ? _self._banners : banners // ignore: cast_nullable_to_non_nullable
-as List<BannerModel>,
+as List<HomeCategoryEntity>,null == banners ? _self._banners : banners // ignore: cast_nullable_to_non_nullable
+as List<HomeBannerEntity>,
   ));
 }
 

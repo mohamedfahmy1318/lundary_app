@@ -211,8 +211,8 @@ return $default(_that.id,_that.title,_that.image,_that.link);case _:
 /// @nodoc
 @JsonSerializable()
 
-class _BannerModel implements BannerModel {
-  const _BannerModel({required this.id, required this.title, required this.image, this.link});
+class _BannerModel extends BannerModel {
+  const _BannerModel({required this.id, required this.title, required this.image, this.link}): super._();
   factory _BannerModel.fromJson(Map<String, dynamic> json) => _$BannerModelFromJson(json);
 
 @override final  int id;

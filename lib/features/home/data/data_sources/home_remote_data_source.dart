@@ -7,6 +7,7 @@ import 'package:laundry/features/home/data/models/banner_model.dart';
 abstract class HomeRemoteDataSource {
   Future<List<CategoryModel>> getCategories();
   Future<List<ServiceModel>> getServices({int? categoryId, String? search});
+  Future<List<ServiceModel>> getTopServices({String period, int limit});
   Future<List<BannerModel>> getBanners();
 }
 
@@ -42,6 +43,48 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     return data
         .map((json) => ServiceModel.fromJson(json as Map<String, dynamic>))
         .toList();
+  }
+
+  @override
+  Future<List<ServiceModel>> getTopServices({
+    String period = 'all',
+    int limit = 10,
+  }) async {
+    final response = await _apiClient.get(
+      ApiConstants.topServices,
+      queryParameters: {'period': period, 'limit': limit},
+    );
+
+    final List<dynamic> data = response.data['data'] as List<dynamic>;
+    return data
+        .map((json) => _mapTopService(json as Map<String, dynamic>))
+        .toList();
+  }
+
+  ServiceModel _mapTopService(Map<String, dynamic> json) {
+    final categoryJson = json['category'] as Map<String, dynamic>?;
+
+    return ServiceModel(
+      id: (json['id'] as num).toInt(),
+      categoryId: ((categoryJson?['id'] as num?)?.toInt()) ?? 0,
+      name: (json['name'] as String?) ?? '',
+      slug: json['slug'] as String?,
+      description: json['description'] as String?,
+      price: (json['price'] ?? '0').toString(),
+      expressPrice: json['express_price']?.toString(),
+      icon: json['icon'] as String?,
+      image: json['image'] as String?,
+      estimatedHours: (json['estimated_hours'] as num?)?.toInt(),
+      sortOrder: (json['rank'] as num?)?.toInt(),
+      isActive: json['is_active'] as bool?,
+      category:
+          categoryJson == null
+              ? null
+              : ServiceCategoryModel(
+                id: ((categoryJson['id'] as num?)?.toInt()) ?? 0,
+                name: (categoryJson['name'] as String?) ?? '',
+              ),
+    );
   }
 
   @override

@@ -1,11 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:laundry/features/profile/domain/repos/profile_repo.dart';
+import 'package:laundry/features/profile/domain/usecases/change_password_usecase.dart';
 import 'package:laundry/features/profile/presentation/cubit/change_password_state.dart';
 
 class ChangePasswordCubit extends Cubit<ChangePasswordState> {
-  final ProfileRepo _repo;
+  final ChangePasswordUseCase _changePasswordUseCase;
 
-  ChangePasswordCubit(this._repo) : super(const ChangePasswordState.initial());
+  ChangePasswordCubit({required ChangePasswordUseCase changePasswordUseCase})
+    : _changePasswordUseCase = changePasswordUseCase,
+      super(const ChangePasswordState.initial());
 
   Future<void> changePassword({
     required String currentPassword,
@@ -18,16 +20,20 @@ class ChangePasswordCubit extends Cubit<ChangePasswordState> {
     }
 
     emit(const ChangePasswordState.loading());
-    
-    final result = await _repo.changePassword({
-      'current_password': currentPassword,
-      'password': newPassword,
-      'password_confirmation': confirmPassword,
-    });
+
+    final result = await _changePasswordUseCase(
+      ChangePasswordParams(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+        confirmPassword: confirmPassword,
+      ),
+    );
 
     result.fold(
       (failure) => emit(ChangePasswordState.error(failure.message)),
-      (_) => emit(const ChangePasswordState.success("Password changed successfully")),
+      (_) => emit(
+        const ChangePasswordState.success('Password changed successfully'),
+      ),
     );
   }
 }

@@ -1,15 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:laundry/core/di/injection_container.dart';
+import 'package:laundry/features/profile/domain/entities/ticket_lookup_option_entity.dart';
+
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_bar_factory.dart';
 import '../../../../core/widgets/custom_button.dart';
-import '../../../../core/widgets/selectable_chip.dart';
 import '../cubit/support_cubit.dart';
 import '../cubit/support_state.dart';
+import '../widgets/new_ticket/new_ticket_form_widgets.dart';
 
 class NewTicketPage extends StatelessWidget {
   const NewTicketPage({super.key});
@@ -31,53 +35,134 @@ class _NewTicketView extends StatefulWidget {
 }
 
 class _NewTicketViewState extends State<_NewTicketView> {
-  String? _selectedCategory;
-  final TextEditingController _orderNumberController = TextEditingController();
+  String? _selectedCategoryValue;
+  String? _selectedPriorityValue;
+
+  List<TicketLookupOptionEntity> _categoryLookupOptions = const [];
+  List<TicketLookupOptionEntity> _priorityLookupOptions = const [];
+
+  bool _isLookupLoading = true;
+  String? _lookupErrorMessage;
+
   final TextEditingController _subjectController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
 
-  final List<String> _categories = [
-    "order_issue",
-    "delivery_problem",
-    "quality_complaint",
-    "refund_request",
-    "payment_issue",
-    "other",
-  ];
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadLookups());
+  }
 
   @override
   void dispose() {
-    _orderNumberController.dispose();
     _subjectController.dispose();
     _messageController.dispose();
     super.dispose();
   }
 
-  void _submitTicket() {
-    if (_selectedCategory == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a category.')));
-      return;
-    }
-    if (_subjectController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a subject.')));
-      return;
-    }
-    if (_messageController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please describe your issue.')));
+  Future<void> _loadLookups() async {
+    _setLookupLoading();
+
+    final lookups = await context.read<SupportCubit>().loadTicketLookups();
+
+    if (!mounted) {
       return;
     }
 
-    String finalSubject = _subjectController.text.trim();
-    if (_orderNumberController.text.trim().isNotEmpty) {
-      finalSubject += " - Order: ${_orderNumberController.text.trim()}";
+    if (lookups == null) {
+      _setLookupError('Unable to load support options. Please try again.');
+      return;
+    }
+
+    _setLookupData(lookups);
+  }
+
+  void _setLookupLoading() {
+    setState(() {
+      _isLookupLoading = true;
+      _lookupErrorMessage = null;
+    });
+  }
+
+  void _setLookupError(String message) {
+    setState(() {
+      _isLookupLoading = false;
+      _lookupErrorMessage = message;
+    });
+  }
+
+  void _setLookupData(TicketLookups lookups) {
+    setState(() {
+      _categoryLookupOptions = lookups.categories;
+      _priorityLookupOptions = lookups.priorities;
+      _selectedCategoryValue ??=
+          _categoryLookupOptions.isNotEmpty
+              ? _categoryLookupOptions.first.value
+              : null;
+      _selectedPriorityValue ??=
+          _priorityLookupOptions.isNotEmpty
+              ? _priorityLookupOptions.first.value
+              : null;
+      _isLookupLoading = false;
+      _lookupErrorMessage = null;
+    });
+  }
+
+  void _onSubmitTicketPressed() {
+    final validationError = _validationErrorMessage();
+    if (validationError != null) {
+      _showSnackBar(validationError);
+      return;
     }
 
     context.read<SupportCubit>().createTicket(
-      finalSubject,
-      _messageController.text.trim(),
-      "low", // default priority valid by backend
-      _selectedCategory!,
+      subject: _subjectController.text.trim(),
+      message: _messageController.text.trim(),
+      priority: _selectedPriorityValue!,
+      category: _selectedCategoryValue!,
     );
+  }
+
+  String? _validationErrorMessage() {
+    if (_isLookupLoading) {
+      return 'Support options are still loading. Please wait.';
+    }
+
+    if (_selectedCategoryValue == null) {
+      return 'Please select a category.';
+    }
+
+    if (_selectedPriorityValue == null) {
+      return 'Please select a priority.';
+    }
+
+    if (_subjectController.text.trim().isEmpty) {
+      return 'Please enter a subject.';
+    }
+
+    if (_messageController.text.trim().isEmpty) {
+      return 'Please describe your issue.';
+    }
+
+    return null;
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _onCategorySelected(String value) {
+    setState(() {
+      _selectedCategoryValue = value;
+    });
+  }
+
+  void _onPrioritySelected(String value) {
+    setState(() {
+      _selectedPriorityValue = value;
+    });
   }
 
   @override
@@ -86,18 +171,24 @@ class _NewTicketViewState extends State<_NewTicketView> {
       backgroundColor: AppColors.white,
       appBar: AppBarFactory.build(
         context,
-        title: "New Ticket",
+        title: 'New Ticket',
         onBack: () => context.pop(),
       ),
       body: BlocListener<SupportCubit, SupportState>(
         listener: (context, state) {
           state.maybeWhen(
             submissionSuccess: () {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Support ticket created successfully!')));
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Support ticket created successfully!'),
+                ),
+              );
               context.pop();
             },
             error: (msg) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(msg)));
             },
             orElse: () {},
           );
@@ -107,71 +198,28 @@ class _NewTicketViewState extends State<_NewTicketView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Create Support Ticket", style: AppTextStyles.sectionTitle),
+              Text('Create Support Ticket', style: AppTextStyles.sectionTitle),
               SizedBox(height: 8.h),
               Text(
-                "We're here to help. Describe your issue below.",
+                'We\'re here to help. Describe your issue below.',
                 style: AppTextStyles.bodyRegular,
               ),
               SizedBox(height: 30.h),
-
-              // Categories
-              Text("Select Category *", style: AppTextStyles.sectionLabel),
-              SizedBox(height: 12.h),
-              Wrap(
-                spacing: 8.w,
-                runSpacing: 12.h,
-                children: _categories.map((category) {
-                  return SelectableChip(
-                    label: category.replaceAll('_', ' ').toUpperCase(),
-                    isSelected: _selectedCategory == category,
-                    onTap: () {
-                      setState(() {
-                        _selectedCategory = _selectedCategory == category ? null : category;
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
-
-              SizedBox(height: 24.h),
-
-              // Subject
-              _buildLabeledField(
-                label: "Subject *",
-                hint: "e.g., Missing items in my bag",
+              _buildLookupContent(),
+              LabeledTicketInputField(
+                label: 'Subject *',
+                hint: 'e.g., Missing items in my bag',
                 controller: _subjectController,
               ),
               SizedBox(height: 24.h),
-
-              // Order Number
-              _buildLabeledField(
-                label: "Order Number (Optional)",
-                hint: "e.g., #123456",
-                controller: _orderNumberController,
-              ),
-              SizedBox(height: 24.h),
-
-              // Description
-              _buildLabeledField(
-                label: "Describe Your Issue *",
-                hint: "Please provide details about your issue...",
+              LabeledTicketInputField(
+                label: 'Describe Your Issue *',
+                hint: 'Please provide details about your issue...',
                 maxLines: 5,
                 controller: _messageController,
               ),
-              
               SizedBox(height: 32.h),
-
-              // Submit Button
-              BlocBuilder<SupportCubit, SupportState>(
-                builder: (context, state) {
-                  final isSubmitting = state.maybeWhen(submitting: () => true, orElse: () => false);
-                  return CustomButton(
-                    text: isSubmitting ? "Submitting..." : "Submit Ticket",
-                    onPressed: isSubmitting ? () {} : _submitTicket,
-                  );
-                },
-              ),
+              _buildSubmitButton(),
               SizedBox(height: 32.h),
             ],
           ),
@@ -180,44 +228,70 @@ class _NewTicketViewState extends State<_NewTicketView> {
     );
   }
 
-  Widget _buildLabeledField({
-    required String label,
-    required String hint,
-    required TextEditingController controller,
-    int maxLines = 1,
-  }) {
+  Widget _buildLookupContent() {
+    if (_isLookupLoading) {
+      return Column(
+        children: [
+          const Center(child: CircularProgressIndicator()),
+          SizedBox(height: 24.h),
+        ],
+      );
+    }
+
+    if (_lookupErrorMessage != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _lookupErrorMessage!,
+            style: AppTextStyles.bodyRegular.copyWith(color: AppColors.error),
+          ),
+          SizedBox(height: 10.h),
+          TextButton(onPressed: _loadLookups, child: const Text('Retry')),
+          SizedBox(height: 24.h),
+        ],
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppTextStyles.sectionLabel),
+        Text('Select Category *', style: AppTextStyles.sectionLabel),
         SizedBox(height: 12.h),
-        TextField(
-          controller: controller,
-          maxLines: maxLines,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 13.sp),
-            filled: true,
-            fillColor: AppColors.cardBackground,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20.r),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20.r),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20.r),
-              borderSide: const BorderSide(color: AppColors.primary),
-            ),
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 16.w,
-              vertical: 16.h,
-            ),
-          ),
+        TicketLookupOptionGrid(
+          options: _categoryLookupOptions,
+          selectedValue: _selectedCategoryValue,
+          onSelected: _onCategorySelected,
         ),
+        SizedBox(height: 24.h),
+        Text('Select Priority *', style: AppTextStyles.sectionLabel),
+        SizedBox(height: 12.h),
+        TicketLookupOptionGrid(
+          options: _priorityLookupOptions,
+          selectedValue: _selectedPriorityValue,
+          onSelected: _onPrioritySelected,
+        ),
+        SizedBox(height: 24.h),
       ],
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return BlocBuilder<SupportCubit, SupportState>(
+      builder: (context, state) {
+        final isSubmitting = state.maybeWhen(
+          submitting: () => true,
+          orElse: () => false,
+        );
+
+        return CustomButton(
+          text: isSubmitting ? 'Submitting...' : 'Submit Ticket',
+          onPressed:
+              (isSubmitting || _isLookupLoading)
+                  ? null
+                  : _onSubmitTicketPressed,
+        );
+      },
     );
   }
 }

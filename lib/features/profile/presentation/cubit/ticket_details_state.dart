@@ -1,46 +1,18 @@
-import 'package:laundry/features/profile/data/models/ticket_model.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:laundry/features/profile/domain/entities/ticket_entity.dart';
 
-class TicketDetailsState {
-  final bool isLoading;
-  final bool isSendingReply;
-  final bool isClosingTicket;
-  final TicketModel? ticket;
-  final String? errorMessage;
-  final String? actionMessage;
+part 'ticket_details_state.freezed.dart';
 
-  const TicketDetailsState({
-    this.isLoading = false,
-    this.isSendingReply = false,
-    this.isClosingTicket = false,
-    this.ticket,
-    this.errorMessage,
-    this.actionMessage,
-  });
+@freezed
+abstract class TicketDetailsState with _$TicketDetailsState {
+  const TicketDetailsState._();
 
-  factory TicketDetailsState.initial() => const TicketDetailsState();
-
-  bool get hasTicket => ticket != null;
-
-  TicketDetailsState copyWith({
-    bool? isLoading,
-    bool? isSendingReply,
-    bool? isClosingTicket,
-    TicketModel? ticket,
-    bool clearTicket = false,
+  const factory TicketDetailsState({
+    @Default(false) bool isLoading,
+    @Default(false) bool isSendingReply,
+    @Default(false) bool isClosingTicket,
+    TicketEntity? ticket,
     String? errorMessage,
-    bool clearError = false,
     String? actionMessage,
-    bool clearActionMessage = false,
-  }) {
-    return TicketDetailsState(
-      isLoading: isLoading ?? this.isLoading,
-      isSendingReply: isSendingReply ?? this.isSendingReply,
-      isClosingTicket: isClosingTicket ?? this.isClosingTicket,
-      ticket: clearTicket ? null : (ticket ?? this.ticket),
-      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-      actionMessage: clearActionMessage
-          ? null
-          : (actionMessage ?? this.actionMessage),
-    );
-  }
+  }) = _TicketDetailsState;
 }

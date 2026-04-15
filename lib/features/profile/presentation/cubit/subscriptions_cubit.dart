@@ -1,26 +1,32 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:laundry/features/profile/data/models/profile_model.dart';
-import 'package:laundry/features/profile/domain/repos/profile_repo.dart';
+import 'package:laundry/features/profile/domain/entities/active_subscription_entity.dart';
+import 'package:laundry/features/profile/domain/entities/subscription_plan_entity.dart';
+import 'package:laundry/features/profile/domain/usecases/get_my_subscriptions_usecase.dart';
+import 'package:laundry/features/profile/domain/usecases/get_subscription_plans_usecase.dart';
 import 'subscriptions_state.dart';
 
 class SubscriptionsCubit extends Cubit<SubscriptionsState> {
-  final ProfileRepo _repo;
+  final GetSubscriptionPlansUseCase _getSubscriptionPlansUseCase;
+  final GetMySubscriptionsUseCase _getMySubscriptionsUseCase;
 
-  SubscriptionsCubit({required ProfileRepo repo})
-    : _repo = repo,
-      super(const SubscriptionsState.initial());
+  SubscriptionsCubit({
+    required GetSubscriptionPlansUseCase getSubscriptionPlansUseCase,
+    required GetMySubscriptionsUseCase getMySubscriptionsUseCase,
+  }) : _getSubscriptionPlansUseCase = getSubscriptionPlansUseCase,
+       _getMySubscriptionsUseCase = getMySubscriptionsUseCase,
+       super(const SubscriptionsState.initial());
 
   Future<void> loadSubscriptions() async {
     emit(const SubscriptionsState.loading());
 
-    final plansResult = await _repo.getSubscriptionPlans();
-    final mySubsResult = await _repo.getMySubscriptions();
+    final plansResult = await _getSubscriptionPlansUseCase();
+    final mySubsResult = await _getMySubscriptionsUseCase();
 
     // Since we fetch them together, if one completely fails with network issues, it fails all.
     // We can handle both fold results concurrently.
     String? errorMessage;
-    List<SubscriptionPlan>? plans;
-    List<ActiveSubscription>? mySubscriptions;
+    List<SubscriptionPlanEntity>? plans;
+    List<ActiveSubscriptionEntity>? mySubscriptions;
 
     plansResult.fold(
       (failure) => errorMessage = failure.message,

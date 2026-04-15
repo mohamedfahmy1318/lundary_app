@@ -8,7 +8,7 @@ import '../../../../core/widgets/app_bar_factory.dart';
 import '../../../../core/widgets/chip_tab_bar.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/sticky_bottom_bar.dart';
-import '../../data/models/cart_item.dart';
+import '../../domain/entities/cart_item_entity.dart';
 import '../cubit/basket_cubit.dart';
 import '../cubit/basket_state.dart';
 import '../widgets/basket_item_card.dart';
@@ -90,7 +90,7 @@ class BasketPage extends StatelessWidget {
 
 class _BasketContent extends StatefulWidget {
   final BasketCubit basketCubit;
-  final List<CartItem> items;
+  final List<CartItemEntity> items;
   final List<String> categories;
 
   const _BasketContent({

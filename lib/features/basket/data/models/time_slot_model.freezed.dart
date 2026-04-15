@@ -214,8 +214,8 @@ return $default(_that.id,_that.startTime,_that.endTime,_that.type,_that.maxOrder
 /// @nodoc
 @JsonSerializable()
 
-class _TimeSlotModel implements TimeSlotModel {
-  const _TimeSlotModel({required this.id, @JsonKey(name: 'start_time') required this.startTime, @JsonKey(name: 'end_time') required this.endTime, required this.type, @JsonKey(name: 'max_orders') required this.maxOrders, @JsonKey(name: 'available_days') required this.availableDays, @JsonKey(name: 'is_active') required this.isActive});
+class _TimeSlotModel extends TimeSlotModel {
+  const _TimeSlotModel({required this.id, @JsonKey(name: 'start_time') required this.startTime, @JsonKey(name: 'end_time') required this.endTime, required this.type, @JsonKey(name: 'max_orders') required this.maxOrders, @JsonKey(name: 'available_days') required this.availableDays, @JsonKey(name: 'is_active') required this.isActive}): super._();
   factory _TimeSlotModel.fromJson(Map<String, dynamic> json) => _$TimeSlotModelFromJson(json);
 
 @override final  String id;

@@ -134,7 +134,7 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<TicketModel> tickets)?  loaded,TResult Function()?  submitting,TResult Function()?  submissionSuccess,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<TicketEntity> tickets)?  loaded,TResult Function()?  submitting,TResult Function()?  submissionSuccess,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -160,7 +160,7 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<TicketModel> tickets)  loaded,required TResult Function()  submitting,required TResult Function()  submissionSuccess,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<TicketEntity> tickets)  loaded,required TResult Function()  submitting,required TResult Function()  submissionSuccess,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
@@ -185,7 +185,7 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<TicketModel> tickets)?  loaded,TResult? Function()?  submitting,TResult? Function()?  submissionSuccess,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<TicketEntity> tickets)?  loaded,TResult? Function()?  submitting,TResult? Function()?  submissionSuccess,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -269,11 +269,11 @@ String toString() {
 
 
 class _Loaded implements SupportState {
-  const _Loaded({required final  List<TicketModel> tickets}): _tickets = tickets;
+  const _Loaded({required final  List<TicketEntity> tickets}): _tickets = tickets;
   
 
- final  List<TicketModel> _tickets;
- List<TicketModel> get tickets {
+ final  List<TicketEntity> _tickets;
+ List<TicketEntity> get tickets {
   if (_tickets is EqualUnmodifiableListView) return _tickets;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_tickets);
@@ -310,7 +310,7 @@ abstract mixin class _$LoadedCopyWith<$Res> implements $SupportStateCopyWith<$Re
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
 @useResult
 $Res call({
- List<TicketModel> tickets
+ List<TicketEntity> tickets
 });
 
 
@@ -330,7 +330,7 @@ class __$LoadedCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? tickets = null,}) {
   return _then(_Loaded(
 tickets: null == tickets ? _self._tickets : tickets // ignore: cast_nullable_to_non_nullable
-as List<TicketModel>,
+as List<TicketEntity>,
   ));
 }
 

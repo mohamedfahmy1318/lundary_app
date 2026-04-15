@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +8,7 @@ import 'package:laundry/core/constants/app_colors.dart';
 class QuickPickCard extends StatelessWidget {
   final String name;
   final String category;
+  final String? imageUrl;
   final int quantity;
   final VoidCallback? onIncrement;
   final VoidCallback? onDecrement;
@@ -15,6 +17,7 @@ class QuickPickCard extends StatelessWidget {
     super.key,
     required this.name,
     required this.category,
+    this.imageUrl,
     this.quantity = 0,
     this.onIncrement,
     this.onDecrement,
@@ -32,7 +35,39 @@ class QuickPickCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           // Image placeholder
-          CircleAvatar(radius: 36.r, backgroundColor: Colors.grey[300]),
+          Container(
+            width: 72.w,
+            height: 72.w,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.grey[300],
+            ),
+            child: ClipOval(
+              child:
+                  imageUrl != null && imageUrl!.trim().isNotEmpty
+                      ? CachedNetworkImage(
+                        imageUrl: imageUrl!,
+                        fit: BoxFit.cover,
+                        placeholder:
+                            (_, __) => Icon(
+                              Icons.checkroom,
+                              color: Colors.grey[500],
+                              size: 28.sp,
+                            ),
+                        errorWidget:
+                            (_, __, ___) => Icon(
+                              Icons.checkroom,
+                              color: Colors.grey[500],
+                              size: 28.sp,
+                            ),
+                      )
+                      : Icon(
+                        Icons.checkroom,
+                        color: Colors.grey[500],
+                        size: 28.sp,
+                      ),
+            ),
+          ),
           SizedBox(height: 12.h),
           Text(
             name,

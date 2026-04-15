@@ -128,7 +128,7 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<OnBoardingModel> slides)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<OnBoardingSlideEntity> slides)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -152,7 +152,7 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<OnBoardingModel> slides)  loaded,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<OnBoardingSlideEntity> slides)  loaded,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
@@ -175,7 +175,7 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<OnBoardingModel> slides)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<OnBoardingSlideEntity> slides)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -257,11 +257,11 @@ String toString() {
 
 
 class _Loaded implements OnBoardingState {
-  const _Loaded({required final  List<OnBoardingModel> slides}): _slides = slides;
+  const _Loaded({required final  List<OnBoardingSlideEntity> slides}): _slides = slides;
   
 
- final  List<OnBoardingModel> _slides;
- List<OnBoardingModel> get slides {
+ final  List<OnBoardingSlideEntity> _slides;
+ List<OnBoardingSlideEntity> get slides {
   if (_slides is EqualUnmodifiableListView) return _slides;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_slides);
@@ -298,7 +298,7 @@ abstract mixin class _$LoadedCopyWith<$Res> implements $OnBoardingStateCopyWith<
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
 @useResult
 $Res call({
- List<OnBoardingModel> slides
+ List<OnBoardingSlideEntity> slides
 });
 
 
@@ -318,7 +318,7 @@ class __$LoadedCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? slides = null,}) {
   return _then(_Loaded(
 slides: null == slides ? _self._slides : slides // ignore: cast_nullable_to_non_nullable
-as List<OnBoardingModel>,
+as List<OnBoardingSlideEntity>,
   ));
 }
 

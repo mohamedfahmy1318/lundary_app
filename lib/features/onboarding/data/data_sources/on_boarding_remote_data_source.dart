@@ -9,12 +9,24 @@ abstract class OnBoardingRemoteDataSource {
 class OnBoardingRemoteDataSourceImpl implements OnBoardingRemoteDataSource {
   final ApiClient _apiClient;
 
-  OnBoardingRemoteDataSourceImpl({required ApiClient apiClient}) : _apiClient = apiClient;
+  OnBoardingRemoteDataSourceImpl({required ApiClient apiClient})
+    : _apiClient = apiClient;
 
   @override
   Future<List<OnBoardingModel>> getOnboardingData() async {
     final response = await _apiClient.get(ApiConstants.onboarding);
-    final List<dynamic> data = response.data['data'];
-    return data.map((json) => OnBoardingModel.fromJson(json as Map<String, dynamic>)).toList();
+    final payload = response.data;
+    final source =
+        payload is Map<String, dynamic>
+            ? payload['data']
+            : (payload is Map ? payload['data'] : payload);
+
+    final data = source is List ? source : const <dynamic>[];
+    return data
+        .whereType<Map>()
+        .map(
+          (json) => OnBoardingModel.fromJson(Map<String, dynamic>.from(json)),
+        )
+        .toList();
   }
 }

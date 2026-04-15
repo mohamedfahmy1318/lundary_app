@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
-import '../../data/models/on_boarding_model.dart';
+import 'package:laundry/features/onboarding/domain/entities/on_boarding_slide_entity.dart';
 
 abstract class OnBoardingRepo {
-  Future<Either<Failure, List<OnBoardingModel>>> getOnboardingData();
+  Future<Either<Failure, List<OnBoardingSlideEntity>>> getOnboardingData();
 }

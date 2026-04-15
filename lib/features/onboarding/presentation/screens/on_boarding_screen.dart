@@ -5,7 +5,10 @@ import 'package:go_router/go_router.dart';
 import 'package:laundry/core/di/injection_container.dart';
 import 'package:laundry/core/theme/app_text_styles.dart';
 import 'package:laundry/core/utils/app_extensions.dart';
+import 'package:laundry/features/onboarding/presentation/widgets/on_boarding_empty_view.dart';
+import 'package:laundry/features/onboarding/presentation/widgets/on_boarding_error_view.dart';
 import 'package:laundry/features/onboarding/presentation/widgets/on_boarding_item.dart';
+import 'package:laundry/features/onboarding/presentation/widgets/on_boarding_loading_view.dart';
 import '../cubit/on_boarding_cubit.dart';
 import '../cubit/on_boarding_state.dart';
 
@@ -55,16 +58,11 @@ class _OnBoardingViewState extends State<_OnBoardingView> {
       body: BlocBuilder<OnBoardingCubit, OnBoardingState>(
         builder: (context, state) {
           return state.maybeWhen(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (msg) => Center(
-              child: Padding(
-                padding: EdgeInsets.all(24.w),
-                child: Text(msg, textAlign: TextAlign.center, style: const TextStyle(color: Colors.red)),
-              ),
-            ),
+            loading: OnBoardingLoadingView.new,
+            error: (msg) => OnBoardingErrorView(message: msg),
             loaded: (slides) {
               if (slides.isEmpty) {
-                return const Center(child: Text('No onboarding data available.'));
+                return const OnBoardingEmptyView();
               }
               return PageView.builder(
                 itemCount: slides.length,
@@ -77,7 +75,7 @@ class _OnBoardingViewState extends State<_OnBoardingView> {
                 itemBuilder: (context, index) {
                   final isLast = index == slides.length - 1;
                   return OnBoardingItem(
-                    onBoardingModel: slides[index],
+                    slide: slides[index],
                     currentIndex: _currentIndex,
                     totalPages: slides.length,
                     buttonText: isLast ? "Get Started" : "Next",

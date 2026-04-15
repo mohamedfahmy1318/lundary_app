@@ -8,10 +8,11 @@ import 'package:laundry/features/home/presentation/screens/main_screen.dart';
 import 'package:laundry/features/onboarding/presentation/screens/on_boarding_screen.dart';
 import 'package:laundry/features/auth/presentation/screens/login_screen.dart';
 import 'package:laundry/features/auth/presentation/screens/register_screen.dart';
+import 'package:laundry/features/auth/presentation/models/verification_params.dart';
 import 'package:laundry/features/auth/presentation/screens/verification_screen.dart';
 import 'package:laundry/features/select_address/presentation/screens/select_address_screen.dart';
+import 'package:laundry/features/orders/domain/entities/order_entity.dart';
 import 'package:laundry/features/orders/presentation/pages/order_details_page.dart';
-import 'package:laundry/features/orders/data/models/order_model.dart';
 import 'package:laundry/features/profile/presentation/pages/manage_account_page.dart';
 import 'package:laundry/features/profile/presentation/pages/support_page.dart';
 import 'package:laundry/features/profile/presentation/pages/new_ticket_page.dart';
@@ -23,7 +24,7 @@ import 'package:laundry/features/basket/presentation/pages/payment_page.dart';
 import 'package:laundry/features/basket/presentation/pages/order_success_page.dart';
 import 'package:laundry/features/wallet/presentation/pages/wallet_page.dart';
 import 'package:laundry/features/home/presentation/screens/category_services_page.dart';
-import 'package:laundry/features/home/data/models/category_model.dart';
+import 'package:laundry/features/home/domain/entities/home_category_entity.dart';
 
 class AppRouter {
   static String get _initialLocation {
@@ -62,7 +63,22 @@ class AppRouter {
       GoRoute(
         path: RoutingNames.verification,
         name: 'verification',
-        builder: (context, state) => const VerificationScreen(),
+        builder: (context, state) {
+          final queryParams = VerificationParams.fromQueryParameters(
+            state.uri.queryParameters,
+          );
+          if (queryParams != null) {
+            return VerificationScreen(params: queryParams);
+          }
+
+          final extra = state.extra;
+          if (extra is VerificationParams) {
+            return VerificationScreen(params: extra);
+          }
+          return const Scaffold(
+            body: Center(child: Text('Missing verification parameters')),
+          );
+        },
       ),
       GoRoute(
         path: RoutingNames.selectAddress,
@@ -73,7 +89,7 @@ class AppRouter {
         path: RoutingNames.orderDetails,
         name: 'orderDetails',
         builder: (context, state) {
-          final order = state.extra as OrderModel;
+          final order = state.extra as OrderEntity;
           return OrderDetailsPage(order: order);
         },
       ),
@@ -152,7 +168,7 @@ class AppRouter {
         name: 'categoryServices',
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>;
-          final categories = extra['categories'] as List<CategoryModel>;
+          final categories = extra['categories'] as List<HomeCategoryEntity>;
           final selectedIndex = extra['selectedIndex'] as int? ?? 0;
           return CategoryServicesPage(
             categories: categories,

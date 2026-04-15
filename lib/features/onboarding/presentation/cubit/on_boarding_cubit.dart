@@ -1,17 +1,20 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/repos/on_boarding_repo.dart';
+
+import 'package:laundry/features/onboarding/domain/usecases/get_on_boarding_slides_usecase.dart';
+
 import 'on_boarding_state.dart';
 
 class OnBoardingCubit extends Cubit<OnBoardingState> {
-  final OnBoardingRepo _repo;
+  final GetOnBoardingSlidesUseCase _getOnBoardingSlidesUseCase;
 
-  OnBoardingCubit({required OnBoardingRepo repo})
-      : _repo = repo,
-        super(const OnBoardingState.initial());
+  OnBoardingCubit({
+    required GetOnBoardingSlidesUseCase getOnBoardingSlidesUseCase,
+  }) : _getOnBoardingSlidesUseCase = getOnBoardingSlidesUseCase,
+       super(const OnBoardingState.initial());
 
   Future<void> loadOnBoarding() async {
     emit(const OnBoardingState.loading());
-    final result = await _repo.getOnboardingData();
+    final result = await _getOnBoardingSlidesUseCase();
 
     result.fold(
       (failure) => emit(OnBoardingState.error(failure.message)),

@@ -11,12 +11,17 @@ class DetailRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: AppTextStyles.caption),
-        Text(
-          value,
-          style: AppTextStyles.caption.copyWith(color: AppColors.textPrimary),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            softWrap: true,
+            style: AppTextStyles.caption.copyWith(color: AppColors.textPrimary),
+          ),
         ),
       ],
     );

@@ -6,7 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/widgets/app_bar_factory.dart';
 import '../../../../core/widgets/chip_tab_bar.dart';
-import '../../data/models/order_model.dart';
+import '../../domain/entities/order_status.dart';
 import '../cubit/orders_cubit.dart';
 import '../cubit/orders_state.dart';
 import '../widgets/order_card.dart';
@@ -118,9 +118,7 @@ class _OrdersPageState extends State<OrdersPage>
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            SliverFillRemaining(
-              child: Center(child: Text("No orders found")),
-            ),
+            SliverFillRemaining(child: Center(child: Text("No orders found"))),
           ],
         ),
       );

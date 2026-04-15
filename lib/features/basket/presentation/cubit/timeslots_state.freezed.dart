@@ -128,7 +128,7 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<TimeSlotModel> timeSlots)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<TimeSlotEntity> timeSlots)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -152,7 +152,7 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<TimeSlotModel> timeSlots)  loaded,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<TimeSlotEntity> timeSlots)  loaded,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
@@ -175,7 +175,7 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<TimeSlotModel> timeSlots)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<TimeSlotEntity> timeSlots)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -257,11 +257,11 @@ String toString() {
 
 
 class _Loaded implements TimeslotsState {
-  const _Loaded(final  List<TimeSlotModel> timeSlots): _timeSlots = timeSlots;
+  const _Loaded(final  List<TimeSlotEntity> timeSlots): _timeSlots = timeSlots;
   
 
- final  List<TimeSlotModel> _timeSlots;
- List<TimeSlotModel> get timeSlots {
+ final  List<TimeSlotEntity> _timeSlots;
+ List<TimeSlotEntity> get timeSlots {
   if (_timeSlots is EqualUnmodifiableListView) return _timeSlots;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_timeSlots);
@@ -298,7 +298,7 @@ abstract mixin class _$LoadedCopyWith<$Res> implements $TimeslotsStateCopyWith<$
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
 @useResult
 $Res call({
- List<TimeSlotModel> timeSlots
+ List<TimeSlotEntity> timeSlots
 });
 
 
@@ -318,7 +318,7 @@ class __$LoadedCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? timeSlots = null,}) {
   return _then(_Loaded(
 null == timeSlots ? _self._timeSlots : timeSlots // ignore: cast_nullable_to_non_nullable
-as List<TimeSlotModel>,
+as List<TimeSlotEntity>,
   ));
 }
 

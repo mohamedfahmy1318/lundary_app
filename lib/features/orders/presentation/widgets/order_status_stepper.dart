@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../data/models/order_model.dart';
+import '../../domain/entities/order_status.dart';
 
 class OrderStatusStepper extends StatelessWidget {
   final OrderStatus status;

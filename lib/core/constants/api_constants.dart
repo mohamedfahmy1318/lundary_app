@@ -8,15 +8,17 @@ abstract class ApiConstants {
   static const int sendTimeout = 30000;
 
   // Auth
-  static const String login = '/auth/login';
-  static const String register = '/auth/register';
-  static const String verify = '/auth/verify';
-  static const String resend = '/auth/resend';
+  static const String registerRequest = '/auth/register-request';
+  static const String registerVerify = '/auth/register-verify';
+  static const String loginRequest = '/auth/login-request';
+  static const String loginVerify = '/auth/login-verify';
+  static const String resendOtp = '/auth/resend-otp';
   static const String logout = '/auth/logout';
 
   // Home
   static const String categories = '/categories';
   static const String services = '/services';
+  static const String topServices = '/services/top';
   static const String products = '/products';
   static const String banners = '/settings/banners';
 
@@ -25,7 +27,7 @@ abstract class ApiConstants {
 
   // Basket
   static const String basket = '/basket';
-  
+
   // Settings
   static const String timeslots = '/settings/timeslots';
 
@@ -40,6 +42,9 @@ abstract class ApiConstants {
   static const String profile = '/auth/profile';
   static const String changePassword = '/auth/change-password';
   static const String tickets = '/support/tickets';
+  static const String supportCategories = '/support/categories';
+  static const String supportPriorities = '/support/priorities';
+  static const String supportStatuses = '/support/statuses';
   static String ticketDetails(int ticketId) => '$tickets/$ticketId';
   static String ticketReply(int ticketId) => '${ticketDetails(ticketId)}/reply';
   static String closeTicket(int ticketId) => '${ticketDetails(ticketId)}/close';

@@ -5,9 +5,9 @@ import 'package:laundry/core/constants/app_colors.dart';
 
 abstract class AppTextStyles {
   // ── Page & Section Titles ──
-  static final TextStyle pageTitle = GoogleFonts.poppins(
+  static final TextStyle pageTitle = GoogleFonts.urbanist(
     fontSize: 18.sp,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.normal,
     color: AppColors.textPrimary,
   );
 

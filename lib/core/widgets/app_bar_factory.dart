@@ -29,7 +29,7 @@ class AppBarFactory {
                   color: AppColors.textPrimary,
                   size: 20.sp,
                 ),
-                onPressed: onBack,
+                onPressed: Navigator.of(context).pop,
               )
               : null,
       title: Text(title, style: AppTextStyles.pageTitle),

@@ -7,21 +7,36 @@ import 'package:laundry/features/profile/data/models/ticket_model.dart';
 
 abstract class ProfileRemoteDataSource {
   Future<ProfileModel> getProfile();
-  Future<void> updateProfile({String? name, String? phone, String? avatarFilePath});
-  Future<void> changePassword(Map<String, dynamic> data);
+  Future<void> updateProfile({
+    String? name,
+    String? phone,
+    String? avatarFilePath,
+  });
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String confirmPassword,
+  });
   Future<List<TicketModel>> getTickets();
   Future<TicketModel> getTicketDetails(int ticketId);
   Future<TicketReplyModel> replyToTicket(int ticketId, String message);
   Future<TicketModel> closeTicket(int ticketId);
-  Future<void> createTicket(Map<String, dynamic> ticketData);
-  Future<List<SubscriptionPlan>> getSubscriptionPlans();
-  Future<List<ActiveSubscription>> getMySubscriptions();
+  Future<void> createTicket({
+    required String subject,
+    required String message,
+    required String priority,
+    required String category,
+  });
+  Future<List<TicketLookupOptionModel>> getTicketCategories();
+  Future<List<TicketLookupOptionModel>> getTicketPriorities();
+  Future<List<TicketLookupOptionModel>> getTicketStatuses();
+  Future<List<SubscriptionPlanModel>> getSubscriptionPlans();
+  Future<List<ActiveSubscriptionModel>> getMySubscriptions();
   Future<void> deleteAccount();
   Future<void> logout();
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
-  // ignore: unused_field
   final ApiClient _apiClient;
 
   ProfileRemoteDataSourceImpl({required ApiClient apiClient})
@@ -34,11 +49,15 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<void> updateProfile({String? name, String? phone, String? avatarFilePath}) async {
+  Future<void> updateProfile({
+    String? name,
+    String? phone,
+    String? avatarFilePath,
+  }) async {
     final Map<String, dynamic> mapStream = {};
     if (name != null) mapStream['name'] = name;
     if (phone != null) mapStream['phone'] = phone;
-    
+
     if (avatarFilePath != null) {
       mapStream['avatar'] = await MultipartFile.fromFile(avatarFilePath);
     }
@@ -48,21 +67,35 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<void> changePassword(Map<String, dynamic> data) async {
-    await _apiClient.post(ApiConstants.changePassword, data: data);
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    await _apiClient.post(
+      ApiConstants.changePassword,
+      data: {
+        'current_password': currentPassword,
+        'password': newPassword,
+        'password_confirmation': confirmPassword,
+      },
+    );
   }
 
   @override
   Future<List<TicketModel>> getTickets() async {
     final response = await _apiClient.get(ApiConstants.tickets);
     final List<dynamic> data = response.data['data']['data'];
-    return data.map((json) => TicketModel.fromJson(json as Map<String, dynamic>)).toList();
+    return data
+        .map((json) => TicketModel.fromJson(json as Map<String, dynamic>))
+        .toList();
   }
 
   @override
   Future<TicketModel> getTicketDetails(int ticketId) async {
     final response = await _apiClient.get(ApiConstants.ticketDetails(ticketId));
-    final Map<String, dynamic> data = response.data['data'] as Map<String, dynamic>;
+    final Map<String, dynamic> data =
+        response.data['data'] as Map<String, dynamic>;
     return TicketModel.fromJson(data);
   }
 
@@ -79,13 +112,12 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
     if (!success) {
       throw ServerException(
-        message:
-            responseData['message'] as String? ??
-            'Failed to send reply',
+        message: responseData['message'] as String? ?? 'Failed to send reply',
       );
     }
 
-    final Map<String, dynamic> data = responseData['data'] as Map<String, dynamic>;
+    final Map<String, dynamic> data =
+        responseData['data'] as Map<String, dynamic>;
     return TicketReplyModel.fromJson(data);
   }
 
@@ -99,44 +131,100 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
     if (!success) {
       throw ServerException(
-        message:
-            responseData['message'] as String? ??
-            'Failed to close ticket',
+        message: responseData['message'] as String? ?? 'Failed to close ticket',
       );
     }
 
-    final Map<String, dynamic> data = responseData['data'] as Map<String, dynamic>;
+    final Map<String, dynamic> data =
+        responseData['data'] as Map<String, dynamic>;
     return TicketModel.fromJson(data);
   }
 
   @override
-  Future<void> createTicket(Map<String, dynamic> ticketData) async {
-    await _apiClient.post(ApiConstants.tickets, data: ticketData);
+  Future<void> createTicket({
+    required String subject,
+    required String message,
+    required String priority,
+    required String category,
+  }) async {
+    await _apiClient.post(
+      ApiConstants.tickets,
+      data: {
+        'subject': subject,
+        'message': message,
+        'priority': priority,
+        'category': category,
+      },
+    );
   }
 
   @override
-  Future<List<SubscriptionPlan>> getSubscriptionPlans() async {
+  Future<List<TicketLookupOptionModel>> getTicketCategories() async {
+    final response = await _apiClient.get(ApiConstants.supportCategories);
+    final List<dynamic> data = response.data['data'] as List<dynamic>;
+    return data
+        .map(
+          (json) =>
+              TicketLookupOptionModel.fromJson(json as Map<String, dynamic>),
+        )
+        .toList();
+  }
+
+  @override
+  Future<List<TicketLookupOptionModel>> getTicketPriorities() async {
+    final response = await _apiClient.get(ApiConstants.supportPriorities);
+    final List<dynamic> data = response.data['data'] as List<dynamic>;
+    return data
+        .map(
+          (json) =>
+              TicketLookupOptionModel.fromJson(json as Map<String, dynamic>),
+        )
+        .toList();
+  }
+
+  @override
+  Future<List<TicketLookupOptionModel>> getTicketStatuses() async {
+    final response = await _apiClient.get(ApiConstants.supportStatuses);
+    final List<dynamic> data = response.data['data'] as List<dynamic>;
+    return data
+        .map(
+          (json) =>
+              TicketLookupOptionModel.fromJson(json as Map<String, dynamic>),
+        )
+        .toList();
+  }
+
+  @override
+  Future<List<SubscriptionPlanModel>> getSubscriptionPlans() async {
     final response = await _apiClient.get(ApiConstants.subscriptionPlans);
     final List<dynamic> data = response.data['data'];
-    return data.map((json) => SubscriptionPlan.fromJson(json as Map<String, dynamic>)).toList();
+    return data
+        .map(
+          (json) =>
+              SubscriptionPlanModel.fromJson(json as Map<String, dynamic>),
+        )
+        .toList();
   }
 
   @override
-  Future<List<ActiveSubscription>> getMySubscriptions() async {
+  Future<List<ActiveSubscriptionModel>> getMySubscriptions() async {
     final response = await _apiClient.get(ApiConstants.mySubscriptions);
     final List<dynamic> data = response.data['data'];
-    return data.map((json) => ActiveSubscription.fromJson(json as Map<String, dynamic>)).toList();
+    return data
+        .map(
+          (json) =>
+              ActiveSubscriptionModel.fromJson(json as Map<String, dynamic>),
+        )
+        .toList();
   }
 
   @override
   Future<void> deleteAccount() async {
-    // TODO: Replace with actual API endpoint
-    // await _apiClient.delete('/profile');
+    await _apiClient.delete(ApiConstants.profile);
   }
 
   @override
   Future<void> logout() async {
-    // TODO: Replace with actual API endpoint
-    // await _apiClient.post('/auth/logout');
+    await _apiClient.post(ApiConstants.logout);
   }
 }

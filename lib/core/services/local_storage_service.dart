@@ -13,6 +13,8 @@ class LocalStorageService {
   static const String _themeKey = 'theme_mode';
   static const String _isFirstTimeKey = 'is_first_time';
   static const String _isLoggedInKey = 'is_logged_in';
+  static const String _currentLocationKey = 'current_location';
+  static const String _savedLocationsKey = 'saved_locations';
 
   // Token
   Future<bool> saveToken(String token) => _prefs.setString(_tokenKey, token);
@@ -45,6 +47,17 @@ class LocalStorageService {
   // Logged In
   Future<bool> setLoggedIn(bool value) => _prefs.setBool(_isLoggedInKey, value);
   bool isLoggedIn() => _prefs.getBool(_isLoggedInKey) ?? false;
+
+  // Current Location
+  Future<bool> saveCurrentLocation(String location) =>
+      _prefs.setString(_currentLocationKey, location);
+  String? getCurrentLocation() => _prefs.getString(_currentLocationKey);
+
+  // Saved Locations
+  Future<bool> saveSavedLocations(List<String> locations) =>
+      _prefs.setStringList(_savedLocationsKey, locations);
+  List<String> getSavedLocations() =>
+      _prefs.getStringList(_savedLocationsKey) ?? const <String>[];
 
   // Clear all data (for logout)
   Future<bool> clearAll() => _prefs.clear();

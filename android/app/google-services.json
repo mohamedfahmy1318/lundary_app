@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "303159150493",
+    "project_id": "lundary-app-ab4f2",
+    "storage_bucket": "lundary-app-ab4f2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:303159150493:android:617c20f851b26631c01174",
+        "android_client_info": {
+          "package_name": "com.findo.lund"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "303159150493-8e2hvbhet1ggo7kd44otpil8er1fcbka.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.findo.lund",
+            "certificate_hash": "d763438fcd484353d9f2ca227e1451ec4e9ce9af"
+          }
+        },
+        {
+          "client_id": "303159150493-ifta2t0ldirkbego3o23vh34t9bphsms.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLOnc1b0GeMDKCdyDCxMphUYMI2BxUC7M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "303159150493-ifta2t0ldirkbego3o23vh34t9bphsms.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "303159150493-d9qhccmg7sdrijfg15uo46es4opveb5j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.findo.lundary"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

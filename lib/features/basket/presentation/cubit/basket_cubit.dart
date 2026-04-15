@@ -1,22 +1,22 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:laundry/features/basket/data/models/cart_item.dart';
-import 'package:laundry/features/basket/domain/repos/basket_repo.dart';
+import 'package:laundry/features/basket/domain/entities/cart_item_entity.dart';
+import 'package:laundry/features/basket/domain/usecases/create_order_usecase.dart';
 import 'package:laundry/features/basket/presentation/cubit/basket_state.dart';
 
 class BasketCubit extends Cubit<BasketState> {
-  final BasketRepo _basketRepo;
+  final CreateOrderUseCase _createOrderUseCase;
 
-  BasketCubit({required BasketRepo basketRepo})
-    : _basketRepo = basketRepo,
+  BasketCubit({required CreateOrderUseCase createOrderUseCase})
+    : _createOrderUseCase = createOrderUseCase,
       super(const BasketState.initial());
 
-  /// serviceId → CartItem
-  final Map<int, CartItem> _cart = {};
+  /// serviceId -> cart item
+  final Map<int, BasketCartItemEntity> _cart = {};
 
-  Map<int, CartItem> get cart => Map.unmodifiable(_cart);
+  Map<int, BasketCartItemEntity> get cart => Map.unmodifiable(_cart);
 
-  List<CartItem> get cartItems =>
+  List<CartItemEntity> get cartItems =>
       _cart.values.where((i) => i.quantity > 0).toList();
 
   double get totalAmount =>
@@ -27,7 +27,7 @@ class BasketCubit extends Cubit<BasketState> {
 
   int getQuantity(int serviceId) => _cart[serviceId]?.quantity ?? 0;
 
-  List<CartItem> getItemsByCategory(String category) =>
+  List<CartItemEntity> getItemsByCategory(String category) =>
       cartItems.where((i) => i.categoryName == category).toList();
 
   /// Add or increment a service in the cart.
@@ -39,15 +39,9 @@ class BasketCubit extends Cubit<BasketState> {
   }) {
     if (_cart.containsKey(serviceId)) {
       final existing = _cart[serviceId]!;
-      _cart[serviceId] = CartItem(
-        serviceId: existing.serviceId,
-        serviceName: existing.serviceName,
-        categoryName: existing.categoryName,
-        unitPrice: existing.unitPrice,
-        quantity: existing.quantity + 1,
-      );
+      _cart[serviceId] = existing.copyWith(quantity: existing.quantity + 1);
     } else {
-      _cart[serviceId] = CartItem(
+      _cart[serviceId] = BasketCartItemEntity(
         serviceId: serviceId,
         serviceName: serviceName,
         categoryName: categoryName,
@@ -64,13 +58,7 @@ class BasketCubit extends Cubit<BasketState> {
       if (newQty == 0) {
         _cart.remove(serviceId);
       } else {
-        _cart[serviceId] = CartItem(
-          serviceId: item.serviceId,
-          serviceName: item.serviceName,
-          categoryName: item.categoryName,
-          unitPrice: item.unitPrice,
-          quantity: newQty,
-        );
+        _cart[serviceId] = item.copyWith(quantity: newQty);
       }
       _emitLoaded();
     }
@@ -93,35 +81,36 @@ class BasketCubit extends Cubit<BasketState> {
     required String deliveryDate,
     required String deliveryTimeSlot,
     required String pickupAddress,
+    required String deliveryAddress,
     required String paymentMethod,
     bool isExpress = false,
     String? promoCode,
-    String? notes,
+    String? notesPickup,
+    String? notesDelivery,
   }) async {
     if (cartItems.isEmpty) return;
     emit(const BasketState.orderCreating());
 
-    final orderData = {
-      'items': cartItems.map((i) => i.toOrderJson()).toList(),
-      'pickup_date': pickupDate,
-      'pickup_time_slot': pickupTimeSlot,
-      'delivery_date': deliveryDate,
-      'delivery_time_slot': deliveryTimeSlot,
-      'pickup_address': pickupAddress,
-      'payment_method': paymentMethod,
-      'is_express': isExpress,
-      if (promoCode != null && promoCode.isNotEmpty) 'promo_code': promoCode,
-      if (notes != null && notes.isNotEmpty) 'notes': notes,
-    };
-
-    final result = await _basketRepo.createOrder(orderData);
-    result.fold(
-      (failure) => emit(BasketState.error(failure.message)),
-      (_) {
-        _cart.clear();
-        emit(const BasketState.orderCreated());
-      },
+    final result = await _createOrderUseCase(
+      CreateOrderParams(
+        items: cartItems,
+        pickupDate: pickupDate,
+        pickupTimeSlot: pickupTimeSlot,
+        deliveryDate: deliveryDate,
+        deliveryTimeSlot: deliveryTimeSlot,
+        pickupAddress: pickupAddress,
+        deliveryAddress: deliveryAddress,
+        paymentMethod: paymentMethod,
+        isExpress: isExpress,
+        promoCode: promoCode,
+        notesPickup: notesPickup,
+        notesDelivery: notesDelivery,
+      ),
     );
+    result.fold((failure) => emit(BasketState.error(failure.message)), (_) {
+      _cart.clear();
+      emit(const BasketState.orderCreated());
+    });
   }
 
   void _emitLoaded() {

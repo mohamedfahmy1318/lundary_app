@@ -1,8 +1,10 @@
 import 'dart:ui';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:laundry/app.dart';
 import 'package:laundry/core/di/injection_container.dart';
 import 'package:laundry/core/services/hive_service.dart';
+import 'package:laundry/core/services/push_notification_service.dart';
 import 'package:laundry/core/utils/app_helpers.dart';
 
 void main() async {
@@ -24,8 +26,8 @@ void main() async {
   await AppHelpers.setPortraitOnly();
   await HiveService.init();
   await setupDependencies();
-
-  // await Firebase.initializeApp();
+  await Firebase.initializeApp();
+  //await PushNotificationService.initialize();
 
   runApp(const MyApp());
 }

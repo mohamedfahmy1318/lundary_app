@@ -1,25 +1,21 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:laundry/features/home/domain/entities/home_category_entity.dart';
 
+part 'category_model.freezed.dart';
 part 'category_model.g.dart';
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class CategoryModel {
-  final int id;
-  final String name;
-  final String? description;
-  final String? icon;
-  final String? image;
+@freezed
+abstract class CategoryModel extends HomeCategoryEntity with _$CategoryModel {
+  const CategoryModel._();
 
-  const CategoryModel({
-    required this.id,
-    required this.name,
-    this.description,
-    this.icon,
-    this.image,
-  });
+  const factory CategoryModel({
+    required int id,
+    required String name,
+    String? description,
+    String? icon,
+    String? image,
+  }) = _CategoryModel;
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) =>
       _$CategoryModelFromJson(json);
-
-  Map<String, dynamic> toJson() => _$CategoryModelToJson(this);
 }

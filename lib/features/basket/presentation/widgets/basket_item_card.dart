@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../data/models/cart_item.dart';
+import '../../domain/entities/cart_item_entity.dart';
 
 class BasketItemCard extends StatelessWidget {
-  final CartItem item;
+  final CartItemEntity item;
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
 
@@ -43,9 +43,20 @@ class BasketItemCard extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          Text(
-            'AED ${item.unitPrice.toStringAsFixed(0)}',
-            style: AppTextStyles.captionSmall,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/images/icon_price.png',
+                width: 14.w,
+                height: 14.w,
+              ),
+              SizedBox(width: 4.w),
+              Text(
+                item.unitPrice.toStringAsFixed(0),
+                style: AppTextStyles.captionSmall,
+              ),
+            ],
           ),
           SizedBox(height: 12.h),
 

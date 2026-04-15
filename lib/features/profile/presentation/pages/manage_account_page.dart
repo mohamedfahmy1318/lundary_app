@@ -3,9 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:laundry/core/utils/app_extensions.dart';
 import 'package:laundry/core/di/injection_container.dart';
+import 'package:laundry/core/services/local_storage_service.dart';
+import 'package:laundry/core/utils/current_location_helper.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_bar_factory.dart';
+import '../../../select_address/presentation/screens/map_address_picker_screen.dart';
 import '../cubit/profile_cubit.dart';
 import '../cubit/profile_state.dart';
 import '../cubit/change_password_cubit.dart';
@@ -14,8 +17,189 @@ import '../cubit/update_profile_cubit.dart';
 import '../cubit/update_profile_state.dart';
 import 'package:image_picker/image_picker.dart';
 
-class ManageAccountPage extends StatelessWidget {
+class ManageAccountPage extends StatefulWidget {
   const ManageAccountPage({super.key});
+
+  @override
+  State<ManageAccountPage> createState() => _ManageAccountPageState();
+}
+
+class _ManageAccountPageState extends State<ManageAccountPage> {
+  final LocalStorageService _localStorage = getIt<LocalStorageService>();
+  List<String> _savedLocations = const <String>[];
+  bool _isLoadingCurrentLocation = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedLocations();
+    _syncCurrentLocation();
+  }
+
+  void _loadSavedLocations() {
+    _savedLocations = _localStorage.getSavedLocations();
+  }
+
+  Future<void> _syncCurrentLocation() async {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _isLoadingCurrentLocation = true;
+    });
+
+    final current = await CurrentLocationHelper.getCurrentAddress();
+    if (current != null && current.trim().isNotEmpty) {
+      await _persistLocation(current.trim());
+    }
+
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _isLoadingCurrentLocation = false;
+      _loadSavedLocations();
+    });
+  }
+
+  Future<void> _persistLocation(String location) async {
+    await _localStorage.saveCurrentLocation(location);
+    final normalized =
+        _localStorage
+            .getSavedLocations()
+            .where(
+              (item) => item.trim().toLowerCase() != location.toLowerCase(),
+            )
+            .toList();
+    await _localStorage.saveSavedLocations(<String>[location, ...normalized]);
+  }
+
+  Future<void> _addAnotherLocation() async {
+    final selectedAddress = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder:
+            (_) => const MapAddressPickerScreen(title: 'Add Another Location'),
+      ),
+    );
+
+    if (!mounted || selectedAddress == null || selectedAddress.trim().isEmpty) {
+      return;
+    }
+
+    await _persistLocation(selectedAddress.trim());
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _loadSavedLocations();
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Location added successfully.')),
+    );
+  }
+
+  Future<void> _editLocation(int index) async {
+    if (index < 0 || index >= _savedLocations.length) {
+      return;
+    }
+
+    final oldLocation = _savedLocations[index];
+    final selectedAddress = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => const MapAddressPickerScreen(title: 'Edit Location'),
+      ),
+    );
+
+    if (!mounted || selectedAddress == null || selectedAddress.trim().isEmpty) {
+      return;
+    }
+
+    final updatedLocation = selectedAddress.trim();
+    final next = List<String>.from(_savedLocations);
+    next[index] = updatedLocation;
+
+    final seen = <String>{};
+    final deduplicated =
+        next.where((item) => seen.add(item.trim().toLowerCase())).toList();
+
+    await _localStorage.saveSavedLocations(deduplicated);
+
+    final current = _localStorage.getCurrentLocation();
+    if (current != null &&
+        current.trim().toLowerCase() == oldLocation.trim().toLowerCase()) {
+      await _localStorage.saveCurrentLocation(updatedLocation);
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _savedLocations = deduplicated;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Location updated successfully.')),
+    );
+  }
+
+  Future<void> _deleteLocation(int index) async {
+    if (index < 0 || index >= _savedLocations.length) {
+      return;
+    }
+
+    final locationToDelete = _savedLocations[index];
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder:
+          (dialogContext) => AlertDialog(
+            title: const Text('Delete location'),
+            content: const Text(
+              'Are you sure you want to delete this location?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
+    );
+
+    if (shouldDelete != true) {
+      return;
+    }
+
+    final next = List<String>.from(_savedLocations)..removeAt(index);
+    await _localStorage.saveSavedLocations(next);
+
+    final current = _localStorage.getCurrentLocation();
+    if (current != null &&
+        current.trim().toLowerCase() == locationToDelete.trim().toLowerCase()) {
+      await _localStorage.saveCurrentLocation(
+        next.isNotEmpty ? next.first : '',
+      );
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _savedLocations = next;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Location deleted successfully.')),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -181,32 +365,91 @@ class ManageAccountPage extends StatelessWidget {
                         _buildSection(
                           label: "Saved Locations",
                           trailing: TextButton.icon(
-                            onPressed: () {},
+                            onPressed: _addAnotherLocation,
                             icon: const Icon(Icons.add, size: 16),
                             label: const Text("Add"),
                             style: TextButton.styleFrom(
                               foregroundColor: AppColors.primary,
                             ),
                           ),
-                          child: Container(
-                            padding: EdgeInsets.all(12.w),
-                            decoration: BoxDecoration(
-                              color: AppColors.cardBackground,
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.location_on_outlined,
-                                  color: AppColors.primary,
+                          child: Column(
+                            children: [
+                              if (_isLoadingCurrentLocation)
+                                Padding(
+                                  padding: EdgeInsets.only(bottom: 8.h),
+                                  child: Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 14.w,
+                                        height: 14.w,
+                                        child: const CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                      SizedBox(width: 8.w),
+                                      Text(
+                                        'Fetching current location...',
+                                        style: AppTextStyles.caption,
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                SizedBox(width: 12.w),
-                                Text(
-                                  "123 Main St, New York, NY 10001",
-                                  style: AppTextStyles.caption,
-                                ),
-                              ],
-                            ),
+                              if (_savedLocations.isEmpty)
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    'No saved locations yet. Tap Add to add one.',
+                                    style: AppTextStyles.caption,
+                                  ),
+                                )
+                              else
+                                ..._savedLocations.asMap().entries.map((entry) {
+                                  final index = entry.key;
+                                  final location = entry.value;
+
+                                  return Container(
+                                    width: double.infinity,
+                                    margin: EdgeInsets.only(bottom: 8.h),
+                                    padding: EdgeInsets.all(12.w),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.cardBackground,
+                                      borderRadius: BorderRadius.circular(12.r),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.location_on_outlined,
+                                          color: AppColors.primary,
+                                        ),
+                                        SizedBox(width: 12.w),
+                                        Expanded(
+                                          child: Text(
+                                            location,
+                                            style: AppTextStyles.caption,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          tooltip: 'Edit location',
+                                          icon: const Icon(
+                                            Icons.edit_outlined,
+                                            color: AppColors.primary,
+                                          ),
+                                          onPressed: () => _editLocation(index),
+                                        ),
+                                        IconButton(
+                                          tooltip: 'Delete location',
+                                          icon: const Icon(
+                                            Icons.delete_outline,
+                                            color: Colors.red,
+                                          ),
+                                          onPressed:
+                                              () => _deleteLocation(index),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }),
+                            ],
                           ),
                         ),
                       ],

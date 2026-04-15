@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,17 +10,84 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_bar_factory.dart';
 import '../../../../core/widgets/custom_button.dart';
-import '../../data/models/ticket_model.dart';
+import '../../domain/entities/ticket_entity.dart';
+import '../../domain/entities/ticket_status.dart';
 import '../cubit/support_cubit.dart';
 import '../cubit/support_state.dart';
 
-class SupportPage extends StatelessWidget {
+class SupportPage extends StatefulWidget {
   const SupportPage({super.key});
 
   @override
+  State<SupportPage> createState() => _SupportPageState();
+}
+
+class _SupportPageState extends State<SupportPage> {
+  late final SupportCubit _supportCubit;
+  Map<String, String> _statusLabelsByValue = const {};
+
+  @override
+  void initState() {
+    super.initState();
+    _supportCubit = getIt<SupportCubit>();
+    unawaited(_refreshSupportData());
+  }
+
+  @override
+  void dispose() {
+    _supportCubit.close();
+    super.dispose();
+  }
+
+  Future<void> _loadStatusLabels() async {
+    final statuses = await _supportCubit.loadTicketStatuses();
+    if (!mounted) {
+      return;
+    }
+
+    final statusLabels = {
+      for (final option in statuses) option.value: option.label,
+    };
+
+    if (mapEquals(_statusLabelsByValue, statusLabels)) {
+      return;
+    }
+
+    setState(() {
+      _statusLabelsByValue = statusLabels;
+    });
+  }
+
+  Future<void> _refreshSupportData() {
+    return Future.wait<void>([
+      _supportCubit.loadTickets(),
+      _loadStatusLabels(),
+    ]);
+  }
+
+  Future<void> _openRouteAndRefresh({
+    required String routeName,
+    Map<String, String>? pathParameters,
+  }) async {
+    await context.pushNamed(
+      routeName,
+      pathParameters: pathParameters ?? const {},
+    );
+    if (!mounted) {
+      return;
+    }
+    await _refreshSupportData();
+  }
+
+  String _statusLabelFor(TicketStatus status) {
+    final statusValue = status.apiValue;
+    return _statusLabelsByValue[statusValue] ?? status.fallbackLabel;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<SupportCubit>()..loadTickets(),
+    return BlocProvider.value(
+      value: _supportCubit,
       child: Scaffold(
         backgroundColor: AppColors.white,
         appBar: AppBarFactory.build(
@@ -41,8 +111,16 @@ class SupportPage extends StatelessWidget {
                 child: BlocBuilder<SupportCubit, SupportState>(
                   builder: (context, state) {
                     return state.maybeWhen(
-                      loading: () => const Center(child: CircularProgressIndicator()),
-                      error: (msg) => Center(child: Text(msg, style: const TextStyle(color: Colors.red))),
+                      loading:
+                          () =>
+                              const Center(child: CircularProgressIndicator()),
+                      error:
+                          (msg) => Center(
+                            child: Text(
+                              msg,
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          ),
                       loaded: (tickets) {
                         if (tickets.isEmpty) {
                           return Center(
@@ -55,21 +133,20 @@ class SupportPage extends StatelessWidget {
                         return ListView.separated(
                           itemCount: tickets.length,
                           separatorBuilder: (_, _) => SizedBox(height: 16.h),
-                          itemBuilder:
-                              (_, index) => _TicketCard(
-                                ticket: tickets[index],
-                                onTap: () async {
-                                  await context.pushNamed(
-                                    'ticketDetails',
+                          itemBuilder: (_, index) {
+                            final ticket = tickets[index];
+                            return _TicketCard(
+                              ticket: ticket,
+                              statusLabel: _statusLabelFor(ticket.status),
+                              onTap:
+                                  () => _openRouteAndRefresh(
+                                    routeName: 'ticketDetails',
                                     pathParameters: {
-                                      'ticketId': tickets[index].id.toString(),
+                                      'ticketId': ticket.id.toString(),
                                     },
-                                  );
-                                  if (context.mounted) {
-                                    context.read<SupportCubit>().loadTickets();
-                                  }
-                                },
-                              ),
+                                  ),
+                            );
+                          },
                         );
                       },
                       orElse: () => const SizedBox.shrink(),
@@ -78,19 +155,10 @@ class SupportPage extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 16.h),
-              Builder(
-                builder: (context) {
-                  return CustomButton(
-                    text: "Open a ticket",
-                    onPressed: () async {
-                      await context.pushNamed('newTicket');
-                      if (context.mounted) {
-                        context.read<SupportCubit>().loadTickets();
-                      }
-                    },
-                    prefix: const Icon(Icons.add, color: AppColors.white),
-                  );
-                }
+              CustomButton(
+                text: "Open a ticket",
+                onPressed: () => _openRouteAndRefresh(routeName: 'newTicket'),
+                prefix: const Icon(Icons.add, color: AppColors.white),
               ),
               SizedBox(height: 20.h),
             ],
@@ -102,14 +170,20 @@ class SupportPage extends StatelessWidget {
 }
 
 class _TicketCard extends StatelessWidget {
-  final TicketModel ticket;
+  final TicketEntity ticket;
+  final String statusLabel;
   final VoidCallback onTap;
 
-  const _TicketCard({required this.ticket, required this.onTap});
+  const _TicketCard({
+    required this.ticket,
+    required this.statusLabel,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final bool isOpen = ticket.status == TicketStatus.open || ticket.status == TicketStatus.inProgress;
+    final statusTextColor = ticket.status.statusTextColor;
+    final statusBackgroundColor = ticket.status.statusBackgroundColor;
 
     return InkWell(
       onTap: onTap,
@@ -137,21 +211,26 @@ class _TicketCard extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                   decoration: BoxDecoration(
-                    color: isOpen ? Colors.orange.withAlpha(50) : AppColors.success.withAlpha(50),
+                    color: statusBackgroundColor,
                     borderRadius: BorderRadius.circular(8.r),
                   ),
                   child: Text(
-                    isOpen ? "Open" : "Closed",
+                    statusLabel,
                     style: AppTextStyles.caption.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: isOpen ? Colors.orange[800] : AppColors.success,
+                      color: statusTextColor,
                     ),
                   ),
                 ),
               ],
             ),
             SizedBox(height: 8.h),
-            Text(ticket.subject, style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+            Text(
+              ticket.subject,
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             SizedBox(height: 4.h),
             Text(
               ticket.description,
@@ -163,10 +242,16 @@ class _TicketCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Priority: ${ticket.priority.toUpperCase()}", style: AppTextStyles.captionSmall),
-                Text(_formatDate(ticket.createdAt), style: AppTextStyles.captionSmall),
+                Text(
+                  "Priority: ${ticket.priority.toUpperCase()}",
+                  style: AppTextStyles.captionSmall,
+                ),
+                Text(
+                  _formatDate(ticket.createdAt),
+                  style: AppTextStyles.captionSmall,
+                ),
               ],
-            )
+            ),
           ],
         ),
       ),
@@ -179,6 +264,34 @@ class _TicketCard extends StatelessWidget {
       return "${date.month}/${date.day}/${date.year}";
     } catch (_) {
       return dateString.split('T').first;
+    }
+  }
+}
+
+extension TicketStatusUiX on TicketStatus {
+  Color get statusTextColor {
+    switch (this) {
+      case TicketStatus.open:
+      case TicketStatus.inProgress:
+      case TicketStatus.waitingCustomer:
+        return Colors.orange[800]!;
+      case TicketStatus.resolved:
+        return AppColors.success;
+      case TicketStatus.closed:
+        return Colors.grey[700]!;
+    }
+  }
+
+  Color get statusBackgroundColor {
+    switch (this) {
+      case TicketStatus.open:
+      case TicketStatus.inProgress:
+      case TicketStatus.waitingCustomer:
+        return Colors.orange.withAlpha(50);
+      case TicketStatus.resolved:
+        return AppColors.success.withAlpha(50);
+      case TicketStatus.closed:
+        return Colors.grey.withAlpha(40);
     }
   }
 }

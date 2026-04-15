@@ -39,8 +39,12 @@ class _PaymentPageState extends State<PaymentPage> {
     final basketCubit = getIt<BasketCubit>();
     final pickupDate = widget.scheduleData?['pickupDate'] ?? '-';
     final pickupTimeSlot = widget.scheduleData?['pickupTimeSlot'] ?? '-';
+    final pickupAddress = widget.scheduleData?['pickupAddress'] ?? '';
+    final pickupNotes = widget.scheduleData?['pickupNotes'] ?? '';
     final deliveryDate = widget.scheduleData?['deliveryDate'] ?? '-';
     final deliveryTimeSlot = widget.scheduleData?['deliveryTimeSlot'] ?? '-';
+    final deliveryAddress = widget.scheduleData?['deliveryAddress'] ?? '';
+    final deliveryNotes = widget.scheduleData?['deliveryNotes'] ?? '';
 
     return BlocProvider.value(
       value: basketCubit,
@@ -102,6 +106,25 @@ class _PaymentPageState extends State<PaymentPage> {
                       ),
                       SizedBox(height: 24.h),
 
+                      Text("Addresses", style: AppTextStyles.sectionTitle),
+                      SizedBox(height: 12.h),
+                      DetailRow(
+                        label: "Pickup:",
+                        value:
+                            pickupAddress.isEmpty
+                                ? "Not selected"
+                                : pickupAddress,
+                      ),
+                      SizedBox(height: 8.h),
+                      DetailRow(
+                        label: "Delivery:",
+                        value:
+                            deliveryAddress.isEmpty
+                                ? "Not selected"
+                                : deliveryAddress,
+                      ),
+                      SizedBox(height: 24.h),
+
                       // Promo Code
                       Text("Promo Code", style: AppTextStyles.sectionTitle),
                       SizedBox(height: 12.h),
@@ -140,10 +163,31 @@ class _PaymentPageState extends State<PaymentPage> {
                       // Total Detail
                       Text("Total Detail", style: AppTextStyles.sectionTitle),
                       SizedBox(height: 12.h),
-                      DetailRow(
-                        label: "Price:",
-                        value:
-                            "AED ${basketCubit.totalAmount.toStringAsFixed(2)}",
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Price:", style: AppTextStyles.caption),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Image.asset(
+                                  'assets/images/icon_price.png',
+                                  width: 16.w,
+                                  height: 16.w,
+                                ),
+                                SizedBox(width: 6.w),
+                                Text(
+                                  basketCubit.totalAmount.toStringAsFixed(2),
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                       SizedBox(height: 8.h),
                       const DetailRow(
@@ -226,17 +270,38 @@ class _PaymentPageState extends State<PaymentPage> {
                           isLoading
                               ? null
                               : () {
+                                if (pickupAddress.isEmpty ||
+                                    deliveryAddress.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Please select pickup and delivery addresses.',
+                                      ),
+                                    ),
+                                  );
+                                  return;
+                                }
+
                                 basketCubit.createOrder(
                                   pickupDate: pickupDate,
                                   pickupTimeSlot: pickupTimeSlot,
+                                  pickupAddress: pickupAddress,
                                   deliveryDate: deliveryDate,
                                   deliveryTimeSlot: deliveryTimeSlot,
-                                  pickupAddress: 'Test Address, Dubai, UAE',
+                                  deliveryAddress: deliveryAddress,
                                   paymentMethod:
                                       _paymentMethods[_selectedPaymentMethod],
                                   promoCode:
                                       _promoController.text.isNotEmpty
                                           ? _promoController.text
+                                          : null,
+                                  notesPickup:
+                                      pickupNotes.isNotEmpty
+                                          ? pickupNotes
+                                          : null,
+                                  notesDelivery:
+                                      deliveryNotes.isNotEmpty
+                                          ? deliveryNotes
                                           : null,
                                 );
                               },

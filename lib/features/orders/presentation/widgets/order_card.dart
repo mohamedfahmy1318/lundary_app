@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../data/models/order_model.dart';
+import '../../domain/entities/order_entity.dart';
+import '../../domain/entities/order_status.dart';
+import '../utils/order_status_ui_x.dart';
 
 class OrderCard extends StatelessWidget {
-  final OrderModel order;
+  final OrderEntity order;
   final VoidCallback onTap;
 
   // Layout constants
@@ -19,15 +21,15 @@ class OrderCard extends StatelessWidget {
   static const double _iconTextSpacing = 12;
   static const double _subtitleTopSpacing = 4;
 
-  // Currency constant — update here if the app goes multi-currency
-  static const String _currencyPrefix = 'AED';
-
   const OrderCard({super.key, required this.order, required this.onTap});
 
-  /// Formats the summary line shown below the order number.
-  String get _summaryText =>
-      '$_currencyPrefix ${order.totalAmount}  ·  ${order.itemsCount} '
+  String get _itemsText =>
+      '${order.itemsCount} '
       '${order.itemsCount == 1 ? 'item' : 'items'}';
+
+  String get _amountText => order.totalAmount;
+
+  String get _summarySemanticsText => '$_amountText  ·  $_itemsText';
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,7 @@ class OrderCard extends StatelessWidget {
       label:
           'Order ${order.orderNumber}, '
           'status: ${order.status.uiName}, '
-          '$_summaryText',
+          '$_summarySemanticsText',
       button: true,
       child: GestureDetector(
         onTap: onTap,
@@ -59,7 +61,23 @@ class OrderCard extends StatelessWidget {
                   children: [
                     _OrderHeaderRow(order: order),
                     SizedBox(height: _subtitleTopSpacing.h),
-                    Text(_summaryText, style: AppTextStyles.caption),
+                    Row(
+                      children: [
+                        Image.asset(
+                          'assets/images/icon_price.png',
+                          width: 12.w,
+                          height: 12.w,
+                        ),
+                        SizedBox(width: 4.w),
+                        Expanded(
+                          child: Text(
+                            '$_amountText  ·  $_itemsText',
+                            style: AppTextStyles.caption,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -103,7 +121,7 @@ class _StatusIcon extends StatelessWidget {
 
 /// Row that shows order number (left) and status badge (right).
 class _OrderHeaderRow extends StatelessWidget {
-  final OrderModel order;
+  final OrderEntity order;
 
   const _OrderHeaderRow({required this.order});
 

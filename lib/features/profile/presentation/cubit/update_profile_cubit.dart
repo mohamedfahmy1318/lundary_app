@@ -1,13 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/repos/profile_repo.dart';
+import 'package:laundry/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'update_profile_state.dart';
 
 class UpdateProfileCubit extends Cubit<UpdateProfileState> {
-  final ProfileRepo _repo;
+  final UpdateProfileUseCase _updateProfileUseCase;
 
-  UpdateProfileCubit({required ProfileRepo repo})
-      : _repo = repo,
-        super(const UpdateProfileState.initial());
+  UpdateProfileCubit({required UpdateProfileUseCase updateProfileUseCase})
+    : _updateProfileUseCase = updateProfileUseCase,
+      super(const UpdateProfileState.initial());
 
   Future<void> updateProfile({
     String? name,
@@ -17,17 +17,21 @@ class UpdateProfileCubit extends Cubit<UpdateProfileState> {
     if (name == null && phone == null && avatarFilePath == null) return;
 
     emit(const UpdateProfileState.loading());
-    final result = await _repo.updateProfile(
-      name: name,
-      phone: phone,
-      avatarFilePath: avatarFilePath,
+    final result = await _updateProfileUseCase(
+      UpdateProfileParams(
+        name: name,
+        phone: phone,
+        avatarFilePath: avatarFilePath,
+      ),
     );
 
     if (isClosed) return;
 
     result.fold(
       (failure) => emit(UpdateProfileState.error(failure.message)),
-      (_) => emit(const UpdateProfileState.success('Profile updated successfully!')),
+      (_) => emit(
+        const UpdateProfileState.success('Profile updated successfully!'),
+      ),
     );
   }
 }

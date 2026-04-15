@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:laundry/core/constants/app_colors.dart';
 
-class HaveAndNotHaveAccountWidget extends StatelessWidget {
-  const HaveAndNotHaveAccountWidget({
+class AuthAccountPromptRow extends StatelessWidget {
+  const AuthAccountPromptRow({
     super.key,
     required this.text,
     required this.buttonText,
@@ -18,10 +18,7 @@ class HaveAndNotHaveAccountWidget extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          text,
-          style: TextStyle(color: Colors.grey, fontSize: 12.sp),
-        ),
+        Text(text, style: TextStyle(color: Colors.grey, fontSize: 12.sp)),
         TextButton(
           onPressed: onPressed,
           child: Text(
@@ -37,3 +34,5 @@ class HaveAndNotHaveAccountWidget extends StatelessWidget {
     );
   }
 }
+
+typedef HaveAndNotHaveAccountWidget = AuthAccountPromptRow;

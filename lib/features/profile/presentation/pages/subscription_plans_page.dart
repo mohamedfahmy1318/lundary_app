@@ -6,9 +6,10 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_bar_factory.dart';
 import 'package:laundry/core/di/injection_container.dart';
+import '../../domain/entities/active_subscription_entity.dart';
+import '../../domain/entities/subscription_plan_entity.dart';
 import '../cubit/subscriptions_cubit.dart';
 import '../cubit/subscriptions_state.dart';
-import '../../data/models/profile_model.dart';
 
 class SubscriptionPlansPage extends StatelessWidget {
   const SubscriptionPlansPage({super.key});
@@ -43,13 +44,17 @@ class SubscriptionPlansPage extends StatelessWidget {
                   builder: (context, state) {
                     return state.when(
                       initial: () => const SizedBox.shrink(),
-                      loading: () => const Center(child: CircularProgressIndicator()),
+                      loading:
+                          () =>
+                              const Center(child: CircularProgressIndicator()),
                       error: (msg) => Center(child: Text(msg)),
                       loaded: (plans, mySubscriptions) {
                         return TabBarView(
                           children: [
                             _AvailablePlansTab(plans: plans),
-                            _MySubscriptionsTab(mySubscriptions: mySubscriptions),
+                            _MySubscriptionsTab(
+                              mySubscriptions: mySubscriptions,
+                            ),
                           ],
                         );
                       },
@@ -66,7 +71,7 @@ class SubscriptionPlansPage extends StatelessWidget {
 }
 
 class _AvailablePlansTab extends StatelessWidget {
-  final List<SubscriptionPlan> plans;
+  final List<SubscriptionPlanEntity> plans;
 
   const _AvailablePlansTab({required this.plans});
 
@@ -74,7 +79,10 @@ class _AvailablePlansTab extends StatelessWidget {
   Widget build(BuildContext context) {
     if (plans.isEmpty) {
       return Center(
-        child: Text("No plans available at the moment.", style: AppTextStyles.bodyMedium),
+        child: Text(
+          "No plans available at the moment.",
+          style: AppTextStyles.bodyMedium,
+        ),
       );
     }
 
@@ -85,7 +93,10 @@ class _AvailablePlansTab extends StatelessWidget {
         final plan = plans[index];
         return _PlanCard(
           title: plan.name,
-          itemsCount: plan.unlimitedItems ? "Unlimited Items" : "${plan.itemLimit} Items",
+          itemsCount:
+              plan.unlimitedItems
+                  ? "Unlimited Items"
+                  : "${plan.itemLimit} Items",
           price: plan.price,
           duration: "${plan.durationDays} Days",
           isActive: plan.isActive,
@@ -96,7 +107,7 @@ class _AvailablePlansTab extends StatelessWidget {
 }
 
 class _MySubscriptionsTab extends StatelessWidget {
-  final List<ActiveSubscription> mySubscriptions;
+  final List<ActiveSubscriptionEntity> mySubscriptions;
 
   const _MySubscriptionsTab({required this.mySubscriptions});
 
@@ -104,7 +115,10 @@ class _MySubscriptionsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     if (mySubscriptions.isEmpty) {
       return Center(
-        child: Text("You have no active subscriptions.", style: AppTextStyles.bodyMedium),
+        child: Text(
+          "You have no active subscriptions.",
+          style: AppTextStyles.bodyMedium,
+        ),
       );
     }
 
@@ -166,8 +180,11 @@ class _PlanCard extends StatelessWidget {
                     color: Colors.redAccent,
                     borderRadius: BorderRadius.circular(8.r),
                   ),
-                  child: Text("Inactive", style: TextStyle(color: Colors.white, fontSize: 10.sp)),
-                )
+                  child: Text(
+                    "Inactive",
+                    style: TextStyle(color: Colors.white, fontSize: 10.sp),
+                  ),
+                ),
             ],
           ),
           SizedBox(height: 8.h),
@@ -193,14 +210,35 @@ class _PlanCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    price == "0.00" ? "FREE" : "$price AED",
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.white,
+                  if (price == "0.00")
+                    Text(
+                      "FREE",
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.white,
+                      ),
+                    )
+                  else
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.asset(
+                          'assets/images/icon_price.png',
+                          width: 14.w,
+                          height: 14.w,
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          price,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.white,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
                   Text(
                     duration,
                     style: TextStyle(fontSize: 10.sp, color: Colors.white70),
@@ -237,7 +275,7 @@ class _PlanCard extends StatelessWidget {
 }
 
 class _ActiveSubscriptionCard extends StatelessWidget {
-  final ActiveSubscription subscription;
+  final ActiveSubscriptionEntity subscription;
 
   const _ActiveSubscriptionCard({required this.subscription});
 
@@ -260,38 +298,87 @@ class _ActiveSubscriptionCard extends StatelessWidget {
             children: [
               Text(
                 subscription.plan.name.toUpperCase(),
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.primary, fontSize: 16.sp, fontWeight: FontWeight.bold),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.primary,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                 decoration: BoxDecoration(
-                  color: subscription.status == 'active' ? Colors.green : Colors.grey,
+                  color:
+                      subscription.status == 'active'
+                          ? Colors.green
+                          : Colors.grey,
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Text(
                   subscription.status.toUpperCase(),
-                  style: TextStyle(color: Colors.white, fontSize: 10.sp, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
           ),
           SizedBox(height: 16.h),
-          _buildDetailRow("Items Used", "${subscription.itemsUsed} / ${subscription.plan.itemLimit}"),
+          _buildDetailRow(
+            "Items Used",
+            "${subscription.itemsUsed} / ${subscription.plan.itemLimit}",
+          ),
           SizedBox(height: 8.h),
           _buildDetailRow("Expires On", subscription.endsAt.split('T').first),
           SizedBox(height: 8.h),
-          _buildDetailRow("Amount Paid", "${subscription.amountPaid} AED"),
+          _buildDetailRow(
+            "Amount Paid",
+            subscription.amountPaid,
+            showPriceIcon: true,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(
+    String label,
+    String value, {
+    bool showPriceIcon = false,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: AppTextStyles.bodyMedium.copyWith(color: Colors.grey[600])),
-        Text(value, style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold)),
+        Text(
+          label,
+          style: AppTextStyles.bodyMedium.copyWith(color: Colors.grey[600]),
+        ),
+        if (showPriceIcon)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/images/icon_price.png',
+                width: 14.w,
+                height: 14.w,
+              ),
+              SizedBox(width: 4.w),
+              Text(
+                value,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          )
+        else
+          Text(
+            value,
+            style: AppTextStyles.bodyMedium.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
       ],
     );
   }

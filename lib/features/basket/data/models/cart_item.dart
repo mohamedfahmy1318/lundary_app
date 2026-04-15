@@ -1,25 +1,47 @@
-/// A lightweight item in the user's local cart.
-/// Holds just enough data to display in the basket UI and send to the API.
-class CartItem {
-  final int serviceId;
-  final String serviceName;
-  final String categoryName;
-  final double unitPrice;
-  int quantity;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  CartItem({
-    required this.serviceId,
-    required this.serviceName,
-    required this.categoryName,
-    required this.unitPrice,
-    this.quantity = 1,
-  });
+import 'package:laundry/features/basket/domain/entities/cart_item_entity.dart';
 
-  double get totalPrice => unitPrice * quantity;
+part 'cart_item.freezed.dart';
+part 'cart_item.g.dart';
 
-  /// Converts to the API payload shape for POST /orders
+@freezed
+abstract class CartItemModel extends CartItemEntity with _$CartItemModel {
+  const CartItemModel._();
+
+  const factory CartItemModel({
+    required int serviceId,
+    required String serviceName,
+    required String categoryName,
+    required double unitPrice,
+    @Default(1) int quantity,
+  }) = _CartItemModel;
+
+  factory CartItemModel.fromJson(Map<String, dynamic> json) =>
+      _$CartItemModelFromJson(json);
+
+  factory CartItemModel.fromEntity(CartItemEntity entity) {
+    return CartItemModel(
+      serviceId: entity.serviceId,
+      serviceName: entity.serviceName,
+      categoryName: entity.categoryName,
+      unitPrice: entity.unitPrice,
+      quantity: entity.quantity,
+    );
+  }
+
+  BasketCartItemEntity toEntity() {
+    return BasketCartItemEntity(
+      serviceId: serviceId,
+      serviceName: serviceName,
+      categoryName: categoryName,
+      unitPrice: unitPrice,
+      quantity: quantity,
+    );
+  }
+
   Map<String, dynamic> toOrderJson() => {
-        'service_id': serviceId,
-        'quantity': quantity,
-      };
+    'service_id': serviceId,
+    'quantity': quantity,
+  };
 }

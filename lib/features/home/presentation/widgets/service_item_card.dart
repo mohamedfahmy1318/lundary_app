@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +8,7 @@ import 'package:laundry/core/constants/app_colors.dart';
 class ServiceItemCard extends StatelessWidget {
   final String name;
   final double price;
+  final String? imageUrl;
   final int quantity;
   final VoidCallback? onIncrement;
   final VoidCallback? onDecrement;
@@ -15,6 +17,7 @@ class ServiceItemCard extends StatelessWidget {
     super.key,
     required this.name,
     required this.price,
+    this.imageUrl,
     this.quantity = 0,
     this.onIncrement,
     this.onDecrement,
@@ -39,7 +42,31 @@ class ServiceItemCard extends StatelessWidget {
               color: AppColors.white,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.checkroom, color: Colors.grey[400], size: 28.sp),
+            child: ClipOval(
+              child:
+                  imageUrl != null && imageUrl!.trim().isNotEmpty
+                      ? CachedNetworkImage(
+                        imageUrl: imageUrl!,
+                        fit: BoxFit.cover,
+                        placeholder:
+                            (_, __) => Icon(
+                              Icons.checkroom,
+                              color: Colors.grey[400],
+                              size: 28.sp,
+                            ),
+                        errorWidget:
+                            (_, __, ___) => Icon(
+                              Icons.checkroom,
+                              color: Colors.grey[400],
+                              size: 28.sp,
+                            ),
+                      )
+                      : Icon(
+                        Icons.checkroom,
+                        color: Colors.grey[400],
+                        size: 28.sp,
+                      ),
+            ),
           ),
           SizedBox(height: 10.h),
           Text(
@@ -51,12 +78,23 @@ class ServiceItemCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 2.h),
-          Text(
-            'AED ${price.toStringAsFixed(0)}',
-            style: GoogleFonts.poppins(
-              fontSize: 11.sp,
-              color: AppColors.textSecondary,
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/images/icon_price.png',
+                width: 14.w,
+                height: 14.w,
+              ),
+              SizedBox(width: 4.w),
+              Text(
+                price.toStringAsFixed(0),
+                style: GoogleFonts.poppins(
+                  fontSize: 11.sp,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
           ),
           SizedBox(height: 10.h),
           // Quantity controls

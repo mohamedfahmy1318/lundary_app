@@ -6,8 +6,8 @@ part of 'order_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-OrderItemModel _$OrderItemModelFromJson(Map<String, dynamic> json) =>
-    OrderItemModel(
+_OrderItemModel _$OrderItemModelFromJson(Map<String, dynamic> json) =>
+    _OrderItemModel(
       id: (json['id'] as num).toInt(),
       orderId: (json['order_id'] as num).toInt(),
       serviceId: (json['service_id'] as num).toInt(),
@@ -18,7 +18,7 @@ OrderItemModel _$OrderItemModelFromJson(Map<String, dynamic> json) =>
       specialInstructions: json['special_instructions'] as String?,
     );
 
-Map<String, dynamic> _$OrderItemModelToJson(OrderItemModel instance) =>
+Map<String, dynamic> _$OrderItemModelToJson(_OrderItemModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'order_id': instance.orderId,
@@ -30,11 +30,11 @@ Map<String, dynamic> _$OrderItemModelToJson(OrderItemModel instance) =>
       'special_instructions': instance.specialInstructions,
     };
 
-OrderModel _$OrderModelFromJson(Map<String, dynamic> json) => OrderModel(
+_OrderModel _$OrderModelFromJson(Map<String, dynamic> json) => _OrderModel(
   id: (json['id'] as num).toInt(),
   orderNumber: json['order_number'] as String,
   userId: (json['user_id'] as num).toInt(),
-  status: $enumDecode(_$OrderStatusEnumMap, json['status']),
+  status: const OrderStatusJsonConverter().fromJson(json['status']),
   pickupDate: json['pickup_date'] as String?,
   pickupTimeSlot: json['pickup_time_slot'] as String?,
   pickupAddress: json['pickup_address'] as String?,
@@ -60,12 +60,12 @@ OrderModel _$OrderModelFromJson(Map<String, dynamic> json) => OrderModel(
           .toList(),
 );
 
-Map<String, dynamic> _$OrderModelToJson(OrderModel instance) =>
+Map<String, dynamic> _$OrderModelToJson(_OrderModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'order_number': instance.orderNumber,
       'user_id': instance.userId,
-      'status': _$OrderStatusEnumMap[instance.status]!,
+      'status': const OrderStatusJsonConverter().toJson(instance.status),
       'pickup_date': instance.pickupDate,
       'pickup_time_slot': instance.pickupTimeSlot,
       'pickup_address': instance.pickupAddress,
@@ -88,31 +88,20 @@ Map<String, dynamic> _$OrderModelToJson(OrderModel instance) =>
       'items': instance.items,
     };
 
-const _$OrderStatusEnumMap = {
-  OrderStatus.pending: 'pending',
-  OrderStatus.confirmed: 'confirmed',
-  OrderStatus.pickingUp: 'picking_up',
-  OrderStatus.pickedUp: 'picked_up',
-  OrderStatus.processing: 'processing',
-  OrderStatus.ready: 'ready',
-  OrderStatus.outForDelivery: 'out_for_delivery',
-  OrderStatus.delivered: 'delivered',
-  OrderStatus.completed: 'completed',
-  OrderStatus.cancelled: 'cancelled',
+_OrderStatisticsModel _$OrderStatisticsModelFromJson(
+  Map<String, dynamic> json,
+) => _OrderStatisticsModel(
+  totalOrders: (json['total_orders'] as num).toInt(),
+  pendingOrders: (json['pending_orders'] as num).toInt(),
+  completedOrders: (json['completed_orders'] as num).toInt(),
+  totalSpent: (json['total_spent'] as num).toInt(),
+);
+
+Map<String, dynamic> _$OrderStatisticsModelToJson(
+  _OrderStatisticsModel instance,
+) => <String, dynamic>{
+  'total_orders': instance.totalOrders,
+  'pending_orders': instance.pendingOrders,
+  'completed_orders': instance.completedOrders,
+  'total_spent': instance.totalSpent,
 };
-
-OrderStatistics _$OrderStatisticsFromJson(Map<String, dynamic> json) =>
-    OrderStatistics(
-      totalOrders: (json['total_orders'] as num).toInt(),
-      pendingOrders: (json['pending_orders'] as num).toInt(),
-      completedOrders: (json['completed_orders'] as num).toInt(),
-      totalSpent: (json['total_spent'] as num).toInt(),
-    );
-
-Map<String, dynamic> _$OrderStatisticsToJson(OrderStatistics instance) =>
-    <String, dynamic>{
-      'total_orders': instance.totalOrders,
-      'pending_orders': instance.pendingOrders,
-      'completed_orders': instance.completedOrders,
-      'total_spent': instance.totalSpent,
-    };

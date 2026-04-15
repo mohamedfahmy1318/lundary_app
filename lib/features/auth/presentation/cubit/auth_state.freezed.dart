@@ -55,12 +55,13 @@ extension AuthStatePatterns on AuthState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Authenticated value)?  authenticated,TResult Function( _Unauthenticated value)?  unauthenticated,TResult Function( _Error value)?  error,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _OtpRequested value)?  otpRequested,TResult Function( _Authenticated value)?  authenticated,TResult Function( _Unauthenticated value)?  unauthenticated,TResult Function( _Error value)?  error,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Loading() when loading != null:
-return loading(_that);case _Authenticated() when authenticated != null:
+return loading(_that);case _OtpRequested() when otpRequested != null:
+return otpRequested(_that);case _Authenticated() when authenticated != null:
 return authenticated(_that);case _Unauthenticated() when unauthenticated != null:
 return unauthenticated(_that);case _Error() when error != null:
 return error(_that);case _:
@@ -81,12 +82,13 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Authenticated value)  authenticated,required TResult Function( _Unauthenticated value)  unauthenticated,required TResult Function( _Error value)  error,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _OtpRequested value)  otpRequested,required TResult Function( _Authenticated value)  authenticated,required TResult Function( _Unauthenticated value)  unauthenticated,required TResult Function( _Error value)  error,}){
 final _that = this;
 switch (_that) {
 case _Initial():
 return initial(_that);case _Loading():
-return loading(_that);case _Authenticated():
+return loading(_that);case _OtpRequested():
+return otpRequested(_that);case _Authenticated():
 return authenticated(_that);case _Unauthenticated():
 return unauthenticated(_that);case _Error():
 return error(_that);case _:
@@ -106,12 +108,13 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Authenticated value)?  authenticated,TResult? Function( _Unauthenticated value)?  unauthenticated,TResult? Function( _Error value)?  error,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _OtpRequested value)?  otpRequested,TResult? Function( _Authenticated value)?  authenticated,TResult? Function( _Unauthenticated value)?  unauthenticated,TResult? Function( _Error value)?  error,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Loading() when loading != null:
-return loading(_that);case _Authenticated() when authenticated != null:
+return loading(_that);case _OtpRequested() when otpRequested != null:
+return otpRequested(_that);case _Authenticated() when authenticated != null:
 return authenticated(_that);case _Unauthenticated() when unauthenticated != null:
 return unauthenticated(_that);case _Error() when error != null:
 return error(_that);case _:
@@ -131,11 +134,12 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( AuthResponseModel authResponse)?  authenticated,TResult Function()?  unauthenticated,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( AuthOtpPurpose purpose,  String email,  AuthOtpChallengeEntity challenge)?  otpRequested,TResult Function( AuthResponseEntity authResponse)?  authenticated,TResult Function()?  unauthenticated,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
-return loading();case _Authenticated() when authenticated != null:
+return loading();case _OtpRequested() when otpRequested != null:
+return otpRequested(_that.purpose,_that.email,_that.challenge);case _Authenticated() when authenticated != null:
 return authenticated(_that.authResponse);case _Unauthenticated() when unauthenticated != null:
 return unauthenticated();case _Error() when error != null:
 return error(_that.message);case _:
@@ -156,11 +160,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( AuthResponseModel authResponse)  authenticated,required TResult Function()  unauthenticated,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( AuthOtpPurpose purpose,  String email,  AuthOtpChallengeEntity challenge)  otpRequested,required TResult Function( AuthResponseEntity authResponse)  authenticated,required TResult Function()  unauthenticated,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
-return loading();case _Authenticated():
+return loading();case _OtpRequested():
+return otpRequested(_that.purpose,_that.email,_that.challenge);case _Authenticated():
 return authenticated(_that.authResponse);case _Unauthenticated():
 return unauthenticated();case _Error():
 return error(_that.message);case _:
@@ -180,11 +185,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( AuthResponseModel authResponse)?  authenticated,TResult? Function()?  unauthenticated,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( AuthOtpPurpose purpose,  String email,  AuthOtpChallengeEntity challenge)?  otpRequested,TResult? Function( AuthResponseEntity authResponse)?  authenticated,TResult? Function()?  unauthenticated,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
-return loading();case _Authenticated() when authenticated != null:
+return loading();case _OtpRequested() when otpRequested != null:
+return otpRequested(_that.purpose,_that.email,_that.challenge);case _Authenticated() when authenticated != null:
 return authenticated(_that.authResponse);case _Unauthenticated() when unauthenticated != null:
 return unauthenticated();case _Error() when error != null:
 return error(_that.message);case _:
@@ -262,11 +268,81 @@ String toString() {
 /// @nodoc
 
 
+class _OtpRequested implements AuthState {
+  const _OtpRequested(this.purpose, this.email, this.challenge);
+  
+
+ final  AuthOtpPurpose purpose;
+ final  String email;
+ final  AuthOtpChallengeEntity challenge;
+
+/// Create a copy of AuthState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$OtpRequestedCopyWith<_OtpRequested> get copyWith => __$OtpRequestedCopyWithImpl<_OtpRequested>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OtpRequested&&(identical(other.purpose, purpose) || other.purpose == purpose)&&(identical(other.email, email) || other.email == email)&&(identical(other.challenge, challenge) || other.challenge == challenge));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,purpose,email,challenge);
+
+@override
+String toString() {
+  return 'AuthState.otpRequested(purpose: $purpose, email: $email, challenge: $challenge)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$OtpRequestedCopyWith<$Res> implements $AuthStateCopyWith<$Res> {
+  factory _$OtpRequestedCopyWith(_OtpRequested value, $Res Function(_OtpRequested) _then) = __$OtpRequestedCopyWithImpl;
+@useResult
+$Res call({
+ AuthOtpPurpose purpose, String email, AuthOtpChallengeEntity challenge
+});
+
+
+
+
+}
+/// @nodoc
+class __$OtpRequestedCopyWithImpl<$Res>
+    implements _$OtpRequestedCopyWith<$Res> {
+  __$OtpRequestedCopyWithImpl(this._self, this._then);
+
+  final _OtpRequested _self;
+  final $Res Function(_OtpRequested) _then;
+
+/// Create a copy of AuthState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? purpose = null,Object? email = null,Object? challenge = null,}) {
+  return _then(_OtpRequested(
+null == purpose ? _self.purpose : purpose // ignore: cast_nullable_to_non_nullable
+as AuthOtpPurpose,null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String,null == challenge ? _self.challenge : challenge // ignore: cast_nullable_to_non_nullable
+as AuthOtpChallengeEntity,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
 class _Authenticated implements AuthState {
   const _Authenticated(this.authResponse);
   
 
- final  AuthResponseModel authResponse;
+ final  AuthResponseEntity authResponse;
 
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
@@ -298,7 +374,7 @@ abstract mixin class _$AuthenticatedCopyWith<$Res> implements $AuthStateCopyWith
   factory _$AuthenticatedCopyWith(_Authenticated value, $Res Function(_Authenticated) _then) = __$AuthenticatedCopyWithImpl;
 @useResult
 $Res call({
- AuthResponseModel authResponse
+ AuthResponseEntity authResponse
 });
 
 
@@ -318,7 +394,7 @@ class __$AuthenticatedCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? authResponse = null,}) {
   return _then(_Authenticated(
 null == authResponse ? _self.authResponse : authResponse // ignore: cast_nullable_to_non_nullable
-as AuthResponseModel,
+as AuthResponseEntity,
   ));
 }
 

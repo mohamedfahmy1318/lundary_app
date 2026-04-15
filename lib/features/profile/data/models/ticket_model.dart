@@ -1,101 +1,239 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:laundry/features/profile/domain/entities/ticket_entity.dart';
+import 'package:laundry/features/profile/domain/entities/ticket_lookup_option_entity.dart';
+import 'package:laundry/features/profile/domain/entities/ticket_reply_entity.dart';
+import 'package:laundry/features/profile/domain/entities/ticket_reply_user_entity.dart';
+import 'package:laundry/features/profile/domain/entities/ticket_status.dart';
 
+part 'ticket_model.freezed.dart';
 part 'ticket_model.g.dart';
 
-enum TicketStatus {
-  @JsonValue('open')
-  open,
-  @JsonValue('in_progress')
-  inProgress,
-  @JsonValue('resolved')
-  resolved,
-  @JsonValue('closed')
-  closed,
+class TicketStatusJsonConverter
+    implements JsonConverter<TicketStatus, Object?> {
+  const TicketStatusJsonConverter();
+
+  @override
+  TicketStatus fromJson(Object? json) => _ticketStatusFromJson(json);
+
+  @override
+  Object? toJson(TicketStatus object) => object.apiValue;
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class TicketModel {
-  final int id;
-  final String ticketNumber;
-  final int userId;
-  final int? orderId;
-  final String subject;
-  final String description;
-  final String category;
-  final String priority;
-  final TicketStatus status;
-  final String? assignedTo;
-  final String? firstResponseAt;
-  final String? resolvedAt;
-  final String createdAt;
-  final String updatedAt;
-  final List<TicketReplyModel>? replies;
+TicketStatus _ticketStatusFromJson(Object? value) {
+  final normalized = value
+      ?.toString()
+      .trim()
+      .toLowerCase()
+      .replaceAll('-', '_')
+      .replaceAll(' ', '_');
 
-  TicketModel({
-    required this.id,
-    required this.ticketNumber,
-    required this.userId,
-    this.orderId,
-    required this.subject,
-    required this.description,
-    required this.category,
-    required this.priority,
-    required this.status,
-    this.assignedTo,
-    this.firstResponseAt,
-    this.resolvedAt,
-    required this.createdAt,
-    required this.updatedAt,
-    this.replies,
-  });
-
-  bool get isClosed => status == TicketStatus.closed;
-  bool get isOpen =>
-      status == TicketStatus.open || status == TicketStatus.inProgress;
-
-  factory TicketModel.fromJson(Map<String, dynamic> json) =>
-      _$TicketModelFromJson(json);
-  Map<String, dynamic> toJson() => _$TicketModelToJson(this);
+  switch (normalized) {
+    case 'in_progress':
+      return TicketStatus.inProgress;
+    case 'waiting_customer':
+      return TicketStatus.waitingCustomer;
+    case 'resolved':
+      return TicketStatus.resolved;
+    case 'closed':
+      return TicketStatus.closed;
+    case 'open':
+    default:
+      return TicketStatus.open;
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class TicketReplyModel {
-  final int id;
-  final int ticketId;
-  final int userId;
-  final String message;
-  final bool isStaffReply;
-  final String? attachments;
-  final String createdAt;
-  final String updatedAt;
-  final ReplyUserModel? user;
+int _parseInt(Object? value, {int fallback = 0}) {
+  if (value is int) {
+    return value;
+  }
+  if (value is num) {
+    return value.toInt();
+  }
+  return int.tryParse(value?.toString() ?? '') ?? fallback;
+}
 
-  TicketReplyModel({
-    required this.id,
-    required this.ticketId,
-    required this.userId,
-    required this.message,
-    required this.isStaffReply,
-    this.attachments,
-    required this.createdAt,
-    required this.updatedAt,
-    this.user,
-  });
+String _parseString(Object? value, {String fallback = ''}) {
+  final parsed = value?.toString();
+  if (parsed == null || parsed.trim().isEmpty || parsed == 'null') {
+    return fallback;
+  }
+  return parsed;
+}
+
+String? _parseNullableString(Object? value) {
+  final parsed = value?.toString();
+  if (parsed == null || parsed.trim().isEmpty || parsed == 'null') {
+    return null;
+  }
+  return parsed;
+}
+
+bool _parseBool(Object? value, {bool fallback = false}) {
+  if (value is bool) {
+    return value;
+  }
+  final normalized = value?.toString().trim().toLowerCase();
+  if (normalized == '1' || normalized == 'true' || normalized == 'yes') {
+    return true;
+  }
+  if (normalized == '0' || normalized == 'false' || normalized == 'no') {
+    return false;
+  }
+  return fallback;
+}
+
+@freezed
+abstract class TicketLookupOptionModel extends TicketLookupOptionEntity
+    with _$TicketLookupOptionModel {
+  const TicketLookupOptionModel._();
+
+  const factory TicketLookupOptionModel({
+    required String value,
+    required String label,
+  }) = _TicketLookupOptionModel;
+
+  factory TicketLookupOptionModel.fromJson(Map<String, dynamic> json) =>
+      _$TicketLookupOptionModelFromJson(_normalizeJson(json));
+
+  static Map<String, dynamic> _normalizeJson(Map<String, dynamic> json) {
+    return <String, dynamic>{
+      ...json,
+      'value': _parseString(json['value']),
+      'label': _parseString(json['label']),
+    };
+  }
+}
+
+@freezed
+abstract class TicketReplyUserModel extends TicketReplyUserEntity
+    with _$TicketReplyUserModel {
+  const TicketReplyUserModel._();
+
+  const factory TicketReplyUserModel({
+    required int id,
+    required String name,
+    required String role,
+  }) = _TicketReplyUserModel;
+
+  factory TicketReplyUserModel.fromJson(Map<String, dynamic> json) =>
+      _$TicketReplyUserModelFromJson(_normalizeJson(json));
+
+  static Map<String, dynamic> _normalizeJson(Map<String, dynamic> json) {
+    return <String, dynamic>{
+      ...json,
+      'id': _parseInt(json['id']),
+      'name': _parseString(json['name']),
+      'role': _parseString(json['role']),
+    };
+  }
+}
+
+@freezed
+abstract class TicketReplyModel extends TicketReplyEntity
+    with _$TicketReplyModel {
+  const TicketReplyModel._();
+
+  const factory TicketReplyModel({
+    required int id,
+    @JsonKey(name: 'ticket_id') required int ticketId,
+    @JsonKey(name: 'user_id') required int userId,
+    required String message,
+    @JsonKey(name: 'is_staff_reply') required bool isStaffReply,
+    String? attachments,
+    @JsonKey(name: 'created_at') required String createdAt,
+    @JsonKey(name: 'updated_at') required String updatedAt,
+    TicketReplyUserModel? user,
+  }) = _TicketReplyModel;
 
   factory TicketReplyModel.fromJson(Map<String, dynamic> json) =>
-      _$TicketReplyModelFromJson(json);
-  Map<String, dynamic> toJson() => _$TicketReplyModelToJson(this);
+      _$TicketReplyModelFromJson(_normalizeJson(json));
+
+  static Map<String, dynamic> _normalizeJson(Map<String, dynamic> json) {
+    final userJson = json['user'];
+
+    return <String, dynamic>{
+      ...json,
+      'id': _parseInt(json['id']),
+      'ticket_id': _parseInt(json['ticket_id'] ?? json['ticketId']),
+      'user_id': _parseInt(json['user_id'] ?? json['userId']),
+      'message': _parseString(json['message']),
+      'is_staff_reply': _parseBool(
+        json['is_staff_reply'] ?? json['isStaffReply'],
+      ),
+      'attachments': _parseNullableString(json['attachments']),
+      'created_at': _parseString(json['created_at'] ?? json['createdAt']),
+      'updated_at': _parseString(json['updated_at'] ?? json['updatedAt']),
+      'user':
+          userJson is Map
+              ? TicketReplyUserModel._normalizeJson(
+                Map<String, dynamic>.from(userJson),
+              )
+              : null,
+    };
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class ReplyUserModel {
-  final int id;
-  final String name;
-  final String role;
+@freezed
+abstract class TicketModel extends TicketEntity with _$TicketModel {
+  const TicketModel._();
 
-  ReplyUserModel({required this.id, required this.name, required this.role});
+  const factory TicketModel({
+    required int id,
+    @JsonKey(name: 'ticket_number') required String ticketNumber,
+    @JsonKey(name: 'user_id') required int userId,
+    @JsonKey(name: 'order_id') int? orderId,
+    required String subject,
+    required String description,
+    required String category,
+    required String priority,
+    @TicketStatusJsonConverter() required TicketStatus status,
+    @JsonKey(name: 'assigned_to') String? assignedTo,
+    @JsonKey(name: 'first_response_at') String? firstResponseAt,
+    @JsonKey(name: 'resolved_at') String? resolvedAt,
+    @JsonKey(name: 'created_at') required String createdAt,
+    @JsonKey(name: 'updated_at') required String updatedAt,
+    List<TicketReplyModel>? replies,
+  }) = _TicketModel;
 
-  factory ReplyUserModel.fromJson(Map<String, dynamic> json) =>
-      _$ReplyUserModelFromJson(json);
-  Map<String, dynamic> toJson() => _$ReplyUserModelToJson(this);
+  factory TicketModel.fromJson(Map<String, dynamic> json) =>
+      _$TicketModelFromJson(_normalizeJson(json));
+
+  static Map<String, dynamic> _normalizeJson(Map<String, dynamic> json) {
+    final rawReplies = json['replies'];
+    final normalizedReplies =
+        rawReplies is List
+            ? rawReplies.whereType<Map>().map((reply) {
+              return TicketReplyModel._normalizeJson(
+                Map<String, dynamic>.from(reply),
+              );
+            }).toList()
+            : null;
+
+    return <String, dynamic>{
+      ...json,
+      'id': _parseInt(json['id']),
+      'ticket_number': _parseString(
+        json['ticket_number'] ?? json['ticketNumber'],
+      ),
+      'user_id': _parseInt(json['user_id'] ?? json['userId']),
+      'order_id': json['order_id'] ?? json['orderId'],
+      'subject': _parseString(json['subject']),
+      'description': _parseString(json['description']),
+      'category': _parseString(json['category']),
+      'priority': _parseString(json['priority']),
+      'status': json['status'],
+      'assigned_to': _parseNullableString(
+        json['assigned_to'] ?? json['assignedTo'],
+      ),
+      'first_response_at': _parseNullableString(
+        json['first_response_at'] ?? json['firstResponseAt'],
+      ),
+      'resolved_at': _parseNullableString(
+        json['resolved_at'] ?? json['resolvedAt'],
+      ),
+      'created_at': _parseString(json['created_at'] ?? json['createdAt']),
+      'updated_at': _parseString(json['updated_at'] ?? json['updatedAt']),
+      'replies': normalizedReplies,
+    };
+  }
 }
