@@ -8,6 +8,8 @@ import 'package:laundry/features/basket/data/data_sources/basket_remote_data_sou
 import 'package:laundry/features/basket/data/models/create_order_models.dart';
 import 'package:laundry/features/basket/domain/entities/order_request_entity.dart';
 import 'package:laundry/features/basket/domain/entities/order_response_entity.dart';
+import 'package:laundry/features/basket/domain/entities/payment_initiation_entity.dart';
+import 'package:laundry/features/basket/domain/entities/payment_status_entity.dart';
 import 'package:laundry/features/basket/domain/entities/time_slot_entity.dart';
 import 'package:laundry/features/basket/domain/repos/basket_repo.dart';
 
@@ -34,6 +36,45 @@ class BasketRepoImpl implements BasketRepo {
     try {
       final requestModel = CreateOrderRequestModel.fromEntity(orderData);
       final result = await _remoteDataSource.createOrder(requestModel);
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, PaymentInitiationEntity>> initiateOrderPayment(
+    int orderId,
+  ) async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NoInternetFailure());
+    }
+    try {
+      final result = await _remoteDataSource.initiateOrderPayment(orderId);
+      if (result.paymentUrl.trim().isEmpty) {
+        return const Left(
+          ServerFailure(message: 'Payment URL not returned by server.'),
+        );
+      }
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, PaymentStatusEntity>> getOrderPaymentStatus(
+    int orderId,
+  ) async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NoInternetFailure());
+    }
+    try {
+      final result = await _remoteDataSource.getOrderPaymentStatus(orderId);
       return Right(result);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));

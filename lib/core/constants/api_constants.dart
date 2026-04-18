@@ -12,6 +12,7 @@ abstract class ApiConstants {
   static const String registerVerify = '/auth/register-verify';
   static const String loginRequest = '/auth/login-request';
   static const String loginVerify = '/auth/login-verify';
+  static const String socialAuth = '/auth/social';
   static const String resendOtp = '/auth/resend-otp';
   static const String logout = '/auth/logout';
 
@@ -24,6 +25,8 @@ abstract class ApiConstants {
 
   // Orders
   static const String orders = '/orders';
+  static String paymentInitiate(int orderId) => '/payment/initiate/$orderId';
+  static String paymentStatus(int orderId) => '/payment/status/$orderId';
 
   // Basket
   static const String basket = '/basket';
@@ -50,6 +53,7 @@ abstract class ApiConstants {
   static String closeTicket(int ticketId) => '${ticketDetails(ticketId)}/close';
   static const String subscriptionPlans = '/subscription-plans';
   static const String mySubscriptions = '/subscriptions/my';
+  static const String subscribeToPlan = '/subscriptions/subscribe';
   static const String onboarding = '/settings/onboarding';
   static const String updateProfile = '/auth/profile';
 

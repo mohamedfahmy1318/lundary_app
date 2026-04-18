@@ -8,6 +8,7 @@ import 'package:laundry/features/auth/domain/usecases/logout_auth_usecase.dart';
 import 'package:laundry/features/auth/domain/usecases/request_login_otp_usecase.dart';
 import 'package:laundry/features/auth/domain/usecases/request_register_otp_usecase.dart';
 import 'package:laundry/features/auth/domain/usecases/resend_auth_otp_usecase.dart';
+import 'package:laundry/features/auth/domain/usecases/social_auth_login_usecase.dart';
 import 'package:laundry/features/auth/domain/usecases/verify_auth_otp_usecase.dart';
 import 'package:laundry/features/auth/presentation/cubit/auth_state.dart';
 
@@ -16,6 +17,7 @@ class AuthCubit extends Cubit<AuthState> {
   final RequestRegisterOtpUseCase _requestRegisterOtpUseCase;
   final VerifyAuthOtpUseCase _verifyAuthOtpUseCase;
   final ResendAuthOtpUseCase _resendAuthOtpUseCase;
+  final SocialAuthLoginUseCase _socialAuthLoginUseCase;
   final LogoutAuthUseCase _logoutAuthUseCase;
 
   AuthCubit({
@@ -23,11 +25,13 @@ class AuthCubit extends Cubit<AuthState> {
     required RequestRegisterOtpUseCase requestRegisterOtpUseCase,
     required VerifyAuthOtpUseCase verifyAuthOtpUseCase,
     required ResendAuthOtpUseCase resendAuthOtpUseCase,
+    required SocialAuthLoginUseCase socialAuthLoginUseCase,
     required LogoutAuthUseCase logoutAuthUseCase,
   }) : _requestLoginOtpUseCase = requestLoginOtpUseCase,
        _requestRegisterOtpUseCase = requestRegisterOtpUseCase,
        _verifyAuthOtpUseCase = verifyAuthOtpUseCase,
        _resendAuthOtpUseCase = resendAuthOtpUseCase,
+       _socialAuthLoginUseCase = socialAuthLoginUseCase,
        _logoutAuthUseCase = logoutAuthUseCase,
        super(const AuthState.initial());
 
@@ -133,6 +137,36 @@ class AuthCubit extends Cubit<AuthState> {
       email: trimmedEmail,
       request:
           () => _resendAuthOtpUseCase(ResendAuthOtpParams(email: trimmedEmail)),
+    );
+  }
+
+  Future<void> socialLogin({
+    required String firebaseToken,
+    String fcmToken = '',
+    required String deviceType,
+  }) async {
+    final trimmedFirebaseToken = firebaseToken.trim();
+    final trimmedDeviceType = deviceType.trim();
+
+    if (trimmedFirebaseToken.isEmpty) {
+      emit(const AuthState.error('Firebase token is required.'));
+      return;
+    }
+
+    if (trimmedDeviceType.isEmpty) {
+      emit(const AuthState.error('Device type is required.'));
+      return;
+    }
+
+    await _runAuthResponseRequest(
+      request:
+          () => _socialAuthLoginUseCase(
+            SocialAuthLoginParams(
+              firebaseToken: trimmedFirebaseToken,
+              fcmToken: fcmToken,
+              deviceType: trimmedDeviceType,
+            ),
+          ),
     );
   }
 

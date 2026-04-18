@@ -619,7 +619,7 @@ $SubscriptionPlanModelCopyWith<$Res> get plan {
 /// @nodoc
 mixin _$ProfileModel {
 
- int get id; String get name; String get email; String get phone;@JsonKey(name: 'wallet_balance') String? get walletBalance; String? get avatar;@JsonKey(name: 'active_subscription') ActiveSubscriptionModel? get activeSubscription;
+ int get id; String get name; String get email; String get phone;@JsonKey(name: 'wallet_balance') String? get walletBalance; String? get avatar; List<String> get addresses;@JsonKey(name: 'active_subscription') ActiveSubscriptionModel? get activeSubscription;
 /// Create a copy of ProfileModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -632,16 +632,16 @@ $ProfileModelCopyWith<ProfileModel> get copyWith => _$ProfileModelCopyWithImpl<P
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfileModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.walletBalance, walletBalance) || other.walletBalance == walletBalance)&&(identical(other.avatar, avatar) || other.avatar == avatar)&&(identical(other.activeSubscription, activeSubscription) || other.activeSubscription == activeSubscription));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfileModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.walletBalance, walletBalance) || other.walletBalance == walletBalance)&&(identical(other.avatar, avatar) || other.avatar == avatar)&&const DeepCollectionEquality().equals(other.addresses, addresses)&&(identical(other.activeSubscription, activeSubscription) || other.activeSubscription == activeSubscription));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,email,phone,walletBalance,avatar,activeSubscription);
+int get hashCode => Object.hash(runtimeType,id,name,email,phone,walletBalance,avatar,const DeepCollectionEquality().hash(addresses),activeSubscription);
 
 @override
 String toString() {
-  return 'ProfileModel(id: $id, name: $name, email: $email, phone: $phone, walletBalance: $walletBalance, avatar: $avatar, activeSubscription: $activeSubscription)';
+  return 'ProfileModel(id: $id, name: $name, email: $email, phone: $phone, walletBalance: $walletBalance, avatar: $avatar, addresses: $addresses, activeSubscription: $activeSubscription)';
 }
 
 
@@ -652,7 +652,7 @@ abstract mixin class $ProfileModelCopyWith<$Res>  {
   factory $ProfileModelCopyWith(ProfileModel value, $Res Function(ProfileModel) _then) = _$ProfileModelCopyWithImpl;
 @useResult
 $Res call({
- int id, String name, String email, String phone,@JsonKey(name: 'wallet_balance') String? walletBalance, String? avatar,@JsonKey(name: 'active_subscription') ActiveSubscriptionModel? activeSubscription
+ int id, String name, String email, String phone,@JsonKey(name: 'wallet_balance') String? walletBalance, String? avatar, List<String> addresses,@JsonKey(name: 'active_subscription') ActiveSubscriptionModel? activeSubscription
 });
 
 
@@ -669,7 +669,7 @@ class _$ProfileModelCopyWithImpl<$Res>
 
 /// Create a copy of ProfileModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? email = null,Object? phone = null,Object? walletBalance = freezed,Object? avatar = freezed,Object? activeSubscription = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? email = null,Object? phone = null,Object? walletBalance = freezed,Object? avatar = freezed,Object? addresses = null,Object? activeSubscription = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -677,7 +677,8 @@ as String,email: null == email ? _self.email : email // ignore: cast_nullable_to
 as String,phone: null == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
 as String,walletBalance: freezed == walletBalance ? _self.walletBalance : walletBalance // ignore: cast_nullable_to_non_nullable
 as String?,avatar: freezed == avatar ? _self.avatar : avatar // ignore: cast_nullable_to_non_nullable
-as String?,activeSubscription: freezed == activeSubscription ? _self.activeSubscription : activeSubscription // ignore: cast_nullable_to_non_nullable
+as String?,addresses: null == addresses ? _self.addresses : addresses // ignore: cast_nullable_to_non_nullable
+as List<String>,activeSubscription: freezed == activeSubscription ? _self.activeSubscription : activeSubscription // ignore: cast_nullable_to_non_nullable
 as ActiveSubscriptionModel?,
   ));
 }
@@ -775,10 +776,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  String email,  String phone, @JsonKey(name: 'wallet_balance')  String? walletBalance,  String? avatar, @JsonKey(name: 'active_subscription')  ActiveSubscriptionModel? activeSubscription)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  String email,  String phone, @JsonKey(name: 'wallet_balance')  String? walletBalance,  String? avatar,  List<String> addresses, @JsonKey(name: 'active_subscription')  ActiveSubscriptionModel? activeSubscription)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProfileModel() when $default != null:
-return $default(_that.id,_that.name,_that.email,_that.phone,_that.walletBalance,_that.avatar,_that.activeSubscription);case _:
+return $default(_that.id,_that.name,_that.email,_that.phone,_that.walletBalance,_that.avatar,_that.addresses,_that.activeSubscription);case _:
   return orElse();
 
 }
@@ -796,10 +797,10 @@ return $default(_that.id,_that.name,_that.email,_that.phone,_that.walletBalance,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  String email,  String phone, @JsonKey(name: 'wallet_balance')  String? walletBalance,  String? avatar, @JsonKey(name: 'active_subscription')  ActiveSubscriptionModel? activeSubscription)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  String email,  String phone, @JsonKey(name: 'wallet_balance')  String? walletBalance,  String? avatar,  List<String> addresses, @JsonKey(name: 'active_subscription')  ActiveSubscriptionModel? activeSubscription)  $default,) {final _that = this;
 switch (_that) {
 case _ProfileModel():
-return $default(_that.id,_that.name,_that.email,_that.phone,_that.walletBalance,_that.avatar,_that.activeSubscription);case _:
+return $default(_that.id,_that.name,_that.email,_that.phone,_that.walletBalance,_that.avatar,_that.addresses,_that.activeSubscription);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -816,10 +817,10 @@ return $default(_that.id,_that.name,_that.email,_that.phone,_that.walletBalance,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  String email,  String phone, @JsonKey(name: 'wallet_balance')  String? walletBalance,  String? avatar, @JsonKey(name: 'active_subscription')  ActiveSubscriptionModel? activeSubscription)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  String email,  String phone, @JsonKey(name: 'wallet_balance')  String? walletBalance,  String? avatar,  List<String> addresses, @JsonKey(name: 'active_subscription')  ActiveSubscriptionModel? activeSubscription)?  $default,) {final _that = this;
 switch (_that) {
 case _ProfileModel() when $default != null:
-return $default(_that.id,_that.name,_that.email,_that.phone,_that.walletBalance,_that.avatar,_that.activeSubscription);case _:
+return $default(_that.id,_that.name,_that.email,_that.phone,_that.walletBalance,_that.avatar,_that.addresses,_that.activeSubscription);case _:
   return null;
 
 }
@@ -831,7 +832,7 @@ return $default(_that.id,_that.name,_that.email,_that.phone,_that.walletBalance,
 @JsonSerializable()
 
 class _ProfileModel extends ProfileModel {
-  const _ProfileModel({required this.id, required this.name, required this.email, required this.phone, @JsonKey(name: 'wallet_balance') this.walletBalance, this.avatar, @JsonKey(name: 'active_subscription') this.activeSubscription}): super._();
+  const _ProfileModel({required this.id, required this.name, required this.email, required this.phone, @JsonKey(name: 'wallet_balance') this.walletBalance, this.avatar, final  List<String> addresses = const <String>[], @JsonKey(name: 'active_subscription') this.activeSubscription}): _addresses = addresses,super._();
   factory _ProfileModel.fromJson(Map<String, dynamic> json) => _$ProfileModelFromJson(json);
 
 @override final  int id;
@@ -840,6 +841,13 @@ class _ProfileModel extends ProfileModel {
 @override final  String phone;
 @override@JsonKey(name: 'wallet_balance') final  String? walletBalance;
 @override final  String? avatar;
+ final  List<String> _addresses;
+@override@JsonKey() List<String> get addresses {
+  if (_addresses is EqualUnmodifiableListView) return _addresses;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_addresses);
+}
+
 @override@JsonKey(name: 'active_subscription') final  ActiveSubscriptionModel? activeSubscription;
 
 /// Create a copy of ProfileModel
@@ -855,16 +863,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfileModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.walletBalance, walletBalance) || other.walletBalance == walletBalance)&&(identical(other.avatar, avatar) || other.avatar == avatar)&&(identical(other.activeSubscription, activeSubscription) || other.activeSubscription == activeSubscription));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfileModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.walletBalance, walletBalance) || other.walletBalance == walletBalance)&&(identical(other.avatar, avatar) || other.avatar == avatar)&&const DeepCollectionEquality().equals(other._addresses, _addresses)&&(identical(other.activeSubscription, activeSubscription) || other.activeSubscription == activeSubscription));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,email,phone,walletBalance,avatar,activeSubscription);
+int get hashCode => Object.hash(runtimeType,id,name,email,phone,walletBalance,avatar,const DeepCollectionEquality().hash(_addresses),activeSubscription);
 
 @override
 String toString() {
-  return 'ProfileModel(id: $id, name: $name, email: $email, phone: $phone, walletBalance: $walletBalance, avatar: $avatar, activeSubscription: $activeSubscription)';
+  return 'ProfileModel(id: $id, name: $name, email: $email, phone: $phone, walletBalance: $walletBalance, avatar: $avatar, addresses: $addresses, activeSubscription: $activeSubscription)';
 }
 
 
@@ -875,7 +883,7 @@ abstract mixin class _$ProfileModelCopyWith<$Res> implements $ProfileModelCopyWi
   factory _$ProfileModelCopyWith(_ProfileModel value, $Res Function(_ProfileModel) _then) = __$ProfileModelCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String name, String email, String phone,@JsonKey(name: 'wallet_balance') String? walletBalance, String? avatar,@JsonKey(name: 'active_subscription') ActiveSubscriptionModel? activeSubscription
+ int id, String name, String email, String phone,@JsonKey(name: 'wallet_balance') String? walletBalance, String? avatar, List<String> addresses,@JsonKey(name: 'active_subscription') ActiveSubscriptionModel? activeSubscription
 });
 
 
@@ -892,7 +900,7 @@ class __$ProfileModelCopyWithImpl<$Res>
 
 /// Create a copy of ProfileModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? email = null,Object? phone = null,Object? walletBalance = freezed,Object? avatar = freezed,Object? activeSubscription = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? email = null,Object? phone = null,Object? walletBalance = freezed,Object? avatar = freezed,Object? addresses = null,Object? activeSubscription = freezed,}) {
   return _then(_ProfileModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -900,7 +908,8 @@ as String,email: null == email ? _self.email : email // ignore: cast_nullable_to
 as String,phone: null == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
 as String,walletBalance: freezed == walletBalance ? _self.walletBalance : walletBalance // ignore: cast_nullable_to_non_nullable
 as String?,avatar: freezed == avatar ? _self.avatar : avatar // ignore: cast_nullable_to_non_nullable
-as String?,activeSubscription: freezed == activeSubscription ? _self.activeSubscription : activeSubscription // ignore: cast_nullable_to_non_nullable
+as String?,addresses: null == addresses ? _self._addresses : addresses // ignore: cast_nullable_to_non_nullable
+as List<String>,activeSubscription: freezed == activeSubscription ? _self.activeSubscription : activeSubscription // ignore: cast_nullable_to_non_nullable
 as ActiveSubscriptionModel?,
   ));
 }

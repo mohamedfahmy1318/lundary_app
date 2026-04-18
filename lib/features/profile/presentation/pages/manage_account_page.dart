@@ -1,10 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:laundry/core/utils/app_extensions.dart';
 import 'package:laundry/core/di/injection_container.dart';
 import 'package:laundry/core/services/local_storage_service.dart';
-import 'package:laundry/core/utils/current_location_helper.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_bar_factory.dart';
@@ -27,55 +27,91 @@ class ManageAccountPage extends StatefulWidget {
 class _ManageAccountPageState extends State<ManageAccountPage> {
   final LocalStorageService _localStorage = getIt<LocalStorageService>();
   List<String> _savedLocations = const <String>[];
-  bool _isLoadingCurrentLocation = false;
 
   @override
   void initState() {
     super.initState();
     _loadSavedLocations();
-    _syncCurrentLocation();
   }
 
   void _loadSavedLocations() {
-    _savedLocations = _localStorage.getSavedLocations();
+    _savedLocations = _normalizeLocations(_localStorage.getSavedLocations());
   }
 
-  Future<void> _syncCurrentLocation() async {
-    if (!mounted) {
-      return;
+  List<String> _normalizeLocations(Iterable<String> locations) {
+    final normalized = <String>[];
+    final seen = <String>{};
+
+    for (final location in locations) {
+      final trimmed = location.trim();
+      if (trimmed.isEmpty) {
+        continue;
+      }
+
+      final key = trimmed.toLowerCase();
+      if (seen.add(key)) {
+        normalized.add(trimmed);
+      }
     }
 
-    setState(() {
-      _isLoadingCurrentLocation = true;
-    });
-
-    final current = await CurrentLocationHelper.getCurrentAddress();
-    if (current != null && current.trim().isNotEmpty) {
-      await _persistLocation(current.trim());
-    }
-
-    if (!mounted) {
-      return;
-    }
-    setState(() {
-      _isLoadingCurrentLocation = false;
-      _loadSavedLocations();
-    });
+    return normalized;
   }
 
-  Future<void> _persistLocation(String location) async {
-    await _localStorage.saveCurrentLocation(location);
+  void _syncSavedLocationsFromProfile(List<String> addresses) {
+    final remoteLocations = _normalizeLocations(addresses);
+    final localLocations = _normalizeLocations(
+      _localStorage.getSavedLocations(),
+    );
     final normalized =
-        _localStorage
-            .getSavedLocations()
-            .where(
-              (item) => item.trim().toLowerCase() != location.toLowerCase(),
-            )
-            .toList();
-    await _localStorage.saveSavedLocations(<String>[location, ...normalized]);
+        remoteLocations.isNotEmpty ? remoteLocations : localLocations;
+
+    if (listEquals(_savedLocations, normalized)) {
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _savedLocations = normalized;
+      });
+
+      await _localStorage.saveSavedLocations(normalized);
+      if (normalized.isNotEmpty) {
+        await _localStorage.saveCurrentLocation(normalized.first);
+      }
+    });
   }
 
-  Future<void> _addAnotherLocation() async {
+  Future<void> _submitAddressUpdate(
+    BuildContext context,
+    List<String> locations,
+  ) async {
+    final updateProfileCubit = context.read<UpdateProfileCubit>();
+    final normalized = _normalizeLocations(locations);
+    if (listEquals(_savedLocations, normalized)) {
+      return;
+    }
+
+    setState(() {
+      _savedLocations = normalized;
+    });
+
+    await _localStorage.saveSavedLocations(normalized);
+    await _localStorage.saveCurrentLocation(
+      normalized.isNotEmpty ? normalized.first : '',
+    );
+
+    updateProfileCubit.updateProfile(addresses: normalized);
+  }
+
+  Future<void> _addAnotherLocation(BuildContext context) async {
     final selectedAddress = await Navigator.of(context).push<String>(
       MaterialPageRoute(
         builder:
@@ -83,75 +119,61 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
       ),
     );
 
-    if (!mounted || selectedAddress == null || selectedAddress.trim().isEmpty) {
+    if (!context.mounted ||
+        selectedAddress == null ||
+        selectedAddress.trim().isEmpty) {
       return;
     }
 
-    await _persistLocation(selectedAddress.trim());
-    if (!mounted) {
+    final updated = _normalizeLocations(<String>[
+      ..._savedLocations,
+      selectedAddress.trim(),
+    ]);
+
+    if (listEquals(_savedLocations, updated)) {
+      if (!context.mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('This location is already saved.')),
+      );
       return;
     }
 
-    setState(() {
-      _loadSavedLocations();
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Location added successfully.')),
-    );
+    if (!context.mounted) {
+      return;
+    }
+    await _submitAddressUpdate(context, updated);
   }
 
-  Future<void> _editLocation(int index) async {
+  Future<void> _editLocation(BuildContext context, int index) async {
     if (index < 0 || index >= _savedLocations.length) {
       return;
     }
 
-    final oldLocation = _savedLocations[index];
     final selectedAddress = await Navigator.of(context).push<String>(
       MaterialPageRoute(
         builder: (_) => const MapAddressPickerScreen(title: 'Edit Location'),
       ),
     );
 
-    if (!mounted || selectedAddress == null || selectedAddress.trim().isEmpty) {
+    if (!context.mounted ||
+        selectedAddress == null ||
+        selectedAddress.trim().isEmpty) {
       return;
     }
 
     final updatedLocation = selectedAddress.trim();
     final next = List<String>.from(_savedLocations);
     next[index] = updatedLocation;
-
-    final seen = <String>{};
-    final deduplicated =
-        next.where((item) => seen.add(item.trim().toLowerCase())).toList();
-
-    await _localStorage.saveSavedLocations(deduplicated);
-
-    final current = _localStorage.getCurrentLocation();
-    if (current != null &&
-        current.trim().toLowerCase() == oldLocation.trim().toLowerCase()) {
-      await _localStorage.saveCurrentLocation(updatedLocation);
-    }
-
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _savedLocations = deduplicated;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Location updated successfully.')),
-    );
+    await _submitAddressUpdate(context, next);
   }
 
-  Future<void> _deleteLocation(int index) async {
+  Future<void> _deleteLocation(BuildContext context, int index) async {
     if (index < 0 || index >= _savedLocations.length) {
       return;
     }
 
-    final locationToDelete = _savedLocations[index];
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder:
@@ -178,27 +200,11 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
     }
 
     final next = List<String>.from(_savedLocations)..removeAt(index);
-    await _localStorage.saveSavedLocations(next);
 
-    final current = _localStorage.getCurrentLocation();
-    if (current != null &&
-        current.trim().toLowerCase() == locationToDelete.trim().toLowerCase()) {
-      await _localStorage.saveCurrentLocation(
-        next.isNotEmpty ? next.first : '',
-      );
-    }
-
-    if (!mounted) {
+    if (!context.mounted) {
       return;
     }
-
-    setState(() {
-      _savedLocations = next;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Location deleted successfully.')),
-    );
+    await _submitAddressUpdate(context, next);
   }
 
   @override
@@ -235,6 +241,8 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
             builder: (context, state) {
               return state.maybeWhen(
                 loaded: (profile) {
+                  _syncSavedLocationsFromProfile(profile.addresses);
+
                   return SingleChildScrollView(
                     padding: EdgeInsets.symmetric(
                       horizontal: 24.w,
@@ -365,7 +373,7 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
                         _buildSection(
                           label: "Saved Locations",
                           trailing: TextButton.icon(
-                            onPressed: _addAnotherLocation,
+                            onPressed: () => _addAnotherLocation(context),
                             icon: const Icon(Icons.add, size: 16),
                             label: const Text("Add"),
                             style: TextButton.styleFrom(
@@ -374,26 +382,6 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
                           ),
                           child: Column(
                             children: [
-                              if (_isLoadingCurrentLocation)
-                                Padding(
-                                  padding: EdgeInsets.only(bottom: 8.h),
-                                  child: Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 14.w,
-                                        height: 14.w,
-                                        child: const CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
-                                      ),
-                                      SizedBox(width: 8.w),
-                                      Text(
-                                        'Fetching current location...',
-                                        style: AppTextStyles.caption,
-                                      ),
-                                    ],
-                                  ),
-                                ),
                               if (_savedLocations.isEmpty)
                                 Align(
                                   alignment: Alignment.centerLeft,
@@ -434,7 +422,9 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
                                             Icons.edit_outlined,
                                             color: AppColors.primary,
                                           ),
-                                          onPressed: () => _editLocation(index),
+                                          onPressed:
+                                              () =>
+                                                  _editLocation(context, index),
                                         ),
                                         IconButton(
                                           tooltip: 'Delete location',
@@ -443,7 +433,10 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
                                             color: Colors.red,
                                           ),
                                           onPressed:
-                                              () => _deleteLocation(index),
+                                              () => _deleteLocation(
+                                                context,
+                                                index,
+                                              ),
                                         ),
                                       ],
                                     ),

@@ -49,6 +49,7 @@ _CreateOrderResponseModel _$CreateOrderResponseModelFromJson(
   success: json['success'] as bool,
   message: json['message'] as String,
   orderId: (json['order_id'] as num?)?.toInt(),
+  orderNumber: json['order_number'] as String?,
 );
 
 Map<String, dynamic> _$CreateOrderResponseModelToJson(
@@ -57,4 +58,5 @@ Map<String, dynamic> _$CreateOrderResponseModelToJson(
   'success': instance.success,
   'message': instance.message,
   'order_id': instance.orderId,
+  'order_number': instance.orderNumber,
 };

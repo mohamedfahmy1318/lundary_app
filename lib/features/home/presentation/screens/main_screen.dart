@@ -5,19 +5,27 @@ import 'package:laundry/features/orders/presentation/pages/orders_page.dart';
 import 'package:laundry/features/profile/presentation/pages/profile_page.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final int initialIndex;
+
+  const MainScreen({super.key, this.initialIndex = 0});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
+  late int _currentIndex;
 
   /// Controls nav-bar opacity: fades while scrolling, returns on idle.
   double _navBarOpacity = 1.0;
 
   final List<Widget> _tabs = const [HomeTab(), OrdersPage(), ProfilePage()];
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = _normalizedIndex(widget.initialIndex);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,5 +52,12 @@ class _MainScreenState extends State<MainScreen> {
 
   void _setNavBarOpacity(double value) {
     if (_navBarOpacity != value) setState(() => _navBarOpacity = value);
+  }
+
+  int _normalizedIndex(int index) {
+    if (index < 0 || index >= _tabs.length) {
+      return 0;
+    }
+    return index;
   }
 }

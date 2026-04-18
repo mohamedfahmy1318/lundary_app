@@ -27,6 +27,12 @@ abstract class AuthRepo {
     String fcmToken,
   });
 
+  Future<Either<Failure, AuthResponseEntity>> socialLogin({
+    required String firebaseToken,
+    String fcmToken,
+    required String deviceType,
+  });
+
   Future<Either<Failure, AuthOtpChallengeEntity>> resendOtp({
     required String email,
   });

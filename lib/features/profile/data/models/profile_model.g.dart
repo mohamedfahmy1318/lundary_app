@@ -78,6 +78,11 @@ _ProfileModel _$ProfileModelFromJson(Map<String, dynamic> json) =>
       phone: json['phone'] as String,
       walletBalance: json['wallet_balance'] as String?,
       avatar: json['avatar'] as String?,
+      addresses:
+          (json['addresses'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
       activeSubscription:
           json['active_subscription'] == null
               ? null
@@ -94,5 +99,6 @@ Map<String, dynamic> _$ProfileModelToJson(_ProfileModel instance) =>
       'phone': instance.phone,
       'wallet_balance': instance.walletBalance,
       'avatar': instance.avatar,
+      'addresses': instance.addresses,
       'active_subscription': instance.activeSubscription,
     };

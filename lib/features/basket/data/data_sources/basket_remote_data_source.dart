@@ -1,12 +1,15 @@
 import 'package:laundry/core/constants/api_constants.dart';
 import 'package:laundry/core/network/api_client.dart';
 import 'package:laundry/features/basket/data/models/create_order_models.dart';
+import 'package:laundry/features/basket/data/models/payment_models.dart';
 import 'package:laundry/features/basket/data/models/time_slot_model.dart';
 
 abstract class BasketRemoteDataSource {
   Future<CreateOrderResponseModel> createOrder(
     CreateOrderRequestModel orderData,
   );
+  Future<PaymentInitiationModel> initiateOrderPayment(int orderId);
+  Future<PaymentStatusModel> getOrderPaymentStatus(int orderId);
   Future<List<TimeSlotModel>> getTimeslots(String date);
 }
 
@@ -35,6 +38,35 @@ class BasketRemoteDataSourceImpl implements BasketRemoteDataSource {
       success: false,
       message: 'Invalid create-order response format.',
     );
+  }
+
+  @override
+  Future<PaymentInitiationModel> initiateOrderPayment(int orderId) async {
+    final response = await _apiClient.post(
+      ApiConstants.paymentInitiate(orderId),
+      data: const <String, dynamic>{},
+    );
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      return PaymentInitiationModel.fromJson(data);
+    }
+    if (data is Map) {
+      return PaymentInitiationModel.fromJson(Map<String, dynamic>.from(data));
+    }
+    return const PaymentInitiationModel(paymentUrl: '');
+  }
+
+  @override
+  Future<PaymentStatusModel> getOrderPaymentStatus(int orderId) async {
+    final response = await _apiClient.get(ApiConstants.paymentStatus(orderId));
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      return PaymentStatusModel.fromJson(data);
+    }
+    if (data is Map) {
+      return PaymentStatusModel.fromJson(Map<String, dynamic>.from(data));
+    }
+    return const PaymentStatusModel(paid: false);
   }
 
   @override

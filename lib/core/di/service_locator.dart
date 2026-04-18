@@ -10,6 +10,7 @@ import 'package:laundry/features/auth/domain/usecases/logout_auth_usecase.dart';
 import 'package:laundry/features/auth/domain/usecases/request_login_otp_usecase.dart';
 import 'package:laundry/features/auth/domain/usecases/request_register_otp_usecase.dart';
 import 'package:laundry/features/auth/domain/usecases/resend_auth_otp_usecase.dart';
+import 'package:laundry/features/auth/domain/usecases/social_auth_login_usecase.dart';
 import 'package:laundry/features/auth/domain/usecases/verify_auth_otp_usecase.dart';
 import 'package:laundry/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:laundry/features/basket/data/data_sources/basket_local_data_source.dart';
@@ -17,7 +18,9 @@ import 'package:laundry/features/basket/data/data_sources/basket_remote_data_sou
 import 'package:laundry/features/basket/data/repos/basket_repo_impl.dart';
 import 'package:laundry/features/basket/domain/repos/basket_repo.dart';
 import 'package:laundry/features/basket/domain/usecases/create_order_usecase.dart';
+import 'package:laundry/features/basket/domain/usecases/get_order_payment_status_usecase.dart';
 import 'package:laundry/features/basket/domain/usecases/get_timeslots_usecase.dart';
+import 'package:laundry/features/basket/domain/usecases/initiate_order_payment_usecase.dart';
 import 'package:laundry/features/basket/presentation/cubit/basket_cubit.dart';
 import 'package:laundry/features/basket/presentation/cubit/timeslots_cubit.dart';
 import 'package:laundry/features/home/data/data_sources/home_local_data_source.dart';
@@ -63,6 +66,7 @@ import 'package:laundry/features/profile/domain/usecases/get_ticket_statuses_use
 import 'package:laundry/features/profile/domain/usecases/get_tickets_usecase.dart';
 import 'package:laundry/features/profile/domain/usecases/logout_profile_usecase.dart';
 import 'package:laundry/features/profile/domain/usecases/reply_to_ticket_usecase.dart';
+import 'package:laundry/features/profile/domain/usecases/subscribe_to_plan_usecase.dart';
 import 'package:laundry/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:laundry/features/profile/presentation/cubit/change_password_cubit.dart';
 import 'package:laundry/features/profile/presentation/cubit/profile_cubit.dart';
@@ -143,6 +147,9 @@ void registerAuthFeatureDependencies(GetIt serviceLocator) {
     () => ResendAuthOtpUseCase(authRepo: serviceLocator<AuthRepo>()),
   );
   serviceLocator.registerLazySingleton(
+    () => SocialAuthLoginUseCase(authRepo: serviceLocator<AuthRepo>()),
+  );
+  serviceLocator.registerLazySingleton(
     () => LogoutAuthUseCase(authRepo: serviceLocator<AuthRepo>()),
   );
 
@@ -152,6 +159,7 @@ void registerAuthFeatureDependencies(GetIt serviceLocator) {
       requestRegisterOtpUseCase: serviceLocator<RequestRegisterOtpUseCase>(),
       verifyAuthOtpUseCase: serviceLocator<VerifyAuthOtpUseCase>(),
       resendAuthOtpUseCase: serviceLocator<ResendAuthOtpUseCase>(),
+      socialAuthLoginUseCase: serviceLocator<SocialAuthLoginUseCase>(),
       logoutAuthUseCase: serviceLocator<LogoutAuthUseCase>(),
     ),
   );
@@ -178,10 +186,23 @@ void registerBasketFeatureDependencies(GetIt serviceLocator) {
   serviceLocator.registerLazySingleton(
     () => GetTimeslotsUseCase(basketRepo: serviceLocator<BasketRepo>()),
   );
+  serviceLocator.registerLazySingleton(
+    () => InitiateOrderPaymentUseCase(basketRepo: serviceLocator<BasketRepo>()),
+  );
+  serviceLocator.registerLazySingleton(
+    () =>
+        GetOrderPaymentStatusUseCase(basketRepo: serviceLocator<BasketRepo>()),
+  );
 
   // Keep the cart state across screens in the same app session.
   serviceLocator.registerLazySingleton(
-    () => BasketCubit(createOrderUseCase: serviceLocator<CreateOrderUseCase>()),
+    () => BasketCubit(
+      createOrderUseCase: serviceLocator<CreateOrderUseCase>(),
+      initiateOrderPaymentUseCase:
+          serviceLocator<InitiateOrderPaymentUseCase>(),
+      getOrderPaymentStatusUseCase:
+          serviceLocator<GetOrderPaymentStatusUseCase>(),
+    ),
   );
   serviceLocator.registerFactory(
     () => TimeslotsCubit(
@@ -311,6 +332,9 @@ void registerProfileFeatureDependencies(GetIt serviceLocator) {
     () => GetMySubscriptionsUseCase(profileRepo: serviceLocator<ProfileRepo>()),
   );
   serviceLocator.registerLazySingleton(
+    () => SubscribeToPlanUseCase(profileRepo: serviceLocator<ProfileRepo>()),
+  );
+  serviceLocator.registerLazySingleton(
     () => DeleteAccountUseCase(profileRepo: serviceLocator<ProfileRepo>()),
   );
   serviceLocator.registerLazySingleton(
@@ -348,6 +372,7 @@ void registerProfileFeatureDependencies(GetIt serviceLocator) {
       getSubscriptionPlansUseCase:
           serviceLocator<GetSubscriptionPlansUseCase>(),
       getMySubscriptionsUseCase: serviceLocator<GetMySubscriptionsUseCase>(),
+      subscribeToPlanUseCase: serviceLocator<SubscribeToPlanUseCase>(),
     ),
   );
   serviceLocator.registerFactory(

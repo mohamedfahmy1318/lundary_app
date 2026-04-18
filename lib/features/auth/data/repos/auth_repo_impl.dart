@@ -84,6 +84,25 @@ class AuthRepoImpl implements AuthRepo {
   }
 
   @override
+  Future<Either<Failure, AuthResponseEntity>> socialLogin({
+    required String firebaseToken,
+    String fcmToken = '',
+    required String deviceType,
+  }) async {
+    return _performRequest(() async {
+      final response = await _remoteDataSource.socialLogin(
+        SocialLoginRequestModel(
+          firebaseToken: firebaseToken,
+          fcmToken: fcmToken,
+          deviceType: deviceType,
+        ),
+      );
+      await _localDataSource.persistSession(response);
+      return response;
+    });
+  }
+
+  @override
   Future<Either<Failure, AuthOtpChallengeEntity>> resendOtp({
     required String email,
   }) async {

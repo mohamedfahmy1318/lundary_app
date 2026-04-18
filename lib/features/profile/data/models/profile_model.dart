@@ -32,6 +32,46 @@ String? _parseNullableString(Object? value) {
   return parsed;
 }
 
+List<String> _parseAddressList(Object? value) {
+  if (value is! List) {
+    return const <String>[];
+  }
+
+  final addresses = <String>[];
+  final seen = <String>{};
+
+  for (final item in value) {
+    String? parsed;
+
+    if (item is String) {
+      parsed = item.trim();
+    } else if (item is Map<String, dynamic>) {
+      parsed =
+          item['address']?.toString().trim() ??
+          item['name']?.toString().trim() ??
+          item['label']?.toString().trim();
+    } else if (item is Map) {
+      parsed =
+          item['address']?.toString().trim() ??
+          item['name']?.toString().trim() ??
+          item['label']?.toString().trim();
+    } else {
+      parsed = item?.toString().trim();
+    }
+
+    if (parsed == null || parsed.isEmpty || parsed == 'null') {
+      continue;
+    }
+
+    final normalized = parsed.toLowerCase();
+    if (seen.add(normalized)) {
+      addresses.add(parsed);
+    }
+  }
+
+  return addresses;
+}
+
 bool _parseBool(Object? value, {bool fallback = false}) {
   if (value is bool) {
     return value;
@@ -157,6 +197,7 @@ abstract class ProfileModel extends ProfileEntity with _$ProfileModel {
     required String phone,
     @JsonKey(name: 'wallet_balance') String? walletBalance,
     String? avatar,
+    @Default(<String>[]) List<String> addresses,
     @JsonKey(name: 'active_subscription')
     ActiveSubscriptionModel? activeSubscription,
   }) = _ProfileModel;
@@ -178,6 +219,7 @@ abstract class ProfileModel extends ProfileEntity with _$ProfileModel {
         json['wallet_balance'] ?? json['walletBalance'],
       ),
       'avatar': _parseNullableString(json['avatar']),
+      'addresses': _parseAddressList(json['addresses']),
       'active_subscription':
           activeSubscriptionJson is Map
               ? ActiveSubscriptionModel._normalizeJson(

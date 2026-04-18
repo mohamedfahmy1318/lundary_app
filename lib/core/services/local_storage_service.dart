@@ -1,9 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorageService {
   final SharedPreferences _prefs;
+  late final ValueNotifier<bool> authStateNotifier;
 
-  LocalStorageService({required SharedPreferences prefs}) : _prefs = prefs;
+  LocalStorageService({required SharedPreferences prefs}) : _prefs = prefs {
+    authStateNotifier = ValueNotifier<bool>(
+      _prefs.getBool(_isLoggedInKey) ?? false,
+    );
+  }
 
   // Keys
   static const String _tokenKey = 'auth_token';
@@ -45,8 +51,13 @@ class LocalStorageService {
   bool isFirstTime() => _prefs.getBool(_isFirstTimeKey) ?? true;
 
   // Logged In
-  Future<bool> setLoggedIn(bool value) => _prefs.setBool(_isLoggedInKey, value);
-  bool isLoggedIn() => _prefs.getBool(_isLoggedInKey) ?? false;
+  Future<bool> setLoggedIn(bool value) async {
+    final result = await _prefs.setBool(_isLoggedInKey, value);
+    authStateNotifier.value = value;
+    return result;
+  }
+
+  bool isLoggedIn() => authStateNotifier.value;
 
   // Current Location
   Future<bool> saveCurrentLocation(String location) =>
@@ -60,5 +71,9 @@ class LocalStorageService {
       _prefs.getStringList(_savedLocationsKey) ?? const <String>[];
 
   // Clear all data (for logout)
-  Future<bool> clearAll() => _prefs.clear();
+  Future<bool> clearAll() async {
+    final result = await _prefs.clear();
+    authStateNotifier.value = false;
+    return result;
+  }
 }

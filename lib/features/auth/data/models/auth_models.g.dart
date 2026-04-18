@@ -62,6 +62,22 @@ Map<String, dynamic> _$LoginVerifyRequestModelToJson(
   'fcm_token': instance.fcmToken,
 };
 
+_SocialLoginRequestModel _$SocialLoginRequestModelFromJson(
+  Map<String, dynamic> json,
+) => _SocialLoginRequestModel(
+  firebaseToken: json['firebase_token'] as String,
+  fcmToken: json['fcm_token'] as String? ?? '',
+  deviceType: json['device_type'] as String,
+);
+
+Map<String, dynamic> _$SocialLoginRequestModelToJson(
+  _SocialLoginRequestModel instance,
+) => <String, dynamic>{
+  'firebase_token': instance.firebaseToken,
+  'fcm_token': instance.fcmToken,
+  'device_type': instance.deviceType,
+};
+
 _ResendOtpRequestModel _$ResendOtpRequestModelFromJson(
   Map<String, dynamic> json,
 ) => _ResendOtpRequestModel(email: json['email'] as String);
@@ -99,7 +115,7 @@ _UserModel _$UserModelFromJson(Map<String, dynamic> json) => _UserModel(
   id: (json['id'] as num).toInt(),
   name: json['name'] as String,
   email: json['email'] as String,
-  phone: json['phone'] as String,
+  phone: UserModel._stringOrEmptyFromJson(json['phone']),
   walletBalance: UserModel._walletBalanceFromJson(json['wallet_balance']),
   avatar: json['avatar'] as String?,
   role: json['role'] as String?,

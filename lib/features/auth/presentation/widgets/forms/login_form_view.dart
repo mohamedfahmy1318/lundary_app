@@ -16,6 +16,7 @@ class LoginFormView extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onTogglePasswordVisibility;
   final VoidCallback onSubmit;
+  final VoidCallback onGoogleTap;
   final VoidCallback onNavigateToRegister;
 
   const LoginFormView({
@@ -27,6 +28,7 @@ class LoginFormView extends StatelessWidget {
     required this.isLoading,
     required this.onTogglePasswordVisibility,
     required this.onSubmit,
+    required this.onGoogleTap,
     required this.onNavigateToRegister,
   });
 
@@ -70,7 +72,7 @@ class LoginFormView extends StatelessWidget {
         SizedBox(height: 32.h),
         const OrDivider(text: 'Or sign in with'),
         SizedBox(height: 24.h),
-        const SocialLoginRow(),
+        SocialLoginRow(onGoogleTap: onGoogleTap),
         SizedBox(height: 120.h),
         AuthAccountPromptRow(
           text: "Don't have an account?",

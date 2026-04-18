@@ -3,6 +3,7 @@ import 'package:laundry/core/constants/api_constants.dart';
 import 'package:laundry/core/error/exceptions.dart';
 import 'package:laundry/core/network/api_client.dart';
 import 'package:laundry/features/profile/data/models/profile_model.dart';
+import 'package:laundry/features/profile/data/models/subscription_checkout_model.dart';
 import 'package:laundry/features/profile/data/models/ticket_model.dart';
 
 abstract class ProfileRemoteDataSource {
@@ -11,6 +12,7 @@ abstract class ProfileRemoteDataSource {
     String? name,
     String? phone,
     String? avatarFilePath,
+    List<String>? addresses,
   });
   Future<void> changePassword({
     required String currentPassword,
@@ -32,6 +34,7 @@ abstract class ProfileRemoteDataSource {
   Future<List<TicketLookupOptionModel>> getTicketStatuses();
   Future<List<SubscriptionPlanModel>> getSubscriptionPlans();
   Future<List<ActiveSubscriptionModel>> getMySubscriptions();
+  Future<SubscriptionCheckoutModel> subscribeToPlan(int planId);
   Future<void> deleteAccount();
   Future<void> logout();
 }
@@ -53,17 +56,32 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     String? name,
     String? phone,
     String? avatarFilePath,
+    List<String>? addresses,
   }) async {
-    final Map<String, dynamic> mapStream = {};
-    if (name != null) mapStream['name'] = name;
-    if (phone != null) mapStream['phone'] = phone;
-
-    if (avatarFilePath != null) {
-      mapStream['avatar'] = await MultipartFile.fromFile(avatarFilePath);
+    final formData = FormData();
+    if (name != null) {
+      formData.fields.add(MapEntry('name', name));
+    }
+    if (phone != null) {
+      formData.fields.add(MapEntry('phone', phone));
+    }
+    if (addresses != null) {
+      for (final address in addresses) {
+        formData.fields.add(MapEntry('addresses[]', address));
+      }
     }
 
-    final formData = FormData.fromMap(mapStream);
-    await _apiClient.post(ApiConstants.updateProfile, data: formData);
+    if (avatarFilePath != null) {
+      formData.files.add(
+        MapEntry('avatar', await MultipartFile.fromFile(avatarFilePath)),
+      );
+    }
+
+    await _apiClient.post(
+      ApiConstants.updateProfile,
+      data: formData,
+      options: Options(contentType: Headers.multipartFormDataContentType),
+    );
   }
 
   @override
@@ -216,6 +234,27 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
               ActiveSubscriptionModel.fromJson(json as Map<String, dynamic>),
         )
         .toList();
+  }
+
+  @override
+  Future<SubscriptionCheckoutModel> subscribeToPlan(int planId) async {
+    final response = await _apiClient.post(
+      ApiConstants.subscribeToPlan,
+      data: {'plan_id': planId},
+    );
+
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      return SubscriptionCheckoutModel.fromJson(data, planId: planId);
+    }
+    if (data is Map) {
+      return SubscriptionCheckoutModel.fromJson(
+        Map<String, dynamic>.from(data),
+        planId: planId,
+      );
+    }
+
+    throw const ServerException(message: 'Invalid subscription response.');
   }
 
   @override

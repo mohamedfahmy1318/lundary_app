@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:laundry/core/di/injection_container.dart';
+import 'package:laundry/core/services/push_notification_service.dart';
+import 'package:laundry/core/services/social_auth_service.dart';
+import 'package:laundry/core/widgets/app_dialogs.dart';
 import 'package:laundry/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:laundry/features/auth/presentation/cubit/auth_state.dart';
 import 'package:laundry/features/auth/presentation/cubit/auth_state_x.dart';
@@ -47,6 +51,64 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
+  String _resolveDeviceType() {
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.iOS => 'ios',
+      TargetPlatform.android => 'android',
+      _ => 'android',
+    };
+  }
+
+  Future<void> _handleGoogleSignIn(BuildContext context) async {
+    try {
+      final firebaseToken =
+          await SocialAuthService.signInWithGoogleAndGetFirebaseToken();
+
+      if (!mounted || firebaseToken == null || firebaseToken.isEmpty) {
+        return;
+      }
+
+      String fcmToken = '';
+      try {
+        fcmToken = await PushNotificationService.getToken();
+      } catch (_) {
+        fcmToken = '';
+      }
+
+      if (!context.mounted) {
+        return;
+      }
+
+      context.read<AuthCubit>().socialLogin(
+        firebaseToken: firebaseToken,
+        fcmToken: fcmToken,
+        deviceType: _resolveDeviceType(),
+      );
+    } on SocialAuthException catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      AppDialogs.showMessage(
+        context,
+        title: 'Google Sign-In Failed',
+        message: e.message,
+        isError: true,
+      );
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      AppDialogs.showMessage(
+        context,
+        title: 'Google Sign-In Failed',
+        message: 'Unable to sign in with Google. Please try again.',
+        isError: true,
+      );
+    }
+  }
+
   @override
   void dispose() {
     _usernameController.dispose();
@@ -85,6 +147,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   onToggleConfirmPasswordVisibility:
                       _toggleConfirmPasswordVisibility,
                   onSubmit: () => _submitRegistration(context),
+                  onGoogleTap: () => _handleGoogleSignIn(context),
                   onNavigateToLogin: () => context.pop(),
                 );
               },

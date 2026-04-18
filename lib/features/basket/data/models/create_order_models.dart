@@ -71,28 +71,37 @@ abstract class CreateOrderResponseModel extends OrderResponseEntity
     required bool success,
     required String message,
     @JsonKey(name: 'order_id') int? orderId,
+    @JsonKey(name: 'order_number') String? orderNumber,
   }) = _CreateOrderResponseModel;
 
   factory CreateOrderResponseModel.fromJson(Map<String, dynamic> json) =>
       _$CreateOrderResponseModelFromJson(_normalizeJson(json));
 
   static Map<String, dynamic> _normalizeJson(Map<String, dynamic> json) {
-    final orderId =
-        _extractOrderId(json['data']) ?? _parseInt(json['order_id']);
+    final data = _extractMap(json['data']);
+    final orderId = _extractOrderId(data) ?? _parseInt(json['order_id']);
+    final orderNumber =
+        _parseString(data?['order_number']) ??
+        _parseString(json['order_number']);
+
     return <String, dynamic>{
       ...json,
       'success': _parseBool(json['success'], fallback: true),
       'message': (json['message'] ?? 'Order created successfully').toString(),
       'order_id': orderId,
+      'order_number': orderNumber,
     };
   }
 
-  static int? _extractOrderId(Object? data) {
-    if (data is Map<String, dynamic>) {
-      return _parseInt(data['id'] ?? data['order_id']);
+  static int? _extractOrderId(Map<String, dynamic>? data) =>
+      _parseInt(data?['id'] ?? data?['order_id']);
+
+  static Map<String, dynamic>? _extractMap(Object? value) {
+    if (value is Map<String, dynamic>) {
+      return value;
     }
-    if (data is Map) {
-      return _parseInt(data['id'] ?? data['order_id']);
+    if (value is Map) {
+      return Map<String, dynamic>.from(value);
     }
     return null;
   }
@@ -105,6 +114,14 @@ abstract class CreateOrderResponseModel extends OrderResponseEntity
       return value.toInt();
     }
     return int.tryParse(value?.toString() ?? '');
+  }
+
+  static String? _parseString(Object? value) {
+    final result = value?.toString();
+    if (result == null || result.trim().isEmpty || result == 'null') {
+      return null;
+    }
+    return result;
   }
 
   static bool _parseBool(Object? value, {required bool fallback}) {

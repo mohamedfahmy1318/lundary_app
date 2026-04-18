@@ -56,6 +56,18 @@ abstract class LoginVerifyRequestModel with _$LoginVerifyRequestModel {
 }
 
 @freezed
+abstract class SocialLoginRequestModel with _$SocialLoginRequestModel {
+  const factory SocialLoginRequestModel({
+    @JsonKey(name: 'firebase_token') required String firebaseToken,
+    @JsonKey(name: 'fcm_token') @Default('') String fcmToken,
+    @JsonKey(name: 'device_type') required String deviceType,
+  }) = _SocialLoginRequestModel;
+
+  factory SocialLoginRequestModel.fromJson(Map<String, dynamic> json) =>
+      _$SocialLoginRequestModelFromJson(json);
+}
+
+@freezed
 abstract class ResendOtpRequestModel with _$ResendOtpRequestModel {
   const factory ResendOtpRequestModel({required String email}) =
       _ResendOtpRequestModel;
@@ -102,7 +114,7 @@ abstract class UserModel extends AuthUserEntity with _$UserModel {
     required int id,
     required String name,
     required String email,
-    required String phone,
+    @JsonKey(fromJson: UserModel._stringOrEmptyFromJson) required String phone,
     @JsonKey(
       name: 'wallet_balance',
       fromJson: UserModel._walletBalanceFromJson,
@@ -115,6 +127,9 @@ abstract class UserModel extends AuthUserEntity with _$UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
       _$UserModelFromJson(json);
+
+  static String _stringOrEmptyFromJson(Object? value) =>
+      value?.toString() ?? '';
 
   static String? _walletBalanceFromJson(Object? value) => value?.toString();
   static Object? _walletBalanceToJson(String? value) => value;

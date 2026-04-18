@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:laundry/app.dart';
 import 'package:laundry/core/di/injection_container.dart';
 import 'package:laundry/core/services/hive_service.dart';
-import 'package:laundry/core/services/push_notification_service.dart';
 import 'package:laundry/core/utils/app_helpers.dart';
 
 void main() async {

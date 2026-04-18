@@ -317,7 +317,7 @@ as String?,
 /// @nodoc
 mixin _$CreateOrderResponseModel {
 
- bool get success; String get message;@JsonKey(name: 'order_id') int? get orderId;
+ bool get success; String get message;@JsonKey(name: 'order_id') int? get orderId;@JsonKey(name: 'order_number') String? get orderNumber;
 /// Create a copy of CreateOrderResponseModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -330,16 +330,16 @@ $CreateOrderResponseModelCopyWith<CreateOrderResponseModel> get copyWith => _$Cr
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreateOrderResponseModel&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message)&&(identical(other.orderId, orderId) || other.orderId == orderId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreateOrderResponseModel&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message)&&(identical(other.orderId, orderId) || other.orderId == orderId)&&(identical(other.orderNumber, orderNumber) || other.orderNumber == orderNumber));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,success,message,orderId);
+int get hashCode => Object.hash(runtimeType,success,message,orderId,orderNumber);
 
 @override
 String toString() {
-  return 'CreateOrderResponseModel(success: $success, message: $message, orderId: $orderId)';
+  return 'CreateOrderResponseModel(success: $success, message: $message, orderId: $orderId, orderNumber: $orderNumber)';
 }
 
 
@@ -350,7 +350,7 @@ abstract mixin class $CreateOrderResponseModelCopyWith<$Res>  {
   factory $CreateOrderResponseModelCopyWith(CreateOrderResponseModel value, $Res Function(CreateOrderResponseModel) _then) = _$CreateOrderResponseModelCopyWithImpl;
 @useResult
 $Res call({
- bool success, String message,@JsonKey(name: 'order_id') int? orderId
+ bool success, String message,@JsonKey(name: 'order_id') int? orderId,@JsonKey(name: 'order_number') String? orderNumber
 });
 
 
@@ -367,12 +367,13 @@ class _$CreateOrderResponseModelCopyWithImpl<$Res>
 
 /// Create a copy of CreateOrderResponseModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? success = null,Object? message = null,Object? orderId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? success = null,Object? message = null,Object? orderId = freezed,Object? orderNumber = freezed,}) {
   return _then(_self.copyWith(
 success: null == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
 as bool,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,orderId: freezed == orderId ? _self.orderId : orderId // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,orderNumber: freezed == orderNumber ? _self.orderNumber : orderNumber // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -457,10 +458,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool success,  String message, @JsonKey(name: 'order_id')  int? orderId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool success,  String message, @JsonKey(name: 'order_id')  int? orderId, @JsonKey(name: 'order_number')  String? orderNumber)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CreateOrderResponseModel() when $default != null:
-return $default(_that.success,_that.message,_that.orderId);case _:
+return $default(_that.success,_that.message,_that.orderId,_that.orderNumber);case _:
   return orElse();
 
 }
@@ -478,10 +479,10 @@ return $default(_that.success,_that.message,_that.orderId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool success,  String message, @JsonKey(name: 'order_id')  int? orderId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool success,  String message, @JsonKey(name: 'order_id')  int? orderId, @JsonKey(name: 'order_number')  String? orderNumber)  $default,) {final _that = this;
 switch (_that) {
 case _CreateOrderResponseModel():
-return $default(_that.success,_that.message,_that.orderId);case _:
+return $default(_that.success,_that.message,_that.orderId,_that.orderNumber);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -498,10 +499,10 @@ return $default(_that.success,_that.message,_that.orderId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool success,  String message, @JsonKey(name: 'order_id')  int? orderId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool success,  String message, @JsonKey(name: 'order_id')  int? orderId, @JsonKey(name: 'order_number')  String? orderNumber)?  $default,) {final _that = this;
 switch (_that) {
 case _CreateOrderResponseModel() when $default != null:
-return $default(_that.success,_that.message,_that.orderId);case _:
+return $default(_that.success,_that.message,_that.orderId,_that.orderNumber);case _:
   return null;
 
 }
@@ -513,12 +514,13 @@ return $default(_that.success,_that.message,_that.orderId);case _:
 @JsonSerializable()
 
 class _CreateOrderResponseModel extends CreateOrderResponseModel {
-  const _CreateOrderResponseModel({required this.success, required this.message, @JsonKey(name: 'order_id') this.orderId}): super._();
+  const _CreateOrderResponseModel({required this.success, required this.message, @JsonKey(name: 'order_id') this.orderId, @JsonKey(name: 'order_number') this.orderNumber}): super._();
   factory _CreateOrderResponseModel.fromJson(Map<String, dynamic> json) => _$CreateOrderResponseModelFromJson(json);
 
 @override final  bool success;
 @override final  String message;
 @override@JsonKey(name: 'order_id') final  int? orderId;
+@override@JsonKey(name: 'order_number') final  String? orderNumber;
 
 /// Create a copy of CreateOrderResponseModel
 /// with the given fields replaced by the non-null parameter values.
@@ -533,16 +535,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreateOrderResponseModel&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message)&&(identical(other.orderId, orderId) || other.orderId == orderId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreateOrderResponseModel&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message)&&(identical(other.orderId, orderId) || other.orderId == orderId)&&(identical(other.orderNumber, orderNumber) || other.orderNumber == orderNumber));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,success,message,orderId);
+int get hashCode => Object.hash(runtimeType,success,message,orderId,orderNumber);
 
 @override
 String toString() {
-  return 'CreateOrderResponseModel(success: $success, message: $message, orderId: $orderId)';
+  return 'CreateOrderResponseModel(success: $success, message: $message, orderId: $orderId, orderNumber: $orderNumber)';
 }
 
 
@@ -553,7 +555,7 @@ abstract mixin class _$CreateOrderResponseModelCopyWith<$Res> implements $Create
   factory _$CreateOrderResponseModelCopyWith(_CreateOrderResponseModel value, $Res Function(_CreateOrderResponseModel) _then) = __$CreateOrderResponseModelCopyWithImpl;
 @override @useResult
 $Res call({
- bool success, String message,@JsonKey(name: 'order_id') int? orderId
+ bool success, String message,@JsonKey(name: 'order_id') int? orderId,@JsonKey(name: 'order_number') String? orderNumber
 });
 
 
@@ -570,12 +572,13 @@ class __$CreateOrderResponseModelCopyWithImpl<$Res>
 
 /// Create a copy of CreateOrderResponseModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? success = null,Object? message = null,Object? orderId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? success = null,Object? message = null,Object? orderId = freezed,Object? orderNumber = freezed,}) {
   return _then(_CreateOrderResponseModel(
 success: null == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
 as bool,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,orderId: freezed == orderId ? _self.orderId : orderId // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,orderNumber: freezed == orderNumber ? _self.orderNumber : orderNumber // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

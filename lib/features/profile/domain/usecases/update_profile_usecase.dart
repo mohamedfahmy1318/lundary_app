@@ -7,11 +7,17 @@ class UpdateProfileParams extends Equatable {
   final String? name;
   final String? phone;
   final String? avatarFilePath;
+  final List<String>? addresses;
 
-  const UpdateProfileParams({this.name, this.phone, this.avatarFilePath});
+  const UpdateProfileParams({
+    this.name,
+    this.phone,
+    this.avatarFilePath,
+    this.addresses,
+  });
 
   @override
-  List<Object?> get props => [name, phone, avatarFilePath];
+  List<Object?> get props => [name, phone, avatarFilePath, addresses];
 }
 
 class UpdateProfileUseCase {
@@ -25,6 +31,7 @@ class UpdateProfileUseCase {
       name: params.name,
       phone: params.phone,
       avatarFilePath: params.avatarFilePath,
+      addresses: params.addresses,
     );
   }
 }

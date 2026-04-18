@@ -1089,6 +1089,275 @@ as String,
 
 
 /// @nodoc
+mixin _$SocialLoginRequestModel {
+
+@JsonKey(name: 'firebase_token') String get firebaseToken;@JsonKey(name: 'fcm_token') String get fcmToken;@JsonKey(name: 'device_type') String get deviceType;
+/// Create a copy of SocialLoginRequestModel
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$SocialLoginRequestModelCopyWith<SocialLoginRequestModel> get copyWith => _$SocialLoginRequestModelCopyWithImpl<SocialLoginRequestModel>(this as SocialLoginRequestModel, _$identity);
+
+  /// Serializes this SocialLoginRequestModel to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SocialLoginRequestModel&&(identical(other.firebaseToken, firebaseToken) || other.firebaseToken == firebaseToken)&&(identical(other.fcmToken, fcmToken) || other.fcmToken == fcmToken)&&(identical(other.deviceType, deviceType) || other.deviceType == deviceType));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,firebaseToken,fcmToken,deviceType);
+
+@override
+String toString() {
+  return 'SocialLoginRequestModel(firebaseToken: $firebaseToken, fcmToken: $fcmToken, deviceType: $deviceType)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $SocialLoginRequestModelCopyWith<$Res>  {
+  factory $SocialLoginRequestModelCopyWith(SocialLoginRequestModel value, $Res Function(SocialLoginRequestModel) _then) = _$SocialLoginRequestModelCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'firebase_token') String firebaseToken,@JsonKey(name: 'fcm_token') String fcmToken,@JsonKey(name: 'device_type') String deviceType
+});
+
+
+
+
+}
+/// @nodoc
+class _$SocialLoginRequestModelCopyWithImpl<$Res>
+    implements $SocialLoginRequestModelCopyWith<$Res> {
+  _$SocialLoginRequestModelCopyWithImpl(this._self, this._then);
+
+  final SocialLoginRequestModel _self;
+  final $Res Function(SocialLoginRequestModel) _then;
+
+/// Create a copy of SocialLoginRequestModel
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? firebaseToken = null,Object? fcmToken = null,Object? deviceType = null,}) {
+  return _then(_self.copyWith(
+firebaseToken: null == firebaseToken ? _self.firebaseToken : firebaseToken // ignore: cast_nullable_to_non_nullable
+as String,fcmToken: null == fcmToken ? _self.fcmToken : fcmToken // ignore: cast_nullable_to_non_nullable
+as String,deviceType: null == deviceType ? _self.deviceType : deviceType // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [SocialLoginRequestModel].
+extension SocialLoginRequestModelPatterns on SocialLoginRequestModel {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _SocialLoginRequestModel value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _SocialLoginRequestModel() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _SocialLoginRequestModel value)  $default,){
+final _that = this;
+switch (_that) {
+case _SocialLoginRequestModel():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _SocialLoginRequestModel value)?  $default,){
+final _that = this;
+switch (_that) {
+case _SocialLoginRequestModel() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'firebase_token')  String firebaseToken, @JsonKey(name: 'fcm_token')  String fcmToken, @JsonKey(name: 'device_type')  String deviceType)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _SocialLoginRequestModel() when $default != null:
+return $default(_that.firebaseToken,_that.fcmToken,_that.deviceType);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'firebase_token')  String firebaseToken, @JsonKey(name: 'fcm_token')  String fcmToken, @JsonKey(name: 'device_type')  String deviceType)  $default,) {final _that = this;
+switch (_that) {
+case _SocialLoginRequestModel():
+return $default(_that.firebaseToken,_that.fcmToken,_that.deviceType);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'firebase_token')  String firebaseToken, @JsonKey(name: 'fcm_token')  String fcmToken, @JsonKey(name: 'device_type')  String deviceType)?  $default,) {final _that = this;
+switch (_that) {
+case _SocialLoginRequestModel() when $default != null:
+return $default(_that.firebaseToken,_that.fcmToken,_that.deviceType);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _SocialLoginRequestModel implements SocialLoginRequestModel {
+  const _SocialLoginRequestModel({@JsonKey(name: 'firebase_token') required this.firebaseToken, @JsonKey(name: 'fcm_token') this.fcmToken = '', @JsonKey(name: 'device_type') required this.deviceType});
+  factory _SocialLoginRequestModel.fromJson(Map<String, dynamic> json) => _$SocialLoginRequestModelFromJson(json);
+
+@override@JsonKey(name: 'firebase_token') final  String firebaseToken;
+@override@JsonKey(name: 'fcm_token') final  String fcmToken;
+@override@JsonKey(name: 'device_type') final  String deviceType;
+
+/// Create a copy of SocialLoginRequestModel
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SocialLoginRequestModelCopyWith<_SocialLoginRequestModel> get copyWith => __$SocialLoginRequestModelCopyWithImpl<_SocialLoginRequestModel>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$SocialLoginRequestModelToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SocialLoginRequestModel&&(identical(other.firebaseToken, firebaseToken) || other.firebaseToken == firebaseToken)&&(identical(other.fcmToken, fcmToken) || other.fcmToken == fcmToken)&&(identical(other.deviceType, deviceType) || other.deviceType == deviceType));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,firebaseToken,fcmToken,deviceType);
+
+@override
+String toString() {
+  return 'SocialLoginRequestModel(firebaseToken: $firebaseToken, fcmToken: $fcmToken, deviceType: $deviceType)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$SocialLoginRequestModelCopyWith<$Res> implements $SocialLoginRequestModelCopyWith<$Res> {
+  factory _$SocialLoginRequestModelCopyWith(_SocialLoginRequestModel value, $Res Function(_SocialLoginRequestModel) _then) = __$SocialLoginRequestModelCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'firebase_token') String firebaseToken,@JsonKey(name: 'fcm_token') String fcmToken,@JsonKey(name: 'device_type') String deviceType
+});
+
+
+
+
+}
+/// @nodoc
+class __$SocialLoginRequestModelCopyWithImpl<$Res>
+    implements _$SocialLoginRequestModelCopyWith<$Res> {
+  __$SocialLoginRequestModelCopyWithImpl(this._self, this._then);
+
+  final _SocialLoginRequestModel _self;
+  final $Res Function(_SocialLoginRequestModel) _then;
+
+/// Create a copy of SocialLoginRequestModel
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? firebaseToken = null,Object? fcmToken = null,Object? deviceType = null,}) {
+  return _then(_SocialLoginRequestModel(
+firebaseToken: null == firebaseToken ? _self.firebaseToken : firebaseToken // ignore: cast_nullable_to_non_nullable
+as String,fcmToken: null == fcmToken ? _self.fcmToken : fcmToken // ignore: cast_nullable_to_non_nullable
+as String,deviceType: null == deviceType ? _self.deviceType : deviceType // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$ResendOtpRequestModel {
 
  String get email;
@@ -1910,7 +2179,7 @@ $UserModelCopyWith<$Res> get user {
 /// @nodoc
 mixin _$UserModel {
 
- int get id; String get name; String get email; String get phone;@JsonKey(name: 'wallet_balance', fromJson: UserModel._walletBalanceFromJson, toJson: UserModel._walletBalanceToJson) String? get walletBalance; String? get avatar; String? get role;
+ int get id; String get name; String get email;@JsonKey(fromJson: UserModel._stringOrEmptyFromJson) String get phone;@JsonKey(name: 'wallet_balance', fromJson: UserModel._walletBalanceFromJson, toJson: UserModel._walletBalanceToJson) String? get walletBalance; String? get avatar; String? get role;
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1943,7 +2212,7 @@ abstract mixin class $UserModelCopyWith<$Res>  {
   factory $UserModelCopyWith(UserModel value, $Res Function(UserModel) _then) = _$UserModelCopyWithImpl;
 @useResult
 $Res call({
- int id, String name, String email, String phone,@JsonKey(name: 'wallet_balance', fromJson: UserModel._walletBalanceFromJson, toJson: UserModel._walletBalanceToJson) String? walletBalance, String? avatar, String? role
+ int id, String name, String email,@JsonKey(fromJson: UserModel._stringOrEmptyFromJson) String phone,@JsonKey(name: 'wallet_balance', fromJson: UserModel._walletBalanceFromJson, toJson: UserModel._walletBalanceToJson) String? walletBalance, String? avatar, String? role
 });
 
 
@@ -2054,7 +2323,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  String email,  String phone, @JsonKey(name: 'wallet_balance', fromJson: UserModel._walletBalanceFromJson, toJson: UserModel._walletBalanceToJson)  String? walletBalance,  String? avatar,  String? role)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  String email, @JsonKey(fromJson: UserModel._stringOrEmptyFromJson)  String phone, @JsonKey(name: 'wallet_balance', fromJson: UserModel._walletBalanceFromJson, toJson: UserModel._walletBalanceToJson)  String? walletBalance,  String? avatar,  String? role)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserModel() when $default != null:
 return $default(_that.id,_that.name,_that.email,_that.phone,_that.walletBalance,_that.avatar,_that.role);case _:
@@ -2075,7 +2344,7 @@ return $default(_that.id,_that.name,_that.email,_that.phone,_that.walletBalance,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  String email,  String phone, @JsonKey(name: 'wallet_balance', fromJson: UserModel._walletBalanceFromJson, toJson: UserModel._walletBalanceToJson)  String? walletBalance,  String? avatar,  String? role)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  String email, @JsonKey(fromJson: UserModel._stringOrEmptyFromJson)  String phone, @JsonKey(name: 'wallet_balance', fromJson: UserModel._walletBalanceFromJson, toJson: UserModel._walletBalanceToJson)  String? walletBalance,  String? avatar,  String? role)  $default,) {final _that = this;
 switch (_that) {
 case _UserModel():
 return $default(_that.id,_that.name,_that.email,_that.phone,_that.walletBalance,_that.avatar,_that.role);case _:
@@ -2095,7 +2364,7 @@ return $default(_that.id,_that.name,_that.email,_that.phone,_that.walletBalance,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  String email,  String phone, @JsonKey(name: 'wallet_balance', fromJson: UserModel._walletBalanceFromJson, toJson: UserModel._walletBalanceToJson)  String? walletBalance,  String? avatar,  String? role)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  String email, @JsonKey(fromJson: UserModel._stringOrEmptyFromJson)  String phone, @JsonKey(name: 'wallet_balance', fromJson: UserModel._walletBalanceFromJson, toJson: UserModel._walletBalanceToJson)  String? walletBalance,  String? avatar,  String? role)?  $default,) {final _that = this;
 switch (_that) {
 case _UserModel() when $default != null:
 return $default(_that.id,_that.name,_that.email,_that.phone,_that.walletBalance,_that.avatar,_that.role);case _:
@@ -2110,13 +2379,13 @@ return $default(_that.id,_that.name,_that.email,_that.phone,_that.walletBalance,
 @JsonSerializable()
 
 class _UserModel extends UserModel {
-  const _UserModel({required this.id, required this.name, required this.email, required this.phone, @JsonKey(name: 'wallet_balance', fromJson: UserModel._walletBalanceFromJson, toJson: UserModel._walletBalanceToJson) this.walletBalance, this.avatar, this.role}): super._();
+  const _UserModel({required this.id, required this.name, required this.email, @JsonKey(fromJson: UserModel._stringOrEmptyFromJson) required this.phone, @JsonKey(name: 'wallet_balance', fromJson: UserModel._walletBalanceFromJson, toJson: UserModel._walletBalanceToJson) this.walletBalance, this.avatar, this.role}): super._();
   factory _UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
 
 @override final  int id;
 @override final  String name;
 @override final  String email;
-@override final  String phone;
+@override@JsonKey(fromJson: UserModel._stringOrEmptyFromJson) final  String phone;
 @override@JsonKey(name: 'wallet_balance', fromJson: UserModel._walletBalanceFromJson, toJson: UserModel._walletBalanceToJson) final  String? walletBalance;
 @override final  String? avatar;
 @override final  String? role;
@@ -2154,7 +2423,7 @@ abstract mixin class _$UserModelCopyWith<$Res> implements $UserModelCopyWith<$Re
   factory _$UserModelCopyWith(_UserModel value, $Res Function(_UserModel) _then) = __$UserModelCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String name, String email, String phone,@JsonKey(name: 'wallet_balance', fromJson: UserModel._walletBalanceFromJson, toJson: UserModel._walletBalanceToJson) String? walletBalance, String? avatar, String? role
+ int id, String name, String email,@JsonKey(fromJson: UserModel._stringOrEmptyFromJson) String phone,@JsonKey(name: 'wallet_balance', fromJson: UserModel._walletBalanceFromJson, toJson: UserModel._walletBalanceToJson) String? walletBalance, String? avatar, String? role
 });
 
 

@@ -27,9 +27,10 @@ import 'package:laundry/features/home/presentation/screens/category_services_pag
 import 'package:laundry/features/home/domain/entities/home_category_entity.dart';
 
 class AppRouter {
+  static final LocalStorageService _storage = getIt<LocalStorageService>();
+
   static String get _initialLocation {
-    final storage = getIt<LocalStorageService>();
-    if (storage.isLoggedIn()) {
+    if (_storage.isLoggedIn()) {
       return RoutingNames.main;
     }
     return RoutingNames.onBoarding;
@@ -38,6 +39,23 @@ class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: _initialLocation,
     debugLogDiagnostics: true,
+    refreshListenable: _storage.authStateNotifier,
+    redirect: (context, state) {
+      final isLoggedIn = _storage.isLoggedIn();
+      final location = state.matchedLocation;
+
+      final isAuthRoute =
+          location == RoutingNames.login ||
+          location == RoutingNames.register ||
+          location == RoutingNames.verification ||
+          location == RoutingNames.onBoarding;
+
+      if (!isLoggedIn && !isAuthRoute) {
+        return RoutingNames.login;
+      }
+
+      return null;
+    },
     routes: [
       //onBoarding
       GoRoute(
@@ -48,7 +66,10 @@ class AppRouter {
       GoRoute(
         path: RoutingNames.main,
         name: 'main',
-        builder: (context, state) => const MainScreen(),
+        builder: (context, state) {
+          final tab = int.tryParse(state.uri.queryParameters['tab'] ?? '') ?? 0;
+          return MainScreen(initialIndex: tab);
+        },
       ),
       GoRoute(
         path: RoutingNames.login,

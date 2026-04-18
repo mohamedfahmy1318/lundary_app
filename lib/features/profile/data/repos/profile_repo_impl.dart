@@ -9,6 +9,7 @@ import 'package:laundry/features/profile/data/models/profile_model.dart';
 import 'package:laundry/features/profile/data/models/ticket_model.dart';
 import 'package:laundry/features/profile/domain/entities/active_subscription_entity.dart';
 import 'package:laundry/features/profile/domain/entities/profile_entity.dart';
+import 'package:laundry/features/profile/domain/entities/subscription_checkout_entity.dart';
 import 'package:laundry/features/profile/domain/entities/subscription_plan_entity.dart';
 import 'package:laundry/features/profile/domain/entities/ticket_entity.dart';
 import 'package:laundry/features/profile/domain/entities/ticket_lookup_option_entity.dart';
@@ -67,6 +68,7 @@ class ProfileRepoImpl implements ProfileRepo {
     String? name,
     String? phone,
     String? avatarFilePath,
+    List<String>? addresses,
   }) async {
     if (!await _networkInfo.isConnected) {
       return const Left(NoInternetFailure());
@@ -77,6 +79,7 @@ class ProfileRepoImpl implements ProfileRepo {
         name: name,
         phone: phone,
         avatarFilePath: avatarFilePath,
+        addresses: addresses,
       );
       return const Right(null);
     } on ServerException catch (e) {
@@ -424,6 +427,24 @@ class ProfileRepoImpl implements ProfileRepo {
     }
 
     return const Left(NoInternetFailure());
+  }
+
+  @override
+  Future<Either<Failure, SubscriptionCheckoutEntity>> subscribeToPlan(
+    int planId,
+  ) async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NoInternetFailure());
+    }
+
+    try {
+      final result = await _remoteDataSource.subscribeToPlan(planId);
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
   }
 
   @override

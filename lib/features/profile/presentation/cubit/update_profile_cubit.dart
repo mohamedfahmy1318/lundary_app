@@ -13,8 +13,14 @@ class UpdateProfileCubit extends Cubit<UpdateProfileState> {
     String? name,
     String? phone,
     String? avatarFilePath,
+    List<String>? addresses,
   }) async {
-    if (name == null && phone == null && avatarFilePath == null) return;
+    if (name == null &&
+        phone == null &&
+        avatarFilePath == null &&
+        addresses == null) {
+      return;
+    }
 
     emit(const UpdateProfileState.loading());
     final result = await _updateProfileUseCase(
@@ -22,6 +28,7 @@ class UpdateProfileCubit extends Cubit<UpdateProfileState> {
         name: name,
         phone: phone,
         avatarFilePath: avatarFilePath,
+        addresses: addresses,
       ),
     );
 

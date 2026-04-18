@@ -9,6 +9,7 @@ abstract class ProfileEntity {
   String get phone;
   String? get walletBalance;
   String? get avatar;
+  List<String> get addresses;
   ActiveSubscriptionEntity? get activeSubscription;
 
   String? get fullAvatarUrl {

@@ -152,9 +152,8 @@ class ApiClient {
   Exception _handleBadResponse(Response? response) {
     final statusCode = response?.statusCode;
     final data = response?.data;
-    final message = data is Map
-        ? data['message'] ?? 'Server error'
-        : 'Server error';
+    final message =
+        data is Map ? data['message'] ?? 'Server error' : 'Server error';
 
     switch (statusCode) {
       case 401:
@@ -166,10 +165,7 @@ class ApiClient {
       case 422:
         return ServerException(message: message, statusCode: 422);
       case 500:
-        return ServerException(
-          message: 'Internal server error',
-          statusCode: 500,
-        );
+        return ServerException(message: message, statusCode: 500);
       default:
         return ServerException(message: message, statusCode: statusCode);
     }
@@ -195,10 +191,16 @@ class _AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    if (err.response?.statusCode == 401) {
-      // Handle token refresh or logout here
+    final responseData = err.response?.data;
+    final responseMessage =
+        responseData is Map ? responseData['message']?.toString() : null;
+
+    if (err.response?.statusCode == 401 &&
+        responseMessage == 'Unauthenticated.') {
       _localStorageService.clearToken();
+      _localStorageService.setLoggedIn(false);
     }
+
     handler.next(err);
   }
 }

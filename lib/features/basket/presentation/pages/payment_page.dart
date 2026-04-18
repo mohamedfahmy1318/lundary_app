@@ -4,9 +4,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/routing/routing_names.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_bar_factory.dart';
 import '../../../../core/widgets/custom_button.dart';
+import '../../../../core/widgets/payment_webview_page.dart';
 import '../cubit/basket_cubit.dart';
 import '../cubit/basket_state.dart';
 import '../widgets/detail_row.dart';
@@ -25,6 +27,7 @@ class PaymentPage extends StatefulWidget {
 class _PaymentPageState extends State<PaymentPage> {
   int _selectedPaymentMethod = 0;
   final TextEditingController _promoController = TextEditingController();
+  bool _isOpeningPaymentGateway = false;
 
   final List<String> _paymentMethods = ['cash', 'card', 'wallet'];
 
@@ -51,7 +54,23 @@ class _PaymentPageState extends State<PaymentPage> {
       child: BlocListener<BasketCubit, BasketState>(
         listener: (context, state) {
           state.maybeWhen(
-            orderCreated: () => context.pushNamed('orderSuccess'),
+            orderPaymentRequired: (orderId, orderNumber, paymentUrl) {
+              _openPaymentGateway(
+                basketCubit,
+                orderId: orderId,
+                orderNumber: orderNumber,
+                paymentUrl: paymentUrl,
+              );
+            },
+            orderPaymentInitiationFailed: (orderId, orderNumber, message) {
+              _showPaymentRetrySnackBar(context, basketCubit, message);
+            },
+            orderCreated: (_, __) => context.pushNamed('orderSuccess'),
+            paymentFailed: (message) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(message), backgroundColor: Colors.red),
+              );
+            },
             error: (message) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(message), backgroundColor: Colors.red),
@@ -257,19 +276,31 @@ class _PaymentPageState extends State<PaymentPage> {
                 builder: (context, state) {
                   final isLoading = state.maybeWhen(
                     orderCreating: () => true,
+                    paymentVerifying: () => true,
                     orElse: () => false,
                   );
+                  final shouldRetryPayment = basketCubit.hasPendingPaymentOrder;
                   return Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 24.w,
                       vertical: 20.h,
                     ),
                     child: CustomButton(
-                      text: isLoading ? "Processing..." : "Pay Now",
+                      text:
+                          isLoading
+                              ? "Processing..."
+                              : (shouldRetryPayment
+                                  ? "Retry Payment"
+                                  : "Pay Now"),
                       onPressed:
                           isLoading
                               ? null
                               : () {
+                                if (shouldRetryPayment) {
+                                  basketCubit.retryPendingOrderPayment();
+                                  return;
+                                }
+
                                 if (pickupAddress.isEmpty ||
                                     deliveryAddress.isEmpty) {
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -311,6 +342,87 @@ class _PaymentPageState extends State<PaymentPage> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openPaymentGateway(
+    BasketCubit basketCubit, {
+    required int orderId,
+    required String paymentUrl,
+    String? orderNumber,
+  }) async {
+    if (_isOpeningPaymentGateway) {
+      return;
+    }
+
+    _isOpeningPaymentGateway = true;
+    final result = await Navigator.of(context).push<PaymentWebViewResult>(
+      MaterialPageRoute(
+        builder: (_) => PaymentWebViewPage(paymentUrl: paymentUrl),
+      ),
+    );
+
+    if (!mounted) {
+      _isOpeningPaymentGateway = false;
+      return;
+    }
+
+    final shouldRunFullPolling =
+        result == PaymentWebViewResult.success ||
+        result == PaymentWebViewResult.unknown ||
+        result == null;
+
+    await basketCubit.confirmOrderPayment(
+      orderId: orderId,
+      orderNumber: orderNumber,
+      maxAttempts: shouldRunFullPolling ? 8 : 1,
+      interval:
+          shouldRunFullPolling ? const Duration(seconds: 2) : Duration.zero,
+    );
+
+    if (!mounted) {
+      _isOpeningPaymentGateway = false;
+      return;
+    }
+
+    if (result == PaymentWebViewResult.failed) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Payment page returned an error. Status synced once.'),
+        ),
+      );
+    }
+
+    if (result == PaymentWebViewResult.cancelled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Payment was cancelled. Status synced once.'),
+        ),
+      );
+    }
+
+    _isOpeningPaymentGateway = false;
+  }
+
+  void _showPaymentRetrySnackBar(
+    BuildContext context,
+    BasketCubit basketCubit,
+    String message,
+  ) {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        action: SnackBarAction(
+          label: 'My Orders',
+          textColor: Colors.white,
+          onPressed: () {
+            context.go('${RoutingNames.main}?tab=1');
+          },
         ),
       ),
     );

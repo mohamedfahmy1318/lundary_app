@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:laundry/core/error/failures.dart';
 import 'package:laundry/features/profile/domain/entities/active_subscription_entity.dart';
 import 'package:laundry/features/profile/domain/entities/profile_entity.dart';
+import 'package:laundry/features/profile/domain/entities/subscription_checkout_entity.dart';
 import 'package:laundry/features/profile/domain/entities/subscription_plan_entity.dart';
 import 'package:laundry/features/profile/domain/entities/ticket_entity.dart';
 import 'package:laundry/features/profile/domain/entities/ticket_lookup_option_entity.dart';
@@ -13,6 +14,7 @@ abstract class ProfileRepo {
     String? name,
     String? phone,
     String? avatarFilePath,
+    List<String>? addresses,
   });
   Future<Either<Failure, void>> changePassword({
     required String currentPassword,
@@ -37,6 +39,9 @@ abstract class ProfileRepo {
   Future<Either<Failure, List<TicketLookupOptionEntity>>> getTicketStatuses();
   Future<Either<Failure, List<SubscriptionPlanEntity>>> getSubscriptionPlans();
   Future<Either<Failure, List<ActiveSubscriptionEntity>>> getMySubscriptions();
+  Future<Either<Failure, SubscriptionCheckoutEntity>> subscribeToPlan(
+    int planId,
+  );
   Future<Either<Failure, void>> deleteAccount();
   Future<Either<Failure, void>> logout();
 }

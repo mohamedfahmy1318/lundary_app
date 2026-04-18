@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_bar_factory.dart';
+import '../../../../core/widgets/payment_webview_page.dart';
 import 'package:laundry/core/di/injection_container.dart';
 import '../../domain/entities/active_subscription_entity.dart';
 import '../../domain/entities/subscription_plan_entity.dart';
@@ -70,14 +71,105 @@ class SubscriptionPlansPage extends StatelessWidget {
   }
 }
 
-class _AvailablePlansTab extends StatelessWidget {
+class _AvailablePlansTab extends StatefulWidget {
   final List<SubscriptionPlanEntity> plans;
 
   const _AvailablePlansTab({required this.plans});
 
   @override
+  State<_AvailablePlansTab> createState() => _AvailablePlansTabState();
+}
+
+class _AvailablePlansTabState extends State<_AvailablePlansTab> {
+  int? _processingPlanId;
+
+  Future<void> _subscribeToPlan(SubscriptionPlanEntity plan) async {
+    if (_processingPlanId != null) {
+      return;
+    }
+
+    setState(() => _processingPlanId = plan.id);
+
+    final cubit = context.read<SubscriptionsCubit>();
+    final checkoutResult = await cubit.subscribeToPlan(plan.id);
+
+    if (!mounted) {
+      return;
+    }
+
+    final checkout = checkoutResult.fold((message) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.red),
+      );
+      return null;
+    }, (checkout) => checkout);
+
+    if (checkout == null) {
+      if (mounted) {
+        setState(() => _processingPlanId = null);
+      }
+      return;
+    }
+
+    var activationConfirmed = checkout.activated;
+    if (!activationConfirmed && (checkout.paymentUrl?.isNotEmpty ?? false)) {
+      final paymentResult = await Navigator.of(
+        context,
+      ).push<PaymentWebViewResult>(
+        MaterialPageRoute(
+          builder:
+              (_) => PaymentWebViewPage(
+                paymentUrl: checkout.paymentUrl!,
+                title: 'Subscription Payment',
+              ),
+        ),
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      if (paymentResult == PaymentWebViewResult.failed) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Payment failed or canceled. Verifying with server...',
+            ),
+          ),
+        );
+      }
+
+      activationConfirmed = await cubit.waitUntilPlanIsActive(planId: plan.id);
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    if (!activationConfirmed && (checkout.paymentUrl?.isNotEmpty ?? false)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Payment submitted but not confirmed yet. Please check My Subscriptions shortly.',
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(checkout.message)));
+    }
+
+    await cubit.loadSubscriptions();
+
+    if (mounted) {
+      setState(() => _processingPlanId = null);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (plans.isEmpty) {
+    if (widget.plans.isEmpty) {
       return Center(
         child: Text(
           "No plans available at the moment.",
@@ -88,18 +180,13 @@ class _AvailablePlansTab extends StatelessWidget {
 
     return ListView.builder(
       padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
-      itemCount: plans.length,
+      itemCount: widget.plans.length,
       itemBuilder: (context, index) {
-        final plan = plans[index];
+        final plan = widget.plans[index];
         return _PlanCard(
-          title: plan.name,
-          itemsCount:
-              plan.unlimitedItems
-                  ? "Unlimited Items"
-                  : "${plan.itemLimit} Items",
-          price: plan.price,
-          duration: "${plan.durationDays} Days",
-          isActive: plan.isActive,
+          plan: plan,
+          isProcessing: _processingPlanId == plan.id,
+          onSubscribe: () => _subscribeToPlan(plan),
         );
       },
     );
@@ -134,18 +221,14 @@ class _MySubscriptionsTab extends StatelessWidget {
 }
 
 class _PlanCard extends StatelessWidget {
-  final String title;
-  final String itemsCount;
-  final String price;
-  final String duration;
-  final bool isActive;
+  final SubscriptionPlanEntity plan;
+  final bool isProcessing;
+  final VoidCallback onSubscribe;
 
   const _PlanCard({
-    required this.title,
-    required this.itemsCount,
-    required this.price,
-    required this.duration,
-    required this.isActive,
+    required this.plan,
+    required this.isProcessing,
+    required this.onSubscribe,
   });
 
   @override
@@ -166,14 +249,14 @@ class _PlanCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                title.toUpperCase(),
+                plan.name.toUpperCase(),
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.white,
                 ),
               ),
-              if (!isActive)
+              if (!plan.isActive)
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                   decoration: BoxDecoration(
@@ -197,7 +280,9 @@ class _PlanCard extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    itemsCount,
+                    plan.unlimitedItems
+                        ? "Unlimited Items"
+                        : "${plan.itemLimit} Items",
                     style: TextStyle(
                       fontSize: 28.sp,
                       fontWeight: FontWeight.bold,
@@ -210,7 +295,7 @@ class _PlanCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (price == "0.00")
+                  if (plan.price == "0.00")
                     Text(
                       "FREE",
                       style: TextStyle(
@@ -230,7 +315,7 @@ class _PlanCard extends StatelessWidget {
                         ),
                         SizedBox(width: 4.w),
                         Text(
-                          price,
+                          plan.price,
                           style: TextStyle(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.bold,
@@ -240,7 +325,7 @@ class _PlanCard extends StatelessWidget {
                       ],
                     ),
                   Text(
-                    duration,
+                    "${plan.durationDays} Days",
                     style: TextStyle(fontSize: 10.sp, color: Colors.white70),
                   ),
                 ],
@@ -249,7 +334,7 @@ class _PlanCard extends StatelessWidget {
           ),
           SizedBox(height: 20.h),
           ElevatedButton(
-            onPressed: isActive ? () {} : null,
+            onPressed: plan.isActive && !isProcessing ? onSubscribe : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.white,
               foregroundColor: AppColors.primary,
@@ -259,14 +344,24 @@ class _PlanCard extends StatelessWidget {
               ),
               elevation: 0,
             ),
-            child: Text(
-              "Subscribe Now",
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
+            child:
+                isProcessing
+                    ? SizedBox(
+                      width: 18.w,
+                      height: 18.w,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: color,
+                      ),
+                    )
+                    : Text(
+                      "Subscribe Now",
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
+                    ),
           ),
         ],
       ),

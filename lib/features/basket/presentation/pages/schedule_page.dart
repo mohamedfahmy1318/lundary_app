@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:laundry/core/services/local_storage_service.dart';
 import 'package:laundry/features/select_address/presentation/screens/map_address_picker_screen.dart';
+import 'package:laundry/features/profile/domain/usecases/get_profile_usecase.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_bar_factory.dart';
@@ -35,6 +37,10 @@ class _SchedulePageState extends State<SchedulePage> {
   final TextEditingController _addressController = TextEditingController();
 
   late final TimeslotsCubit _timeslotsCubit;
+  final LocalStorageService _localStorage = getIt<LocalStorageService>();
+
+  List<String> _addressOptions = const <String>[];
+  bool _isLoadingAddressOptions = false;
 
   bool get _isPickup => widget.type == ScheduleType.pickup;
 
@@ -57,6 +63,73 @@ class _SchedulePageState extends State<SchedulePage> {
             ? (widget.pickupData?['pickupAddress'] ?? '')
             : (widget.pickupData?['deliveryAddress'] ?? '');
     _addressController.text = initialAddress;
+
+    _loadAddressOptions(initialAddress: initialAddress);
+  }
+
+  List<String> _normalizeAddressOptions(Iterable<String> addresses) {
+    final normalized = <String>[];
+    final seen = <String>{};
+
+    for (final address in addresses) {
+      final trimmed = address.trim();
+      if (trimmed.isEmpty) {
+        continue;
+      }
+
+      final key = trimmed.toLowerCase();
+      if (seen.add(key)) {
+        normalized.add(trimmed);
+      }
+    }
+
+    return normalized;
+  }
+
+  Future<void> _loadAddressOptions({String? initialAddress}) async {
+    if (!mounted) {
+      return;
+    }
+
+    final local = _normalizeAddressOptions(_localStorage.getSavedLocations());
+
+    setState(() {
+      _isLoadingAddressOptions = true;
+      _addressOptions = local;
+    });
+
+    var options = local;
+
+    final result = await getIt<GetProfileUseCase>()();
+    result.fold((_) {}, (profile) {
+      options = _normalizeAddressOptions(<String>[
+        ...profile.addresses,
+        ...local,
+      ]);
+    });
+
+    final initial = (initialAddress ?? _addressController.text).trim();
+    if (initial.isNotEmpty &&
+        !options.any((item) => item.toLowerCase() == initial.toLowerCase())) {
+      options = _normalizeAddressOptions(<String>[initial, ...options]);
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _addressOptions = options;
+      _isLoadingAddressOptions = false;
+      if (_addressController.text.trim().isEmpty && options.isNotEmpty) {
+        _addressController.text = options.first;
+      }
+    });
+
+    await _localStorage.saveSavedLocations(options);
+    if (options.isNotEmpty) {
+      await _localStorage.saveCurrentLocation(options.first);
+    }
   }
 
   DateTime _dateOnly(DateTime value) {
@@ -130,7 +203,12 @@ class _SchedulePageState extends State<SchedulePage> {
     }
 
     setState(() {
-      _addressController.text = selectedAddress.trim();
+      final normalizedAddress = selectedAddress.trim();
+      _addressController.text = normalizedAddress;
+      _addressOptions = _normalizeAddressOptions(<String>[
+        normalizedAddress,
+        ..._addressOptions,
+      ]);
     });
   }
 
@@ -288,37 +366,95 @@ class _SchedulePageState extends State<SchedulePage> {
                     SizedBox(height: 20.h),
                     Text("Address:", style: AppTextStyles.sectionLabel),
                     SizedBox(height: 8.h),
-                    TextField(
-                      controller: _addressController,
-                      maxLines: 2,
-                      decoration: InputDecoration(
-                        hintText:
-                            _isPickup
-                                ? "Enter pickup address..."
-                                : "Enter delivery address...",
-                        hintStyle: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 13.sp,
+                    if (_isLoadingAddressOptions)
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 16.w,
+                              height: 16.w,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              'Loading your saved addresses...',
+                              style: AppTextStyles.caption,
+                            ),
+                          ],
                         ),
-                        filled: true,
-                        fillColor: AppColors.cardBackground,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16.r),
-                          borderSide: BorderSide.none,
+                      )
+                    else
+                      DropdownButtonFormField<String>(
+                        key: ValueKey<String>(
+                          'address-dropdown-${_addressController.text}',
                         ),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 14.h,
+                        initialValue:
+                            _addressOptions.any(
+                                  (item) =>
+                                      item.toLowerCase() ==
+                                      _addressController.text
+                                          .trim()
+                                          .toLowerCase(),
+                                )
+                                ? _addressOptions.firstWhere(
+                                  (item) =>
+                                      item.toLowerCase() ==
+                                      _addressController.text
+                                          .trim()
+                                          .toLowerCase(),
+                                )
+                                : null,
+                        isExpanded: true,
+                        hint: Text(
+                          _addressOptions.isEmpty
+                              ? 'No saved addresses yet. Add one from map.'
+                              : (_isPickup
+                                  ? 'Select pickup address'
+                                  : 'Select delivery address'),
                         ),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: AppColors.cardBackground,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16.r),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 12.h,
+                          ),
+                        ),
+                        items:
+                            _addressOptions
+                                .map(
+                                  (address) => DropdownMenuItem<String>(
+                                    value: address,
+                                    child: Text(
+                                      address,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                        onChanged: (value) {
+                          if (value == null) {
+                            return;
+                          }
+                          setState(() {
+                            _addressController.text = value;
+                          });
+                        },
                       ),
-                    ),
                     SizedBox(height: 10.h),
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
                         onPressed: _openMapPicker,
                         icon: const Icon(Icons.map_outlined),
-                        label: const Text('Select Address on Map'),
+                        label: const Text('Add New Address from Map'),
                       ),
                     ),
                   ],

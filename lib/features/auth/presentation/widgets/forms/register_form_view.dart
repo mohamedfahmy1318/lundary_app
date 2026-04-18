@@ -21,6 +21,7 @@ class RegisterFormView extends StatelessWidget {
   final VoidCallback onTogglePasswordVisibility;
   final VoidCallback onToggleConfirmPasswordVisibility;
   final VoidCallback onSubmit;
+  final VoidCallback onGoogleTap;
   final VoidCallback onNavigateToLogin;
 
   const RegisterFormView({
@@ -37,6 +38,7 @@ class RegisterFormView extends StatelessWidget {
     required this.onTogglePasswordVisibility,
     required this.onToggleConfirmPasswordVisibility,
     required this.onSubmit,
+    required this.onGoogleTap,
     required this.onNavigateToLogin,
   });
 
@@ -94,7 +96,7 @@ class RegisterFormView extends StatelessWidget {
         SizedBox(height: 32.h),
         const OrDivider(text: 'Or sign up with'),
         SizedBox(height: 24.h),
-        const SocialLoginRow(),
+        SocialLoginRow(onGoogleTap: onGoogleTap),
         SizedBox(height: 40.h),
         AuthAccountPromptRow(
           text: 'Need premium laundry services?',

@@ -9,6 +9,9 @@ abstract class AuthRemoteDataSource {
   Future<AuthResponseModel> registerVerify(VerifyOtpRequestModel verifyRequest);
   Future<OtpChallengeModel> loginRequest(LoginRequestModel loginRequest);
   Future<AuthResponseModel> loginVerify(LoginVerifyRequestModel verifyRequest);
+  Future<AuthResponseModel> socialLogin(
+    SocialLoginRequestModel socialLoginRequest,
+  );
   Future<OtpChallengeModel> resendOtp(ResendOtpRequestModel resendRequest);
   Future<void> logout();
 }
@@ -57,6 +60,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final response = await _apiClient.post(
       ApiConstants.loginVerify,
       data: verifyRequest.toJson(),
+    );
+    return AuthResponseModel.fromJson(response.data['data']);
+  }
+
+  @override
+  Future<AuthResponseModel> socialLogin(
+    SocialLoginRequestModel socialLoginRequest,
+  ) async {
+    final response = await _apiClient.post(
+      ApiConstants.socialAuth,
+      data: socialLoginRequest.toJson(),
     );
     return AuthResponseModel.fromJson(response.data['data']);
   }
